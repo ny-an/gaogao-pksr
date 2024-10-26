@@ -97,6 +97,8 @@ function updateIngredients() {
   const selectedCategory = document.querySelector('input[name="category"]:checked')?.value;
   const selectedDish = foodSelect.value;
 
+  document.getElementById('food-title').innerText = selectedDish;
+
   ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
   let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;
 
