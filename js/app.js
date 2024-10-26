@@ -1,10 +1,3 @@
-const categoryRadios = document.querySelectorAll('input[name="category"]');
-const foodSelect = document.getElementById('foodSelect');
-const ingredientTableBody = document.querySelector('#ingredientTable tbody');
-const total1 = document.getElementById('total1');
-const total3 = document.getElementById('total3');
-const total15 = document.getElementById('total15');
-const total21 = document.getElementById('total21');
 
 // 並べ替え済み料理を使用する
 const dishes = sortDishesByTotalIngredients( org_dishes )

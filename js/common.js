@@ -1,3 +1,12 @@
+const categoryRadios = document.querySelectorAll('input[name="category"]');
+const foodSelect = document.getElementById('foodSelect');
+const ingredientTableBody = document.querySelector('#ingredientTable tbody');
+const total1 = document.getElementById('total1');
+const total3 = document.getElementById('total3');
+const total15 = document.getElementById('total15');
+const total21 = document.getElementById('total21');
+
+
 // 画像ファイルパスを生成するための関数
 function getIngredientImagePath(ingredient) {
   const imageMap = {
@@ -21,7 +30,6 @@ function getIngredientImagePath(ingredient) {
   };
   return `img/ingredients/svg/${imageMap[ingredient] || 'default.svg'}.svg`;
 }
-
 
 
 // カテゴリ選択時に料理リストを更新する関数
