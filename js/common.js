@@ -6,6 +6,8 @@ const total3 = document.getElementById('total3');
 const total15 = document.getElementById('total15');
 const total21 = document.getElementById('total21');
 
+// 並べ替え済み料理を使用する
+const dishes = sortDishesByTotalIngredients(org_dishes)
 
 // 画像ファイルパスを生成するための関数
 function getIngredientImagePath(ingredient) {
