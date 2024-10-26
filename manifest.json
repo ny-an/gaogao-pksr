@@ -1,0 +1,22 @@
+{
+  "name": "ポケスリWeb - 料理必要食材計算",
+  "short_name": "ポケスリWeb",
+  "description": "料理の必要食材を計算するアプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/img/icons/icon-apple.webp",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/icons/icon-apple.webp",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
