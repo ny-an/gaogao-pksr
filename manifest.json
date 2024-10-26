@@ -1,6 +1,6 @@
 {
   "name": "ポケスリWeb - 料理必要食材計算",
-  "short_name": "ポケスリWeb",
+  "short_name": "食材計算機",
   "description": "料理の必要食材を計算するアプリ",
   "start_url": "/gaogao-pksr/",
   "display": "standalone",
