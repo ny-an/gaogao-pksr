@@ -1,25 +1,25 @@
 // 画像ファイルパスを生成するための関数
 function getIngredientImagePath(ingredient) {
   const imageMap = {
-    "マメミート": "BeanSausage.png",
-    "とくせんリンゴ": "FancyApple.png",
-    "とくせんエッグ": "FancyEgg.png",
-    "げきからハーブ": "FieryHerb.png",
-    "ワカクサコーン": "GreengrassCorn.png",
-    "ワカクサ大豆": "GreengrassSoybeans.png",
-    "あまいミツ": "Honey.png",
-    "ふといながねぎ": "LargeLeek.png",
-    "モーモーミルク": "MoomooMilk.png",
-    "ピュアなオイル": "PureOil.png",
-    "めざましコーヒー": "RousingCoffee.png",
-    "おいしいシッポ": "SlowpokeTail.png",
-    "あんみんトマト": "SnoozyTomato.png",
-    "ほっこりポテト": "SoftPotato.png",
-    "リラックスカカオ": "SoothingCacao.png",
-    "あじわいキノコ": "TastyMushroom.png",
-    "あったかジンジャー": "WarmingGinger.png"
+    "マメミート": "BeanSausage",
+    "とくせんリンゴ": "FancyApple",
+    "とくせんエッグ": "FancyEgg",
+    "げきからハーブ": "FieryHerb",
+    "ワカクサコーン": "GreengrassCorn",
+    "ワカクサ大豆": "GreengrassSoybeans",
+    "あまいミツ": "Honey",
+    "ふといながねぎ": "LargeLeek",
+    "モーモーミルク": "MoomooMilk",
+    "ピュアなオイル": "PureOil",
+    "おいしいシッポ": "SlowpokeTail",
+    "あんみんトマト": "SnoozyTomato",
+    "ほっこりポテト": "SoftPotato",
+    "リラックスカカオ": "SoothingCacao",
+    "あじわいキノコ": "TastyMushroom",
+    "あったかジンジャー": "WarmingGinger",
+    "めざましコーヒー": "RousingCoffee",
   };
-  return `img/dishes/png/${imageMap[ingredient] || 'default.png'}`;
+  return `img/ingredients/svg/${imageMap[ingredient] || 'default.svg'}.svg`;
 }
 
 
