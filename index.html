@@ -15,15 +15,26 @@
     <h1>必要食材計算機</h1>
 
     <div class="dish-image" style="display: none">料理の画像</div>
+
+    <!-- カテゴリ選択をラジオボタンに変更したよ -->
     <div class="category-select">
         <label>カテゴリ選択:</label>
-        <select id="categorySelect">
-            <option value="">-- カテゴリを選択 --</option>
-            <option value="サラダ">サラダ</option>
-            <option value="カレー">カレー</option>
-            <option value="デザート">デザート</option>
-        </select>
+        <div class="category-radios">
+            <div>
+                <input type="radio" id="category-salad" name="category" value="サラダ" checked>
+                <label for="category-salad">サラダ</label>
+            </div>
+            <div>
+                <input type="radio" id="category-curry" name="category" value="カレー">
+                <label for="category-curry">カレー</label>
+            </div>
+            <div>
+                <input type="radio" id="category-dessert" name="category" value="デザート">
+                <label for="category-dessert">デザート</label>
+            </div>
+        </div>
     </div>
+
     <div class="food-select">
         <label>料理選択:</label>
         <select id="foodSelect">

@@ -1,5 +1,4 @@
-
-const categorySelect = document.getElementById('categorySelect');
+const categoryRadios = document.querySelectorAll('input[name="category"]');
 const foodSelect = document.getElementById('foodSelect');
 const ingredientTableBody = document.querySelector('#ingredientTable tbody');
 const total1 = document.getElementById('total1');
@@ -10,9 +9,16 @@ const total21 = document.getElementById('total21');
 // 並べ替え済み料理
 const dishes = sortDishesByTotalIngredients( org_dishes )
 
-// カテゴリ選択時に料理選択を更新
-categorySelect.addEventListener('change', function() {
-  const selectedCategory = categorySelect.value;
+// カテゴリ選択が変更された際の処理
+categoryRadios.forEach(radio => {
+  radio.addEventListener('change', function() {
+    const selectedCategory = document.querySelector('input[name="category"]:checked').value;
+    updateFoodOptions(selectedCategory);
+  });
+});
+
+// 料理リストを更新する関数
+function updateFoodOptions(selectedCategory) {
   foodSelect.innerHTML = '<option value="">-- 料理を選択 --</option>';
 
   if (selectedCategory && dishes[selectedCategory]) {
@@ -24,15 +30,15 @@ categorySelect.addEventListener('change', function() {
       foodSelect.appendChild(option);
     }
   }
-  // 料理選択が変更された場合は食材リストを初期化
+  // 食材リストを初期化
   updateIngredients();
-});
+}
 
 // 必要食材リストを更新
 foodSelect.addEventListener('change', updateIngredients);
 
 function updateIngredients() {
-  const selectedCategory = categorySelect.value;
+  const selectedCategory = document.querySelector('input[name="category"]:checked')?.value;
   const selectedDish = foodSelect.value;
 
   ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
@@ -74,6 +80,8 @@ function updateIngredients() {
 // 初期表示の設定
 updateIngredients();
 
+// 初期表示として「サラダ」カテゴリを設定
+updateFoodOptions("サラダ");
 
 
 // カテゴリ内の料理を合計食材数が多い順にソートする関数
