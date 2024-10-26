@@ -51,6 +51,21 @@ function updateFoodOptions(selectedCategory) {
   updateIngredients();
 }
 
+// 最初の料理を自動で選択する関数
+function selectFirstFoodOption() {
+  console.log('selectFirstFoodOption')
+  const foodSelect = document.getElementById('foodSelect');
+  setTimeout(()=>{
+    if (foodSelect.options.length > 0) {
+      foodSelect.selectedIndex = 1; // 最初の項目を選択
+
+      // 食材テーブル更新
+      updateIngredients();
+    }
+  },50)
+
+}
+
 
 // カテゴリ内の料理を合計食材数が多い順にソートする関数
 function sortDishesByTotalIngredients(dishes) {
