@@ -6,7 +6,7 @@ const total3 = document.getElementById('total3');
 const total15 = document.getElementById('total15');
 const total21 = document.getElementById('total21');
 
-// 並べ替え済み料理
+// 並べ替え済み料理を使用する
 const dishes = sortDishesByTotalIngredients( org_dishes )
 
 // カテゴリ選択が変更された際の処理
@@ -16,23 +16,6 @@ categoryRadios.forEach(radio => {
     updateFoodOptions(selectedCategory);
   });
 });
-
-// 料理リストを更新する関数
-function updateFoodOptions(selectedCategory) {
-  foodSelect.innerHTML = '<option value="">-- 料理を選択 --</option>';
-
-  if (selectedCategory && dishes[selectedCategory]) {
-    // 選択されたカテゴリに属する料理をfoodSelectに追加
-    for (const dish in dishes[selectedCategory]) {
-      const option = document.createElement('option');
-      option.value = dish;
-      option.textContent = dish;
-      foodSelect.appendChild(option);
-    }
-  }
-  // 食材リストを初期化
-  updateIngredients();
-}
 
 // 必要食材リストを更新
 foodSelect.addEventListener('change', updateIngredients);
@@ -59,13 +42,17 @@ function updateIngredients() {
       sum15 += amount15;
       sum21 += amount21;
 
+      // 画像のHTMLコードを生成
+      const imgPath = getIngredientImagePath(ingredient);
+      const imgTag = `<img src="${imgPath}" alt="${ingredient}" style="width: 30px; height: 30px;">`;
+
       row.innerHTML = `
-                    <td>${ingredient}</td>
-                    <td>${amount1}</td>
-                    <td>${amount3}</td>
-                    <td>${amount15}</td>
-                    <td>${amount21}</td>
-                `;
+                <td>${imgTag}</td>
+                <td>${amount1}</td>
+                <td>${amount3}</td>
+                <td>${amount15}</td>
+                <td>${amount21}</td>
+            `;
       ingredientTableBody.appendChild(row);
     }
   }
@@ -84,26 +71,3 @@ updateIngredients();
 updateFoodOptions("サラダ");
 
 
-// カテゴリ内の料理を合計食材数が多い順にソートする関数
-function sortDishesByTotalIngredients(dishes) {
-  const sortedDishes = {};
-
-  for (const category in dishes) {
-    // 各料理の合計食材数を計算
-    const recipes = Object.entries(dishes[category]).map(([dish, ingredients]) => {
-      const totalIngredients = Object.values(ingredients).reduce((sum, amount) => sum + amount, 0);
-      return { dish, ingredients, totalIngredients };
-    });
-
-    // 合計食材数でソート
-    recipes.sort((a, b) => b.totalIngredients - a.totalIngredients);
-
-    // ソートした結果を新しいオブジェクトとして保存
-    sortedDishes[category] = recipes.reduce((acc, { dish, ingredients }) => {
-      acc[dish] = ingredients;
-      return acc;
-    }, {});
-  }
-
-  return sortedDishes;
-}
