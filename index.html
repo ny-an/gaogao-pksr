@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケスリWeb - 料理必要食材計算</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .dish-image {
+            width: 200px;
+            height: 200px;
+            background-color: #f0f0f0;
+            margin-bottom: 20px;
+        }
+        .category-select, .food-select {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="dish-image">料理の画像</div>
+    <div class="category-select">
+        <label>カテゴリ選択:</label>
+        <select id="categorySelect">
+            <option value="">-- カテゴリを選択 --</option>
+            <option value="サラダ">サラダ</option>
+            <option value="カレー">カレー</option>
+            <option value="デザート">デザート</option>
+        </select>
+    </div>
+    <div class="food-select">
+        <label>料理選択:</label>
+        <select id="foodSelect">
+            <option value="">-- 料理を選択 --</option>
+        </select>
+    </div>
+    <table id="ingredientTable">
+        <thead>
+            <tr>
+                <th>食材</th>
+                <th>1食</th>
+                <th>3食</th>
+                <th>15食</th>
+                <th>21食</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 食材データがここに挿入されます -->
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td>合計</td>
+                <td id="total1">0</td>
+                <td id="total3">0</td>
+                <td id="total15">0</td>
+                <td id="total21">0</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script>
+// 必要食材データ（カテゴリ別）
+const dishes = {
+    "サラダ": {
+        "まけんきコーヒーサラダ": {
+            "めざましコーヒー": 28,
+            "マメミート": 28,
+            "ピュアなオイル": 22,
+            "ほっこりポテト": 22
+        },
+        "ごちゃまぜサラダ": {}, // 他のレシピに該当しない組み合わせ、データなし
+        "ヤドンテールのペッパーサラダ": {
+            "げきからハーブ": 10,
+            "ピュアなオイル": 15,
+            "おいしいシッポ": 10
+        },
+        "キノコのほうしサラダ": {
+            "あじわいキノコ": 17,
+            "ピュアなオイル": 8,
+            "あんみんトマト": 8
+        },
+        "ゆきかきシーザーサラダ": {
+            "モーモーミルク": 10,
+            "マメミート": 6
+        },
+        "くいしんぼうポテトサラダ": {
+            "ほっこりポテト": 14,
+            "とくせんエッグ": 9,
+            "マメミート": 7,
+            "とくせんリンゴ": 6
+        },
+        "うるおいとうふサラダ": {
+            "ワカクサ大豆": 15,
+            "あんみんトマト": 9
+        },
+        "ばかぢからワイルドサラダ": {
+            "マメミート": 9,
+            "あったかジンジャー": 6,
+            "とくせんエッグ": 5,
+            "ほっこりポテト": 3
+        },
+        "マメハムサラダ": {
+            "マメミート": 8
+        },
+        "あんみんトマトサラダ": {
+            "あんみんトマト": 8
+        },
+        "モーモーカプレーゼ": {
+            "モーモーミルク": 12,
+            "あんみんトマト": 6,
+            "ピュアなオイル": 5
+        },
+        "ムラっけチョコミートサラダ": {
+            "リラックスカカオ": 14,
+            "マメミート": 9
+        },
+        "オーバーヒートサラダ": {
+            "げきからハーブ": 17,
+            "あったかジンジャー": 10,
+            "あんみんトマト": 8
+        },
+        "とくせんリンゴサラダ": {
+            "とくせんリンゴ": 8
+        },
+        "めんえきねぎサラダ": {
+            "あったかジンジャー": 5,
+            "ふといながねぎ": 10
+        },
+        "メロメロりんごのチーズサラダ": {
+            "とくせんリンゴ": 15,
+            "モーモーミルク": 5,
+            "ピュアなオイル": 3
+        },
+        "ニンジャサラダ": {
+            "あったかジンジャー": 11,
+            "ワカクサ大豆": 19,
+            "あじわいキノコ": 12,
+            "ふといながねぎ": 15
+        },
+        "ねっぷうとうふサラダ": {
+            "げきからハーブ": 6,
+            "ワカクサ大豆": 10
+        },
+        "ワカクササラダ": {
+            "ピュアなオイル": 22,
+            "ワカクサコーン": 17,
+            "あんみんトマト": 14,
+            "ほっこりポテト": 9
+        },
+        "めいそうスイートサラダ": {
+            "とくせんリンゴ": 21,
+            "あまいミツ": 16,
+            "ワカクサコーン": 12
+        },
+        "みだれづきコーンサラダ": {
+            "ワカクサコーン": 9,
+            "ピュアなオイル": 8
+        },
+        "クロスチョップドサラダ": {
+            "とくせんエッグ": 20,
+            "マメミート": 15,
+            "ワカクサコーン": 11,
+            "あんみんトマト": 10
+        }
+    },
+      "カレー": {
+        "ごちゃまぜカレー": {}, // 他のレシピに該当しない組み合わせ、データなし
+        "とくせんリンゴカレー": {
+            "とくせんリンゴ": 7
+        },
+        "あぶりテールカレー": {
+            "おいしいシッポ": 8,
+            "げきからハーブ": 25
+        },
+        "サンパワートマトカレー": {
+            "あんみんトマト": 10,
+            "げきからハーブ": 5
+        },
+        "ぜったいねむりバターカレー": {
+            "ほっこりポテト": 18,
+            "リラックスカカオ": 12,
+            "あんみんトマト": 15,
+            "モーモーミルク": 10
+        },
+        "からくちネギもりカレー": {
+            "ふといながねぎ": 14,
+            "あったかジンジャー": 10,
+            "げきからハーブ": 8
+        },
+        "キノコのほうしカレー": {
+            "あじわいキノコ": 14,
+            "ほっこりポテト": 9
+        },
+        "おやこあいカレー": {
+            "あまいミツ": 12,
+            "とくせんエッグ": 8,
+            "とくせんリンゴ": 11,
+            "ほっこりポテト": 4
+        },
+        "満腹チーズバーグカレー": {
+            "モーモーミルク": 8,
+            "マメミート": 8
+        },
+        "ほっこりホワイトシチュー": {
+            "モーモーミルク": 10,
+            "ほっこりポテト": 8,
+            "あじわいキノコ": 4
+        },
+        "たんじゅんホワイトシチュー": {
+            "モーモーミルク": 7
+        },
+        "マメバーグカレー": {
+            "マメミート": 7
+        },
+        "ベイビィハニーカレー": {
+            "あまいミツ": 7
+        },
+        "ニンジャカレー": {
+            "ワカクサ大豆": 24,
+            "ふといながねぎ": 12,
+            "マメミート": 9,
+            "あじわいキノコ": 5
+        },
+        "ひでりカツレツカレー": {
+            "マメミート": 10,
+            "ピュアなオイル": 5
+        },
+        "とけるオムカレー": {
+            "とくせんエッグ": 10,
+            "あんみんトマト": 6
+        },
+        "ビルドアップマメカレー": {
+            "ワカクサ大豆": 12,
+            "マメミート": 6,
+            "とくせんエッグ": 4,
+            "げきからハーブ": 4
+        },
+        "じゅうなんコーンシチュー": {
+            "ワカクサコーン": 14,
+            "モーモーミルク": 8,
+            "ほっこりポテト": 8
+        },
+        "れんごくコーンキーマカレー": {
+            "げきからハーブ": 27,
+            "マメミート": 24,
+            "ワカクサコーン": 14,
+            "あったかジンジャー": 12
+        },
+        "めざめるパワーシチュー": {
+            "ワカクサ大豆": 28,
+            "あんみんトマト": 25,
+            "あじわいキノコ": 23,
+            "めざましコーヒー": 16
+        },
+        "ピヨピヨパンチ辛口カレー": {
+            "めざましコーヒー": 11,
+            "げきからハーブ": 11,
+            "あまいミツ": 11
+        }
+    },
+        "デザート": {
+        "ごちゃまぜジュース": {}, // 他のレシピに該当しない組み合わせ、データなし
+        "じゅくせいスイートポテト": {
+            "ほっこりポテト": 9,
+            "モーモーミルク": 5
+        },
+        "ふくつのジンジャークッキー": {
+            "あまいミツ": 14,
+            "あったかジンジャー": 12,
+            "リラックスカカオ": 5,
+            "とくせんエッグ": 4
+        },
+        "とくせんリンゴジュース": {
+            "とくせんリンゴ": 8
+        },
+        "クラフトサイコソーダ": {
+            "あまいミツ": 9
+        },
+        "ひのこのジンジャーティー": {
+            "とくせんリンゴ": 7,
+            "あったかジンジャー": 9
+        },
+        "プリンのプリンアラモード": {
+            "あまいミツ": 20,
+            "とくせんエッグ": 15,
+            "とくせんリンゴ": 10,
+            "モーモーミルク": 10
+        },
+        "あくまのキッスフルーツオレ": {
+            "とくせんリンゴ": 11,
+            "モーモーミルク": 9,
+            "あまいミツ": 7,
+            "リラックスカカオ": 8
+        },
+        "ねがいごとアップルパイ": {
+            "とくせんリンゴ": 12,
+            "モーモーミルク": 4
+        },
+        "ネロリのデトックスティー": {
+            "あったかジンジャー": 11,
+            "とくせんリンゴ": 15,
+            "あじわいキノコ": 9
+        },
+        "あまいかおりチョコケーキ": {
+            "あまいミツ": 9,
+            "リラックスカカオ": 8,
+            "モーモーミルク": 7
+        },
+        "モーモーホットミルク": {
+            "モーモーミルク": 7
+        },
+        "かるわざソイケーキ": {
+            "とくせんエッグ": 8,
+            "ワカクサ大豆": 7
+        },
+        "はりきりプロテインスムージー": {
+            "ワカクサ大豆": 15,
+            "リラックスカカオ": 8
+        },
+        "マイペースやさいジュース": {
+            "とくせんリンゴ": 7,
+            "あんみんトマト": 9
+        },
+        "おおきいマラサダ": {
+            "ピュアなオイル": 10,
+            "モーモーミルク": 7,
+            "あまいミツ": 6
+        },
+        "ちからもちソイドーナッツ": {
+            "ピュアなオイル": 12,
+            "リラックスカカオ": 7,
+            "ワカクサ大豆": 16
+        },
+        "だいばくはつポップコーン": {
+            "ワカクサコーン": 15,
+            "ピュアなオイル": 14,
+            "モーモーミルク": 7
+        },
+        "おちゃかいコーンスコーン": {
+            "とくせんリンゴ": 20,
+            "あったかジンジャー": 20,
+            "ワカクサコーン": 18,
+            "モーモーミルク": 9
+        },
+        "はなびらのまいチョコタルト": {
+            "リラックスカカオ": 11,
+            "とくせんリンゴ": 11
+        },
+        "フラワーギフトマカロン": {
+            "リラックスカカオ": 25,
+            "とくせんエッグ": 25,
+            "あまいミツ": 17,
+            "モーモーミルク": 10
+        },
+        "スパークスパイスコーラ": {
+            "とくせんリンゴ": 35,
+            "あったかジンジャー": 20,
+            "ふといながねぎ": 20,
+            "めざましコーヒー": 12
+        },
+        "はやおきコーヒーゼリー": {
+            "めざましコーヒー": 16,
+            "モーモーミルク": 14,
+            "あまいミツ": 12
+        }
+    }
+};
+
+    const categorySelect = document.getElementById('categorySelect');
+    const foodSelect = document.getElementById('foodSelect');
+    const ingredientTableBody = document.querySelector('#ingredientTable tbody');
+    const total1 = document.getElementById('total1');
+    const total3 = document.getElementById('total3');
+    const total15 = document.getElementById('total15');
+    const total21 = document.getElementById('total21');
+
+    // カテゴリ選択時に料理選択を更新
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = categorySelect.value;
+        foodSelect.innerHTML = '<option value="">-- 料理を選択 --</option>';
+
+        if (selectedCategory && dishes[selectedCategory]) {
+            // 選択されたカテゴリに属する料理をfoodSelectに追加
+            for (const dish in dishes[selectedCategory]) {
+                const option = document.createElement('option');
+                option.value = dish;
+                option.textContent = dish;
+                foodSelect.appendChild(option);
+            }
+        }
+        // 料理選択が変更された場合は食材リストを初期化
+        updateIngredients();
+    });
+
+    // 必要食材リストを更新
+    foodSelect.addEventListener('change', updateIngredients);
+
+    function updateIngredients() {
+        const selectedCategory = categorySelect.value;
+        const selectedDish = foodSelect.value;
+
+        ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
+        let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;
+
+        if (selectedCategory && selectedDish && dishes[selectedCategory] && dishes[selectedCategory][selectedDish]) {
+            const ingredients = dishes[selectedCategory][selectedDish];
+
+            for (const [ingredient, amount] of Object.entries(ingredients)) {
+                const row = document.createElement('tr');
+                const amount1 = amount;
+                const amount3 = amount * 3;
+                const amount15 = amount * 15;
+                const amount21 = amount * 21;
+
+                sum1 += amount1;
+                sum3 += amount3;
+                sum15 += amount15;
+                sum21 += amount21;
+
+                row.innerHTML = `
+                    <td>${ingredient}</td>
+                    <td>${amount1}</td>
+                    <td>${amount3}</td>
+                    <td>${amount15}</td>
+                    <td>${amount21}</td>
+                `;
+                ingredientTableBody.appendChild(row);
+            }
+        }
+
+        // 合計の表示を更新
+        total1.textContent = sum1;
+        total3.textContent = sum3;
+        total15.textContent = sum15;
+        total21.textContent = sum21;
+    }
+
+    // 初期表示の設定
+    updateIngredients();
+</script>
+
+</body>
+</html>
