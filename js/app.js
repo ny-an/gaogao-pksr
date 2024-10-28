@@ -1,4 +1,4 @@
-
+// body
 document.addEventListener('DOMContentLoaded', () => {
 
   // カテゴリ選択が変更された際の処理
@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+// 設定アイコン
 document.addEventListener('DOMContentLoaded', () => {
   const settingsIcon = document.querySelector('.settings-icon');
   const creditModal = document.getElementById('creditModal');
