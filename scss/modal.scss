@@ -1,0 +1,64 @@
+/* モーダルの背景 */
+.modal {
+  display: none; /* 初期状態では非表示 */
+  position: fixed;
+  z-index: 1001;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 背景の半透明 */
+}
+
+/* モーダルのコンテンツ */
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  width: 80%;
+  max-width: 400px;
+  background-color: #fff;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* 閉じるボタン */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+// 設定アイコン
+.settings-icon {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(76, 175, 80, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 70%;
+    height: 70%;
+  }
+}
+
+.creditBody{
+  p{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+  img{
+    width: 36px;
+  }
+}
