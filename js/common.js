@@ -1,4 +1,4 @@
-const categoryRadios = document.querySelectorAll('input[name="category"]');
+const categoryButtons = document.querySelectorAll('.category-btn');
 const foodSelect = document.getElementById('foodSelect');
 const ingredientTableBody = document.querySelector('#ingredientTable tbody');
 const total1 = document.getElementById('total1');
@@ -94,7 +94,8 @@ function sortDishesByTotalIngredients(dishes) {
 
 // 料理選択時のテーブル更新
 function updateIngredients() {
-  const selectedCategory = document.querySelector('input[name="category"]:checked')?.value;
+  const selectedCategoryButton = document.querySelector('.category-btn.active');
+  const selectedCategory = selectedCategoryButton ? selectedCategoryButton.getAttribute('data-category') : null;
   const selectedDish = foodSelect.value;
 
   document.getElementById('food-title').innerText = selectedDish;

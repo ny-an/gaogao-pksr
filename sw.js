@@ -1,7 +1,7 @@
 // sw.js
 
 // キャッシュバージョンの設定（更新するたびに変更）
-const CACHE_NAME = 'app-cache-v3';
+const CACHE_NAME = 'app-cache-v4';
 
 // キャッシュしたいリソースのリスト
 const urlsToCache = [

@@ -20,22 +20,12 @@
 
     <div class="dish-image" style="display: none">料理の画像</div>
 
-    <!-- カテゴリ選択をラジオボタンに変更したよ -->
+    <!-- カテゴリ選択をボタン式に変更 -->
     <div class="category-select">
-        <label>カテゴリ選択:</label>
-        <div class="category-radios">
-            <div>
-                <input type="radio" id="category-salad" name="category" value="サラダ" checked>
-                <label for="category-salad">サラダ</label>
-            </div>
-            <div>
-                <input type="radio" id="category-curry" name="category" value="カレー">
-                <label for="category-curry">カレー</label>
-            </div>
-            <div>
-                <input type="radio" id="category-dessert" name="category" value="デザート">
-                <label for="category-dessert">デザート</label>
-            </div>
+        <div class="category-buttons">
+            <button type="button" data-category="サラダ" class="category-btn active">サラダ</button>
+            <button type="button" data-category="カレー" class="category-btn">カレー</button>
+            <button type="button" data-category="デザート" class="category-btn">デザート</button>
         </div>
     </div>
 

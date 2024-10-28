@@ -2,9 +2,18 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // カテゴリ選択が変更された際の処理
-  categoryRadios.forEach(radio => {
-    radio.addEventListener('change', function () {
-      const selectedCategory = document.querySelector('input[name="category"]:checked').value;
+  categoryButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      console.log('button click');
+
+      // すべてのボタンからactiveクラスを外す
+      categoryButtons.forEach(btn => btn.classList.remove('active'));
+
+      // 選択されたボタンにactiveクラスを追加
+      this.classList.add('active');
+
+      // 選択されたカテゴリの料理リストを更新
+      const selectedCategory = this.getAttribute('data-category');
       updateFoodOptions(selectedCategory);
       selectFirstFoodOption(); // 一番上の料理を自動で選択
     });
@@ -14,16 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
   foodSelect.addEventListener('change', updateIngredients);
 
   // 初期表示の設定
-  updateIngredients();
-
-  // 初期表示として「サラダ」カテゴリを設定
   updateFoodOptions("サラダ");
 
   // 一番上の料理を自動で選択
   selectFirstFoodOption();
-
 });
-
 
 // 設定アイコン
 document.addEventListener('DOMContentLoaded', () => {
