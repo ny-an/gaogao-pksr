@@ -1,24 +1,32 @@
-// pwa.js
-
 let deferredPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  showInstallHint(); // ヒント表示
+
+  // ユーザーが閉じた日時を取得
+  const lastDismissed = localStorage.getItem('installHintDismissedAt');
+
+  // 現在の日時と比較して24時間以上経過していればヒントを表示
+  if (!lastDismissed || isMoreThanOneDay(new Date(lastDismissed))) {
+    showInstallHint();
+  }
 });
 
 function showInstallHint() {
   const hintElement = document.createElement('div');
-  hintElement.textContent = 'このアプリをホーム画面に追加できます！';
   hintElement.classList.add('install-hint');
-
-  const installButton = document.createElement('button');
-  installButton.textContent = 'ホーム画面に追加';
-  hintElement.appendChild(installButton);
+  hintElement.innerHTML = `
+    <p>このアプリをホーム画面に追加できます！<a href="#" id="closeHint" class="close-hint">[閉じる]</a></p>
+    <button id="installButton">ホーム画面に追加</button>
+  `;
 
   document.body.appendChild(hintElement);
 
+  const installButton = document.getElementById('installButton');
+  const closeHint = document.getElementById('closeHint');
+
+  // インストールボタンが押されたときの処理
   installButton.addEventListener('click', () => {
     hintElement.style.display = 'none';
     deferredPrompt.prompt();
@@ -32,15 +40,30 @@ function showInstallHint() {
       deferredPrompt = null;
     });
   });
+
+  // 閉じるリンクが押されたときの処理
+  closeHint.addEventListener('click', (e) => {
+    e.preventDefault();
+    hintElement.style.display = 'none';
+    localStorage.setItem('installHintDismissedAt', new Date().toISOString()); // ヒントを閉じた日時を記録
+  });
 }
 
-// Service Workerの登録
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(registration => {
-      console.log('Service Worker registered with scope:', registration.scope);
-    })
-    .catch(error => {
-      console.error('Service Worker registration failed:', error);
-    });
+// 1日経過したかどうかをチェックする関数
+function isMoreThanOneDay(lastDismissedDate) {
+  const now = new Date();
+  const lastDismissed = new Date(lastDismissedDate);
+  const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+  return (now - lastDismissed) > oneDayInMilliseconds;
 }
+
+// // Service Workerの登録
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker.register('/sw.js')
+//     .then(registration => {
+//       console.log('Service Worker registered with scope:', registration.scope);
+//     })
+//     .catch(error => {
+//       console.error('Service Worker registration failed:', error);
+//     });
+// }

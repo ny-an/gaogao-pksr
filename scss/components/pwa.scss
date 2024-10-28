@@ -1,3 +1,4 @@
+// _installHint.scss
 .install-hint {
   position: fixed;
   bottom: 10px;
@@ -10,6 +11,11 @@
   display: flex;
   align-items: center;
   z-index: 1000;
+  font-size: 14px;
+
+  p {
+    margin: 0;
+  }
 
   button {
     margin-left: 10px;
@@ -24,6 +30,12 @@
       background-color: #e0e0e0;
     }
   }
+
+  .close-hint {
+    margin-left: 10px;
+    font-size: 12px;
+    text-decoration: underline;
+    color: white;
+    cursor: pointer;
+  }
 }
-
-
