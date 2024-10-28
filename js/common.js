@@ -98,17 +98,15 @@ function updateIngredients() {
   const selectedCategory = selectedCategoryButton ? selectedCategoryButton.getAttribute('data-category') : null;
   const selectedDish = foodSelect.value;
 
-  // title
-  // document.getElementById('food-title').innerText = selectedDish;
-
   ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
   let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;
 
   if (selectedCategory && selectedDish && dishes[selectedCategory] && dishes[selectedCategory][selectedDish]) {
     const ingredients = dishes[selectedCategory][selectedDish];
+    let rowsHtml = ""; // HTML文字列を一度に生成
 
+    // 各食材ごとに行のHTMLを作成
     for (const [ingredient, amount] of Object.entries(ingredients)) {
-      const row = document.createElement('tr');
       const amount1 = amount;
       const amount3 = amount * 3;
       const amount15 = amount * 15;
@@ -123,15 +121,20 @@ function updateIngredients() {
       const imgPath = getIngredientImagePath(ingredient);
       const imgTag = `<img src="${imgPath}" alt="${ingredient}" style="width: 30px; height: 30px;">`;
 
-      row.innerHTML = `
-                <td>${imgTag}</td>
-                <td>${amount1}</td>
-                <td>${amount3}</td>
-                <td>${amount15}</td>
-                <td>${amount21}</td>
-            `;
-      ingredientTableBody.appendChild(row);
+      // 各行のHTMLを生成し、rowsHtmlに追加
+      rowsHtml += `
+        <tr>
+          <td>${imgTag}</td>
+          <td>${amount1}</td>
+          <td>${amount3}</td>
+          <td>${amount15}</td>
+          <td>${amount21}</td>
+        </tr>
+      `;
     }
+
+    // 生成したHTMLを一度に挿入
+    ingredientTableBody.innerHTML = rowsHtml;
   }
 
   // 合計の表示を更新
