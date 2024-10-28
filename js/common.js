@@ -98,7 +98,8 @@ function updateIngredients() {
   const selectedCategory = selectedCategoryButton ? selectedCategoryButton.getAttribute('data-category') : null;
   const selectedDish = foodSelect.value;
 
-  document.getElementById('food-title').innerText = selectedDish;
+  // title
+  // document.getElementById('food-title').innerText = selectedDish;
 
   ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
   let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;

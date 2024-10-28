@@ -21,7 +21,7 @@
 
 // カテゴリと料理選択・共通
 .category-select, .food-select {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   // 直下ラベル
   > label{
     font-weight: bold;
@@ -38,14 +38,15 @@
 
 // 料理
 .food-select{
-
+  display: flex;
+  gap: 12px;
 }
 
 table {
   width: 100%;
   max-width: 600px;
   border-collapse: collapse;
-  margin-top: 20px;
+  //margin-top: 20px;
 
   th, td {
     border: 1px solid #ddd;
