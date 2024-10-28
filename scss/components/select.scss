@@ -7,7 +7,7 @@ select {
   line-height: 1.5; /* 行の高さを調整 */
   //background-color: #f0f0f0; /* 背景色 */
   //border: 1px solid #ccc; /* ボーダーをつけて見やすく */
-  border-radius: 5px; /* 角を丸くする */
+  //border-radius: 5px; /* 角を丸くする */
   width: 100%; /* 横幅を親要素いっぱいに広げる */
   max-width: 100%; /* 最大幅の制限 */
   color: #333; /* 文字の色 */
@@ -15,9 +15,14 @@ select {
 
   border: none;
   background-color: white;
-  text-decoration: underline;
+  //text-decoration: underline;
   font-weight: bold;
   font-size: 18px;
+
+  border-bottom: 1px solid black;
+  border-radius: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 6px;
 
 }
 
