@@ -2,12 +2,8 @@
 select {
   appearance: none; /* デフォルトのスタイルを無効化 */
   -webkit-appearance: none; /* Safariでのデフォルトスタイルを無効化 */
-  padding: 10px; /* 内側の余白を追加してボタンを大きく見せる */
   //font-size: 14px; /* フォントサイズを調整して読みやすく */
   line-height: 1.5; /* 行の高さを調整 */
-  //background-color: #f0f0f0; /* 背景色 */
-  //border: 1px solid #ccc; /* ボーダーをつけて見やすく */
-  //border-radius: 5px; /* 角を丸くする */
   width: 100%; /* 横幅を親要素いっぱいに広げる */
   max-width: 100%; /* 最大幅の制限 */
   color: #333; /* 文字の色 */
@@ -22,13 +18,14 @@ select {
   border-bottom: 1px solid black;
   border-radius: 0;
   margin-bottom: 1rem;
-  padding-bottom: 6px;
+  padding: 10px 10px 6px;
 
 }
 
 /* カスタム矢印を追加 */
 select {
-  background-image: url('../../img/icons/down-arrow.svg'); /* カスタム矢印のアイコン */
+  $icon-path: '/gaogao-pksr/img/icons/';
+  background-image: url(#{$icon-path}down-arrow.svg);
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px; /* アイコンのサイズ */
