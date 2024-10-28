@@ -57,13 +57,24 @@ function isMoreThanOneDay(lastDismissedDate) {
   return (now - lastDismissed) > oneDayInMilliseconds;
 }
 
-// // Service Workerの登録
-// if ('serviceWorker' in navigator) {
-//   navigator.serviceWorker.register('/sw.js')
-//     .then(registration => {
-//       console.log('Service Worker registered with scope:', registration.scope);
-//     })
-//     .catch(error => {
-//       console.error('Service Worker registration failed:', error);
-//     });
-// }
+
+
+
+// pwa
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/gaogao-pksr/sw.js')  // リポジトリのパスに応じて変更
+      .then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    alert("新しいバージョンが利用可能です。アプリを再読み込みしてください。");
+    location.reload();
+  });
+}
+
