@@ -1,13 +1,12 @@
 // sw.js
 
 // キャッシュバージョンの設定（更新するたびに変更）
-const CACHE_NAME = 'v1.06';
+const CACHE_NAME = 'v1.01';
 
 // キャッシュしたいリソースのリスト
 const urlsToCache = [
   '/gaogao-pksr/',
   '/gaogao-pksr/index.html',
-  '/gaogao-pksr/css/style.css',
   '/gaogao-pksr/js/app.js',
   // 他にも必要なリソースをリストに追加
 ];

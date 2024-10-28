@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 一番上の料理を自動で選択
   selectFirstFoodOption();
+
+  // app-versionを記載
+  document.getElementById('app-version').innerText = CACHE_NAME;
 });
 
 // 設定アイコン
