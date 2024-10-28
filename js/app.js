@@ -51,4 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
       creditModal.style.display = 'none';
     }
   });
+
+  // SPタッチイベント対応：モーダルの外側をクリックしてモーダルを閉じる
+  window.addEventListener('touchstart', (event) => {
+    if (event.target === creditModal) {
+      creditModal.style.display = 'none';
+    }
+  });
 });
