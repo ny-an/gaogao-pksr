@@ -29,7 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
   selectFirstFoodOption();
 
   // app-versionを記載
-  document.getElementById('app-version').innerText = CACHE_NAME;
+  document.getElementById('app-version').innerText = CACHE_VER;
+
+  // versionをclickでスーパーリロード
+  document.getElementById('app-version').addEventListener('click', () => {
+    superReload();
+  });
+
 });
 
 // 設定アイコン

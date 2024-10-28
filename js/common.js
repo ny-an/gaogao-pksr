@@ -143,3 +143,21 @@ function updateIngredients() {
   total15.textContent = sum15;
   total21.textContent = sum21;
 }
+
+// スーパーリロードを実行する関数
+function superReload() {
+  // キャッシュを削除してからリロード
+  caches.keys().then((cacheNames) => {
+    return Promise.all(
+      cacheNames.map((cacheName) => {
+        if (cacheName !== CACHE_VER) {
+          return caches.delete(cacheName);
+        }
+      })
+    );
+  }).then(() => {
+    // キャッシュ削除後にリロード
+    const url = window.location.href.split('?')[0] + '?reload=' + new Date().getTime();
+    window.location.href = url;
+  });
+}
