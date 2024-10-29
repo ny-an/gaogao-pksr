@@ -47,6 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 設定アイコンをクリックしたときにモーダルを表示
   settingsIcon.addEventListener('click', () => {
     creditModal.style.display = 'block';
+
+    // 花火だドン！
+    startSchoolPride();
   });
 
   // モーダルの「×」ボタンをクリックしてモーダルを閉じる
