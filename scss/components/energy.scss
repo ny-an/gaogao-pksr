@@ -1,6 +1,99 @@
+@import '../_setting';
+
 .energy-display {
   margin-top: 20px;
   font-size: 1.2em;
   font-weight: bold;
   color: #333;
+}
+
+.settings-toggle {
+  margin-top: 20px;
+
+  button {
+    background-color: $gray-color;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: $blue-color;
+    }
+    &.active {
+      background-color: $blue-color;
+    }
+
+  }
+}
+
+.settings-container {
+  width: 100%;
+  max-width: 600px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px; // 各アイテム間の間隔
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+
+  &.collapsed {
+    opacity: 0;
+    max-height: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .setting-item {
+    display: flex;
+    flex-direction: row;
+    flex: 1; // 各アイテムを均等に配置
+
+    label {
+      width: 100%;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+    }
+
+    input,
+    select {
+      width: 100%;
+      //padding: 8px;
+      //border: 1px solid #ccc;
+      //border-radius: 4px;
+      font-size: 14px;
+      //background-color: #fff;
+      transition: border-color 0.3s ease;
+
+      background: none;
+      padding: 0;
+      border: none;
+      border-bottom: 1px solid black;
+      border-radius: 0;
+      text-align: center;
+
+      &:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+    }
+
+    select {
+      appearance: none; // デフォルトの矢印を非表示
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23333"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+      margin-bottom: 0;
+      font-weight: 100;
+    }
+  }
 }

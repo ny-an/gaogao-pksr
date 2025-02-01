@@ -146,7 +146,7 @@ function getCookingEnergy() {
   console.log('energy:',energy)
 
   // 料理レシピボーナス
-  const recipeLevel = 60;
+  const recipeLevel = parseInt(document.getElementById('recipeLevel').value, 10);
   const recipeBonus = recipeLevelBonusList[recipeLevel] || 0;
   console.log('recipeLevel:',recipeLevel)
   console.log('recipeBonus:',recipeBonus)
@@ -160,11 +160,11 @@ function getCookingEnergy() {
   console.log('recipeDisplayEnergy:',recipeDisplayEnergy)
 
   // FBボーナス
-  const fbBonus = 1.7;
+  const fbBonus = 1 + (parseInt(document.getElementById('fbBonus').value, 10) / 100);
   console.log('fbBonus:',fbBonus)
 
   // イベントボーナス
-  const eventBonus = 1;
+  const eventBonus = parseFloat(document.getElementById('eventBonus').value);
   console.log('eventBonus:',eventBonus)
 
   // 最終エナジー
@@ -180,3 +180,41 @@ function setCookingEnergy(energy) {
   const finalEnergy = energy ?? getCookingEnergy(); // エナジーを取得
   document.getElementById('energyValue').textContent = finalEnergy.toLocaleString(); // エナジーを表示
 }
+
+// 設定をlocalStorageから読み込む
+function loadSettings() {
+  const fbBonus = localStorage.getItem('fbBonus') || 0;
+  const eventBonus = localStorage.getItem('eventBonus') || 1;
+  const recipeLevel = localStorage.getItem('recipeLevel') || 1;
+
+  document.getElementById('fbBonus').value = fbBonus;
+  document.getElementById('eventBonus').value = eventBonus;
+  document.getElementById('recipeLevel').value = recipeLevel;
+}
+
+// 設定をlocalStorageに保存する
+function saveSettings() {
+  const fbBonus = document.getElementById('fbBonus').value;
+  const eventBonus = document.getElementById('eventBonus').value;
+  const recipeLevel = document.getElementById('recipeLevel').value;
+
+  localStorage.setItem('fbBonus', fbBonus);
+  localStorage.setItem('eventBonus', eventBonus);
+  localStorage.setItem('recipeLevel', recipeLevel);
+}
+
+// 設定変更時に再計算する
+function handleSettingChange() {
+  saveSettings();
+  updateIngredients(); // エナジーを再計算
+}
+
+// 初期設定の読み込みとイベントリスナーの設定
+document.addEventListener('DOMContentLoaded', () => {
+  loadSettings();
+
+  // 設定変更時のイベントリスナー
+  document.getElementById('fbBonus').addEventListener('change', handleSettingChange);
+  document.getElementById('eventBonus').addEventListener('change', handleSettingChange);
+  document.getElementById('recipeLevel').addEventListener('change', handleSettingChange);
+});

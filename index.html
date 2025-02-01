@@ -66,6 +66,34 @@
         最大エナジー : <span id="energyValue">0</span>
     </div>
 
+    <!-- 料理エナジー設定ボタン -->
+    <div class="settings-toggle">
+        <button id="toggleSettings">料理設定 ▼</button>
+    </div>
+
+    <!-- 入力設定 -->
+    <div id="settingsContainer" class="settings-container">
+<!--        <div class="title">料理設定</div>-->
+        <div class="setting-item-list">
+            <div class="setting-item">
+                <label for="fbBonus">FBボーナス</label>
+                <input type="number" id="fbBonus" min="0" max="75" step="1" value="0">
+            </div>
+            <div class="setting-item">
+                <label for="recipeLevel">レシピレベル</label>
+                <input type="number" id="recipeLevel" min="1" max="60" step="1" value="1">
+            </div>
+            <div class="setting-item">
+                <label for="eventBonus">イベント</label>
+                <select id="eventBonus">
+                    <option value="1">通常</option>
+                    <option value="1.25">1.25倍</option>
+                    <option value="1.5">1.5倍</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- クレジットモーダル -->
@@ -100,7 +128,7 @@
 <script src="js/dishes.js"></script>
 <script src="js/dishes_energy.js"></script>
 <script src="js/common.js?v=9a"></script>
-<script src="js/app.js"></script>
+<script src="js/app.js?v=2"></script>
 
 <!-- 遊び -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
