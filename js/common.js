@@ -139,6 +139,9 @@ function updateIngredients() {
     // 料理エナジー表示
     setCookingEnergy();
 
+    // 大成功リセット
+    resetExtraTasty();
+
   }else{
     // 料理が選択されていない場合、エナジーを0に設定
     document.getElementById('energyValue').textContent = "0";

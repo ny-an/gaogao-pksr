@@ -3,9 +3,60 @@
 .energy-display {
   margin-top: 20px;
   font-size: 1.2em;
-  font-weight: bold;
+  font-weight: 100;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  //flex-direction: column;
+
+  // 大成功アイコン
+  .extra-tasty-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    transform: rotate(15deg); // 右側に15度傾ける
+
+    &:hover {
+      transform: rotate(15deg) scale(1.1); // 傾きを維持したまま拡大
+    }
+
+    &.disabled {
+      opacity: 0; // 非表示化
+      pointer-events: none; // クリックイベントを無効化
+    }
+  }
+
+  // エナジーアイコン
+  .energy-icon {
+    height: 30px;
+    background-color: #F0AB42;
+    border-radius: 1rem;
+  }
+
+  // エナジー値
+  .energy-value {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-family: 'Montserrat', sans-serif; // 本家っぽいMontserratフォントを適用
+    font-weight: 400;
+
+    // 大きくなるとき
+    &.pop {
+      transform: scale(1.5);
+    }
+
+    // 2倍時
+    &.doubled {
+      color: #FD6772;
+      font-weight: 700;
+      font-size: 1.2em;
+    }
+  }
 }
+
+
 
 .settings-toggle {
   margin-top: 20px;
