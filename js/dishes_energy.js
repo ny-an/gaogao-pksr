@@ -136,6 +136,28 @@ const recipeLevelBonusList = {
   "60": "203"
 };
 
+// 設定値の最小値と最大値
+const FB_BONUS_MIN = 0;
+const FB_BONUS_MAX = 75;
+const RECIPE_LEVEL_MIN = 0;
+const RECIPE_LEVEL_MAX = 60;
+
+/**
+ * 入力値を検証し、範囲内に収める
+ * @param {number} value - 検証する値
+ * @param {number} min - 最小値
+ * @param {number} max - 最大値
+ * @returns {number} - 検証後の値
+ */
+function validateInput(value, min, max) {
+  if (isNaN(value) || value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 // 料理エナジー計算
 function getCookingEnergy() {
   console.log('getFinalEnergy start');
@@ -183,9 +205,12 @@ function setCookingEnergy(energy) {
 
 // 設定をlocalStorageから読み込む
 function loadSettings() {
-  const fbBonus = localStorage.getItem('fbBonus') || 0;
+  // FBボーナスの検証
+  const fbBonus = validateInput(parseInt(localStorage.getItem('fbBonus'), 10), FB_BONUS_MIN, FB_BONUS_MAX);
+  // レシピボーナスの検証
+  const recipeLevel = validateInput(parseInt(localStorage.getItem('recipeLevel'), 10), RECIPE_LEVEL_MIN, RECIPE_LEVEL_MAX);
+  // イベントボーナス
   const eventBonus = localStorage.getItem('eventBonus') || 1;
-  const recipeLevel = localStorage.getItem('recipeLevel') || 1;
 
   document.getElementById('fbBonus').value = fbBonus;
   document.getElementById('eventBonus').value = eventBonus;
@@ -194,14 +219,22 @@ function loadSettings() {
 
 // 設定をlocalStorageに保存する
 function saveSettings() {
-  const fbBonus = document.getElementById('fbBonus').value;
+  // FBボーナスの検証
+  const fbBonusInput = document.getElementById('fbBonus');
+  const fbBonus = validateInput(parseInt(fbBonusInput.value, 10), FB_BONUS_MIN, FB_BONUS_MAX);
+
+  // レシピボーナスの検証
+  const recipeLevelInput = document.getElementById('recipeLevel');
+  const recipeLevel = validateInput(parseInt(recipeLevelInput.value, 10), RECIPE_LEVEL_MIN, RECIPE_LEVEL_MAX);
+
+  // イベントボーナス
   const eventBonus = document.getElementById('eventBonus').value;
-  const recipeLevel = document.getElementById('recipeLevel').value;
 
   localStorage.setItem('fbBonus', fbBonus);
-  localStorage.setItem('eventBonus', eventBonus);
   localStorage.setItem('recipeLevel', recipeLevel);
+  localStorage.setItem('eventBonus', eventBonus);
 }
+
 
 // 設定変更時に再計算する
 function handleSettingChange() {
@@ -291,4 +324,32 @@ document.addEventListener('DOMContentLoaded', () => {
   // リセット機能を外部から呼び出せるように公開
   window.resetExtraTasty = resetExtraTasty;
 
+});
+
+// 料理設定：入力値チェック
+document.addEventListener('DOMContentLoaded', () => {
+  const fbBonusInput = document.getElementById('fbBonus');
+  const recipeLevelInput = document.getElementById('recipeLevel');
+
+  // FBボーナスの入力値検証
+  fbBonusInput.addEventListener('input', () => {
+    const value = validateInput(parseInt(fbBonusInput.value, 10), FB_BONUS_MIN, FB_BONUS_MAX);
+    fbBonusInput.value = isNaN(value) ? '' : value;
+  });
+
+  fbBonusInput.addEventListener('change', () => {
+    const value = validateInput(parseInt(fbBonusInput.value, 10), FB_BONUS_MIN, FB_BONUS_MAX);
+    fbBonusInput.value = isNaN(value) ? '' : value;
+  });
+
+  // レシピボーナスの入力値検証
+  recipeLevelInput.addEventListener('input', () => {
+    const value = validateInput(parseInt(recipeLevelInput.value, 10), RECIPE_LEVEL_MIN, RECIPE_LEVEL_MAX);
+    recipeLevelInput.value = isNaN(value) ? '' : value;
+  });
+
+  recipeLevelInput.addEventListener('change', () => {
+    const value = validateInput(parseInt(recipeLevelInput.value, 10), RECIPE_LEVEL_MIN, RECIPE_LEVEL_MAX);
+    recipeLevelInput.value = isNaN(value) ? '' : value;
+  });
 });
