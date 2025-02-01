@@ -135,6 +135,13 @@ function updateIngredients() {
 
     // 生成したHTMLを一度に挿入
     ingredientTableBody.innerHTML = rowsHtml;
+
+    // 料理エナジー表示
+    setCookingEnergy();
+
+  }else{
+    // 料理が選択されていない場合、エナジーを0に設定
+    document.getElementById('energyValue').textContent = "0";
   }
 
   // 合計の表示を更新
