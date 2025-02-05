@@ -201,6 +201,9 @@ function getCookingEnergy() {
 function setCookingEnergy(energy) {
   const finalEnergy = energy ?? getCookingEnergy(); // エナジーを取得
   document.getElementById('energyValue').textContent = finalEnergy.toLocaleString(); // エナジーを表示
+
+  // エナジーを送信
+  sendEnergy(finalEnergy);
 }
 
 // 設定をlocalStorageから読み込む
