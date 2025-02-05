@@ -1,5 +1,5 @@
-<!-- 大成功クリックイベントを送信するスクリプト -->
-  document.getElementById("energyIcon").addEventListener('click', function(){
+// 大成功クリックイベントを送信
+document.getElementById("energyIcon").addEventListener('click', function(){
   gtag('event', 'click', {
     'event_category': 'button',
     'event_label': 'energyIconClick',
@@ -15,3 +15,12 @@ function sendEnergy(energy){
     'value': energy
   });
 }
+
+// credit表示イベントを送信
+document.getElementById("energyIcon").addEventListener('click', function() {
+  gtag('event', 'credit', {
+    'event_category': 'credit',
+    'event_label': 'credit',
+    'value': 1
+  });
+});
