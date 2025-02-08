@@ -97,6 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
     isCollapsed = !isCollapsed;
     settingsContainer.classList.toggle('collapsed', isCollapsed);
     toggleButton.textContent = isCollapsed ? '料理設定 ▶' : '料理設定 ▼';
+
+    // 開くときはページ下までスクロール
+    if (!isCollapsed) {
+      const doc = document.documentElement;
+      const bottom = doc.scrollHeight - doc.clientHeight;
+      window.scroll({top: bottom, behavior: 'smooth'})
+    }
   });
 
   // 初期状態で折りたたむ

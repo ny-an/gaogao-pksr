@@ -95,8 +95,7 @@
   background-color: #f9f9f9;
 
   &.collapsed {
-    opacity: 0;
-    max-height: 0;
+    display: none;
     padding: 0;
     border: none;
   }
