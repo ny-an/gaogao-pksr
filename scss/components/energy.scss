@@ -71,13 +71,14 @@
     font-size: 14px;
     transition: background-color 0.3s ease;
 
-    &:hover {
-      background-color: $blue-color;
+    @media (hover: hover) {
+      &:hover {
+        background-color: $blue-color;
+      }
     }
     &.active {
       background-color: $blue-color;
     }
-
   }
 }
 
@@ -89,14 +90,14 @@
   flex-direction: column;
   gap: 16px; // 各アイテム間の間隔
   margin-top: 20px;
+  margin-bottom: 60px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
 
   &.collapsed {
-    opacity: 0;
-    max-height: 0;
+    display: none;
     padding: 0;
     border: none;
   }
