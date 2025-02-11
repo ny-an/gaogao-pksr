@@ -183,6 +183,9 @@ function getCookingEnergy() {
   const recipeDisplayEnergy = energy + recipeLevelBonus;
   console.log('recipeDisplayEnergy:',recipeDisplayEnergy)
 
+  // 追加食材の総エナジー
+  const extraAddEnergy = 0;
+
   // FBボーナス
   const fbBonus = 1 + (parseInt(document.getElementById('fbBonus').value, 10) / 100);
   console.log('fbBonus:',fbBonus)
@@ -192,7 +195,7 @@ function getCookingEnergy() {
   console.log('eventBonus:',eventBonus)
 
   // 最終エナジー
-  const finalEnergy = Math.floor(recipeDisplayEnergy * fbBonus * eventBonus);
+  const finalEnergy = Math.floor((recipeDisplayEnergy + extraAddEnergy ) * fbBonus * eventBonus);
   console.log('finalEnergy:',finalEnergy)
   console.log('type',typeof finalEnergy);
 
