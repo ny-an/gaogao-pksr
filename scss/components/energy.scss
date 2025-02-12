@@ -93,12 +93,11 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
+  margin-bottom: 60px;
 
   &.collapsed {
     pointer-events: none; // 非表示時のクリックイベントを無効化
-    opacity: 0;
-    max-height: 0;
-    padding: 0;
+    display: none;
     border: none;
   }
 

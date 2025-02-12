@@ -4,10 +4,17 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #f9f9f9;
+  margin-bottom: 60px;
 
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+
+  &.collapsed {
+    display: none;
+    pointer-events: none; // 非表示時のクリックイベントを無効化
+    border: none;
+  }
 
   .extra-food-item {
     text-align: center;
@@ -30,18 +37,4 @@
       font-family: 'Montserrat', sans-serif;
     }
   }
-}
-
-// 追加食材の表示切り替えボタン
-#toggleExtraFoods {
-  padding: 8px 12px;
-  font-family: 'Montserrat', sans-serif;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    //background-color: #e0e0e0;
-  }
-
 }

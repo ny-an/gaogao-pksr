@@ -6,21 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // 初期状態でエリアを非表示にする
-  extraContainer.style.display = 'none';
+  // 初期状態を設定
+  let isCollapsed = true;
 
+  // ボタンのクリックイベント
   toggleBtn.addEventListener('click', () => {
-    // getComputedStyleを利用して正確な表示状態を取得
-    const currentDisplay = window.getComputedStyle(extraContainer).display;
-
-    if (currentDisplay === 'none') {
-      extraContainer.style.display = 'grid'; // CSSで定義したグリッドレイアウトが適用される前提
-      toggleBtn.textContent = '追加食材 ▼';
-    } else {
-      extraContainer.style.display = 'none';
-      toggleBtn.textContent = '追加食材 ▶';
-    }
+    // 開いたときだけ色つける
+    toggleBtn.classList.toggle('active', isCollapsed);
+    // 折りたたみ状態を切り替え
+    isCollapsed = !isCollapsed;
+    extraContainer.classList.toggle('collapsed', isCollapsed);
+    toggleBtn.textContent = isCollapsed ? '追加食材 ▶' : '追加食材 ▼';
   });
+
+  // 初期状態で折りたたむ
+  extraContainer.classList.add('collapsed');
+  toggleBtn.textContent = '追加食材 ▶';
 });
 
 
