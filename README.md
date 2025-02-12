@@ -34,13 +34,18 @@
 ## ファイル構成
 
 - **index.html**: アプリのUI構造を定義します。
+- **/data/dishes.js**: 料理とその必要食材のデータを保持します。
+- **/data/foods.js**: 食材のデータを保持します。
 - **app.js**: アプリの初期化とイベントハンドリングを担当します。
 - **common.js**: アプリの主要なロジックを担当します。
-- **dishes.js**: 料理とその必要食材のデータを保持します。
+- **dishes_setting.js**: 料理設定のロジックを担当します。
 - **dishes_energy.js**: 料理エナジーの計算と表示を担当します。
+- **extra_tasty.js**: エクストラテイスティのロジックを担当します。
+- **extra_foods.js**: 追加食材のロジックを担当します。
 - **pwa.js**: PWA対応のためのスクリプトです。
 - **cache-config.js**: キャッシュ設定を定義します。
-- **cracker.js**: 花火アニメーションのスクリプトです.
+- **cracker.js**: 花火アニメーションのスクリプトです。
+- **google_script.js**: Gtag.jsを使用してGoogle Analyticsを設定します。
 
 ## 開発者情報
 
