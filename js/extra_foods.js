@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// render
+// render：追加食材エリアを表示
 document.addEventListener('DOMContentLoaded', () => {
   // 追加食材エリアの要素を取得
   const extraContainer = document.getElementById('extraFoodsContainer');
@@ -41,10 +41,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const itemDiv = document.createElement('div');
     itemDiv.className = 'extra-food-item';
 
-    // common.js に定義されている getFoodImagePath 関数を使用して画像要素を作成する
+    // 画像要素を作成
     const img = document.createElement('img');
     img.src = getFoodImagePath(foodName);
     img.alt = foodName;
+
+    // 画像タップ時のイベントを追加
+    img.addEventListener('click', () => {
+      // inputを+1
+      const input = itemDiv.querySelector('input');
+      input.value ++;
+      // 変更イベントを発火して料理エナジーを更新
+      input.dispatchEvent(new Event('change'));
+    });
 
     // 数値入力要素を作成する
     const input = document.createElement('input');
