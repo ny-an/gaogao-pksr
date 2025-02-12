@@ -7,7 +7,7 @@
   margin-bottom: 60px;
 
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 
   &.collapsed {
@@ -23,18 +23,53 @@
     padding: 8px;
     background-color: #fff;
 
-    img {
-      width: 40px;
-      height: 40px;
+    .img-container {
+      position: relative;
+      display: inline-block;
+
+      img {
+        width: 40px;
+        height: 40px;
+      }
+
+      // バッジのスタイル
+      .food-count-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #78909c;
+        color: #ffffff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* バッジの値が0の時は非表示 */
+      .food-count-badge:empty,
+      .food-count-badge[content="0"] {
+        display: none;
+      }
     }
+
     input {
       width: 60px;
       padding: 4px;
       text-align: center;
     }
     .food-label {
-      font-size: 0.9em;
+      font-size: 16px;
       font-family: 'Montserrat', sans-serif;
     }
+
+    .reset-icon{
+      font-size: 12px;
+    }
+
   }
 }
+
+
