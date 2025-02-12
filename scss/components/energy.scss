@@ -95,6 +95,7 @@
   background-color: #f9f9f9;
 
   &.collapsed {
+    pointer-events: none; // 非表示時のクリックイベントを無効化
     opacity: 0;
     max-height: 0;
     padding: 0;
