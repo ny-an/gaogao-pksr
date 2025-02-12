@@ -194,6 +194,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function incrementValue() {
       const newValue = parseInt(input.value) + 1;
+
+      // 600を超える場合は処理を中断
+      if (newValue > 600) {
+        stopIncrementing();
+        return;
+      }
+
       input.value = newValue;
       badge.textContent = newValue;
       badge.style.display = newValue > 0 ? 'flex' : 'none';
