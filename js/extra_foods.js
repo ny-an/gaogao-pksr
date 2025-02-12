@@ -115,16 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     input.setAttribute('data-food', foodName);
     input.style.display = 'none';
 
-    // itemDivにイベントリスナーを設定
-    itemDiv.addEventListener('click', () => {
-      const newValue = parseInt(input.value) + 1;
-      input.value = newValue;
-      badge.textContent = newValue;
-      // 数値が0より大きい時のみバッジを表示
-      badge.style.display = newValue > 0 ? 'flex' : 'none';
-      input.dispatchEvent(new Event('change'));
-    });
-
     // バッジの初期状態を非表示にする
     badge.style.display = 'none';
 
@@ -139,6 +129,78 @@ document.addEventListener('DOMContentLoaded', () => {
     itemDiv.appendChild(imgContainer);
     itemDiv.appendChild(label);
     itemDiv.appendChild(input);
+
+    let incrementInterval;
+    let isIncrementing = false;
+    let pressStartTime;
+
+    // 初速
+    const defaultSpeed = 200; // 初期速度: 200ms 少ないほど速い
+    let currentSpeed = defaultSpeed; // 変化するスピード
+
+    // 中速
+    const middleSpeed = 150; // 中速モード速度: ms
+    const durationToMiddle = 3000; // 中速モード起動時間
+
+    // 高速
+    const highSpeed = 100; // 高速モード速度: ms
+    const durationToHigh = 7000; // 高速モード起動時間
+
+    // 長押し開始時の処理
+    itemDiv.addEventListener('mousedown', startIncrementing);
+    itemDiv.addEventListener('touchstart', startIncrementing);
+
+    // 長押し終了時の処理
+    itemDiv.addEventListener('mouseup', stopIncrementing);
+    itemDiv.addEventListener('mouseleave', stopIncrementing);
+    itemDiv.addEventListener('touchend', stopIncrementing);
+    itemDiv.addEventListener('touchcancel', stopIncrementing);
+
+    function startIncrementing(e) {
+      if (e.type === 'touchstart') {
+        e.preventDefault();
+      }
+      isIncrementing = true;
+      pressStartTime = Date.now();
+      incrementValue();
+
+      function updateInterval() {
+        clearInterval(incrementInterval);
+        incrementInterval = setInterval(() => {
+          if (isIncrementing) {
+            const pressDuration = Date.now() - pressStartTime;
+
+            // 速度変更の判定
+            if (pressDuration > durationToHigh) {
+              currentSpeed = highSpeed;
+            } else if (pressDuration > durationToMiddle) {
+              currentSpeed = middleSpeed;
+            }
+
+            incrementValue();
+            updateInterval(); // 新しい速度で再設定
+          }
+        }, currentSpeed);
+      }
+
+      updateInterval();
+    }
+
+    function stopIncrementing() {
+      isIncrementing = false;
+      currentSpeed = defaultSpeed; // 速度を初期値に戻す
+      clearInterval(incrementInterval);
+    }
+
+    function incrementValue() {
+      const newValue = parseInt(input.value) + 1;
+      input.value = newValue;
+      badge.textContent = newValue;
+      badge.style.display = newValue > 0 ? 'flex' : 'none';
+      input.dispatchEvent(new Event('change'));
+    }
+
+
 
     // 作成したボックスを追加食材エリアに追加する
     extraContainer.appendChild(itemDiv);
