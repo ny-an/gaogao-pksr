@@ -86,42 +86,45 @@
         <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
     </div>
 
-    <!-- 設定選択エリア -->
-    <div id="settingsContainer" class="settings-container">
-<!--        <div class="title">料理設定</div>-->
-        <div class="setting-item-list">
-            <div class="setting-item">
-                <label for="fbBonus">FBボーナス</label>
-                <select id="fbBonus">
-                    <script>
-                      for(let i = 0; i <= 75; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                      }
-                    </script>
-                </select>            </div>
-            <div class="setting-item">
-                <label for="recipeLevel">レシピレベル</label>
-                <select id="recipeLevel">
-                    <script>
-                      for(let i = 1; i <= 60; i++) {
-                        document.write(`<option value="${i}">${i}</option>`);
-                      }
-                    </script>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label for="eventBonus">イベント</label>
-                <select id="eventBonus">
-                    <option value="1">通常</option>
-                    <option value="1.25">1.25倍</option>
-                    <option value="1.5">1.5倍</option>
-                </select>
+    <div class="hidden-area">
+        <!-- 設定選択エリア -->
+        <div id="settingsContainer" class="settings-container">
+    <!--        <div class="title">料理設定</div>-->
+            <div class="setting-item-list">
+                <div class="setting-item">
+                    <label for="fbBonus">FBボーナス</label>
+                    <select id="fbBonus">
+                        <script>
+                          for(let i = 0; i <= 75; i++) {
+                            document.write(`<option value="${i}">${i}</option>`);
+                          }
+                        </script>
+                    </select>            </div>
+                <div class="setting-item">
+                    <label for="recipeLevel">レシピレベル</label>
+                    <select id="recipeLevel">
+                        <script>
+                          for(let i = 1; i <= 60; i++) {
+                            document.write(`<option value="${i}">${i}</option>`);
+                          }
+                        </script>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="eventBonus">イベント</label>
+                    <select id="eventBonus">
+                        <option value="1">通常</option>
+                        <option value="1.25">1.25倍</option>
+                        <option value="1.5">1.5倍</option>
+                    </select>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 追加食材選択エリア -->
-    <div id="extraFoodsContainer" class="extra-foods-container"></div>
+        <!-- 追加食材選択エリア -->
+        <div id="extraFoodsContainer" class="extra-foods-container"></div>
+
+    </div>
 
 </div>
 
