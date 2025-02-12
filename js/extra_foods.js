@@ -115,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     input.setAttribute('data-food', foodName);
     input.style.display = 'none';
 
-    // 画像タップ時のイベント
-    imgContainer.addEventListener('click', () => {
+    // itemDivにイベントリスナーを設定
+    itemDiv.addEventListener('click', () => {
       const newValue = parseInt(input.value) + 1;
       input.value = newValue;
       badge.textContent = newValue;
@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
       input.dispatchEvent(new Event('change'));
     });
 
+    // バッジの初期状態を非表示にする
     badge.style.display = 'none';
 
     // ラベル要素を作成する（エナジー数値を表示）
