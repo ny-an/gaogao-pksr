@@ -47,7 +47,7 @@
 
 <!--    <h4 id="food-title"></h4>-->
 
-    <table id="ingredientTable">
+    <table id="foodTable">
         <thead>
             <tr>
                 <th>食材</th>
@@ -78,12 +78,15 @@
         <img src="img/extra_tasty_red.svg" alt="Extra Tasty" id="extraTastyIcon" class="extra-tasty-icon" style="display: none">
     </div>
 
-    <!-- 料理エナジー設定ボタン -->
+    <!-- 各種ボタン -->
     <div class="settings-toggle">
+        <!-- 料理設定トグルボタン -->
         <button id="toggleSettings">料理設定 ▼</button>
+        <!-- 追加食材トグルボタン -->
+        <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
     </div>
 
-    <!-- 入力設定 -->
+    <!-- 設定選択エリア -->
     <div id="settingsContainer" class="settings-container">
 <!--        <div class="title">料理設定</div>-->
         <div class="setting-item-list">
@@ -116,6 +119,9 @@
             </div>
         </div>
     </div>
+
+    <!-- 追加食材選択エリア -->
+    <div id="extraFoodsContainer" class="extra-foods-container" style="display: none;"></div>
 
 </div>
 
@@ -155,6 +161,7 @@
 <script src="js/app.js?v=2"></script>
 <script src="js/extra_tasty.js"></script>
 <script src="js/dishes_setting.js"></script>
+<script src="js/extra_foods.js"></script>
 
 <!-- 遊び -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>

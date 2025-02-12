@@ -138,6 +138,30 @@ const recipeLevelBonusList = {
   "60": "203"
 };
 
+/**
+ * 食材エナジー表
+ * @type {number}
+ */
+const foodEnergyMap = {
+  "ふといながねぎ": 185,
+  "あじわいキノコ": 167,
+  "とくせんエッグ": 115,
+  "ほっこりポテト": 124,
+  "とくせんリンゴ": 90,
+  "げきからハーブ": 130,
+  "マメミート": 103,
+  "モーモーミルク": 98,
+  "あまいミツ": 101,
+  "ピュアなオイル": 121,
+  "あったかジンジャー": 109,
+  "あんみんトマト": 110,
+  "リラックスカカオ": 151,
+  "おいしいシッポ": 342,
+  "ワカクサ大豆": 100,
+  "ワカクサコーン": 140,
+  "めざましコーヒー": 153
+};
+
 // 設定値の最小値と最大値
 const FB_BONUS_MIN = 0;
 const FB_BONUS_MAX = 75;
@@ -183,8 +207,15 @@ function getCookingEnergy() {
   const recipeDisplayEnergy = energy + recipeLevelBonus;
   console.log('recipeDisplayEnergy:',recipeDisplayEnergy)
 
-  // 追加食材の総エナジー
-  const extraAddEnergy = 0;
+  // 追加食材の総エナジー：追加食材ごとに[数*食材エナジー]を足し合わせる
+  let extraAddEnergy = 0;
+  document.querySelectorAll('.extra-food').forEach(input => {
+    const quantity = parseInt(input.value, 10) || 0;
+    const foodName = input.getAttribute('data-food');
+    const foodEnergy = foodEnergyMap[foodName] || 0;
+    extraAddEnergy += quantity * foodEnergy;
+  });
+  console.log('extraAddEnergy:',extraAddEnergy);
 
   // FBボーナス
   const fbBonus = 1 + (parseInt(document.getElementById('fbBonus').value, 10) / 100);
@@ -247,10 +278,10 @@ function saveSettings() {
 // 設定変更時に再計算する
 function handleSettingChange() {
   saveSettings();
-  updateIngredients(); // エナジーを再計算
+  updateFoods(); // エナジーを再計算
 }
 
-// 初期設定の読み込みとイベントリスナーの設定
+// 初期設定の読み込みと食事エナジー再計算イベントリスナーの設定
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
 

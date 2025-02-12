@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // 必要食材リストを更新
-  foodSelect.addEventListener('change', updateIngredients);
+  foodSelect.addEventListener('change', updateFoods);
 
   // 初期表示の設定
   updateFoodOptions("サラダ");

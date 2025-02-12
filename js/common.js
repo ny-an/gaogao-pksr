@@ -1,16 +1,16 @@
 const categoryButtons = document.querySelectorAll('.category-btn');
 const foodSelect = document.getElementById('foodSelect');
-const ingredientTableBody = document.querySelector('#ingredientTable tbody');
+const foodTableBody = document.querySelector('#foodTable tbody');
 const total1 = document.getElementById('total1');
 const total3 = document.getElementById('total3');
 const total15 = document.getElementById('total15');
 const total21 = document.getElementById('total21');
 
 // 並べ替え済み料理を使用する
-const dishes = sortDishesByTotalIngredients(org_dishes)
+const dishes = sortDishesByTotalFoods(org_dishes)
 
 // 画像ファイルパスを生成するための関数
-function getIngredientImagePath(ingredient) {
+function getFoodImagePath(food) {
   const imageMap = {
     "マメミート": "BeanSausage",
     "とくせんリンゴ": "FancyApple",
@@ -30,7 +30,7 @@ function getIngredientImagePath(ingredient) {
     "あったかジンジャー": "WarmingGinger",
     "めざましコーヒー": "RousingCoffee",
   };
-  return `img/ingredients/svg/${imageMap[ingredient] || 'default.svg'}.svg`;
+  return `img/foods/svg/${imageMap[food] || 'default.svg'}.svg`;
 }
 
 
@@ -48,7 +48,7 @@ function updateFoodOptions(selectedCategory) {
     }
   }
   // 食材リストを初期化
-  updateIngredients();
+  updateFoods();
 }
 
 // 最初の料理を自動で選択する関数
@@ -60,7 +60,7 @@ function selectFirstFoodOption() {
       foodSelect.selectedIndex = 1; // 最初の項目を選択
 
       // 食材テーブル更新
-      updateIngredients();
+      updateFoods();
     }
   },50)
 
@@ -68,22 +68,22 @@ function selectFirstFoodOption() {
 
 
 // カテゴリ内の料理を合計食材数が多い順にソートする関数
-function sortDishesByTotalIngredients(dishes) {
+function sortDishesByTotalFoods(dishes) {
   const sortedDishes = {};
 
   for (const category in dishes) {
     // 各料理の合計食材数を計算
-    const recipes = Object.entries(dishes[category]).map(([dish, ingredients]) => {
-      const totalIngredients = Object.values(ingredients).reduce((sum, amount) => sum + amount, 0);
-      return { dish, ingredients, totalIngredients };
+    const recipes = Object.entries(dishes[category]).map(([dish, foods]) => {
+      const totalFoods = Object.values(foods).reduce((sum, amount) => sum + amount, 0);
+      return { dish, foods, totalFoods };
     });
 
     // 合計食材数でソート
-    recipes.sort((a, b) => b.totalIngredients - a.totalIngredients);
+    recipes.sort((a, b) => b.totalFoods - a.totalFoods);
 
     // ソートした結果を新しいオブジェクトとして保存
-    sortedDishes[category] = recipes.reduce((acc, { dish, ingredients }) => {
-      acc[dish] = ingredients;
+    sortedDishes[category] = recipes.reduce((acc, { dish, foods }) => {
+      acc[dish] = foods;
       return acc;
     }, {});
   }
@@ -93,20 +93,20 @@ function sortDishesByTotalIngredients(dishes) {
 
 
 // 料理選択時のテーブル更新
-function updateIngredients() {
+function updateFoods() {
   const selectedCategoryButton = document.querySelector('.category-btn.active');
   const selectedCategory = selectedCategoryButton ? selectedCategoryButton.getAttribute('data-category') : null;
   const selectedDish = foodSelect.value;
 
-  ingredientTableBody.innerHTML = ""; // テーブルの内容を初期化
+  foodTableBody.innerHTML = ""; // テーブルの内容を初期化
   let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;
 
   if (selectedCategory && selectedDish && dishes[selectedCategory] && dishes[selectedCategory][selectedDish]) {
-    const ingredients = dishes[selectedCategory][selectedDish];
+    const foods = dishes[selectedCategory][selectedDish];
     let rowsHtml = ""; // HTML文字列を一度に生成
 
     // 各食材ごとに行のHTMLを作成
-    for (const [ingredient, amount] of Object.entries(ingredients)) {
+    for (const [food, amount] of Object.entries(foods)) {
       const amount1 = amount;
       const amount3 = amount * 3;
       const amount15 = amount * 15;
@@ -118,8 +118,8 @@ function updateIngredients() {
       sum21 += amount21;
 
       // 画像のHTMLコードを生成
-      const imgPath = getIngredientImagePath(ingredient);
-      const imgTag = `<img src="${imgPath}" alt="${ingredient}" style="width: 30px; height: 30px;">`;
+      const imgPath = getFoodImagePath(food);
+      const imgTag = `<img src="${imgPath}" alt="${food}" style="width: 30px; height: 30px;">`;
 
       // 各行のHTMLを生成し、rowsHtmlに追加
       rowsHtml += `
@@ -134,7 +134,7 @@ function updateIngredients() {
     }
 
     // 生成したHTMLを一度に挿入
-    ingredientTableBody.innerHTML = rowsHtml;
+    foodTableBody.innerHTML = rowsHtml;
 
     // 料理エナジー表示
     setCookingEnergy();
