@@ -1,21 +1,52 @@
+
+
 // 大成功！
 document.addEventListener('DOMContentLoaded', () => {
   const energyIcon = document.getElementById('energyIcon');
   const energyTastyIcon = document.getElementById('extraTastyIcon');
   const energyValue = document.getElementById('energyValue');
 
+  // HTML要素の複製用関数を追加
+  function duplicateExtraTastyIcon() {
+    const originalIcon = document.getElementById('extraTastyIcon');
+    const newIcon = originalIcon.cloneNode(true);
+    newIcon.id = 'extraTastyIcon2';
+    newIcon.classList.remove('disabled');
+    originalIcon.parentNode.insertBefore(newIcon, originalIcon.nextSibling);
+  }
+
   // クリック可能かどうかを示すフラグ
   let isClickable = true;
+
+  // クリック状態管理
+  let clickState = 0; // 0: 通常, 1: 2倍, 2: 3倍
 
   // Extra Tastyアイコンをクリックしたときの処理
   energyIcon.addEventListener('click', () => {
     if (!isClickable) return;
     const currentEnergy = parseInt(energyValue.textContent.replace(/,/g, ''), 10); // カンマを除去して数値に変換
-    const targetEnergy = currentEnergy * 2;
-    animateEnergyValue(currentEnergy, targetEnergy, energyValue);
+    let targetEnergy;
 
-    // クリック不可にする
-    disableExtraTasty();
+    if (clickState === 0) {
+      // 1回目のクリック: 2倍
+      targetEnergy = currentEnergy * 2;
+      clickState = 1;
+      energyValue.classList.add('doubled');
+    } else if (clickState === 1) {
+      // 2回目のクリック: さらに1.5倍
+      targetEnergy = currentEnergy * 1.5;
+      clickState = 2;
+      energyValue.classList.add('tripled');
+
+      // クリック不可にする
+      disableExtraTasty();
+
+      // びっくりびっくり！
+      duplicateExtraTastyIcon();
+
+    }
+
+    animateEnergyValue(currentEnergy, targetEnergy, energyValue);
   });
 
   // 数値アニメーション関数
@@ -54,20 +85,27 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(update);
   }
 
-  // Extra Tasty Iconを無効化する関数
-  function disableExtraTasty() {
-    isClickable = false;
-    // energyIcon.classList.add('disabled');
-  }
-
-  // Extra Tasty Iconをリセットする関数
+  // リセット関数を更新
   function resetExtraTasty() {
     isClickable = true;
-    // energyIcon.classList.remove('disabled');
-    // 赤文字を解除
-    energyValue.classList.remove('doubled');
-    // びっくり非表示
+    clickState = 0;
+    energyValue.classList.remove('doubled', 'tripled');
     energyTastyIcon.style.display = 'none';
+    const secondIcon = document.getElementById('extraTastyIcon2');
+    if (secondIcon) {
+      secondIcon.remove();
+    }
+  }
+
+  // disable関数も更新
+  function disableExtraTasty() {
+    isClickable = false;
+    clickState = 0;
+    energyValue.classList.remove('doubled', 'tripled');
+    const secondIcon = document.getElementById('extraTastyIcon2');
+    if (secondIcon) {
+      secondIcon.remove();
+    }
   }
 
   // リセット機能を外部から呼び出せるように公開

@@ -27,6 +27,10 @@
       pointer-events: none; // クリックイベントを無効化
     }
   }
+  // 大成功アイコン2（複製用）
+  #extraTastyIcon2{
+    margin-left: -22px;
+  }
 
   // エナジーアイコン
   .energy-icon {
@@ -52,6 +56,10 @@
       color: #FD6772;
       font-weight: 700;
       font-size: 1.2em;
+    }
+    // 3倍時
+    &.tripled {
+      font-size: 1.3em;
     }
   }
 }
