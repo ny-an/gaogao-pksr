@@ -9,6 +9,30 @@ const total21 = document.getElementById('total21');
 // 並べ替え済み料理を使用する
 const dishes = sortDishesByTotalFoods(org_dishes)
 
+// カテゴリ内の料理を合計食材数が多い順にソートする関数
+function sortDishesByTotalFoods(dishes) {
+  const sortedDishes = {};
+
+  for (const category in dishes) {
+    // 各料理の合計食材数を計算
+    const recipes = Object.entries(dishes[category]).map(([dish, foods]) => {
+      const totalFoods = Object.values(foods).reduce((sum, amount) => sum + amount, 0);
+      return { dish, foods, totalFoods };
+    });
+
+    // 合計食材数でソート
+    recipes.sort((a, b) => b.totalFoods - a.totalFoods);
+
+    // ソートした結果を新しいオブジェクトとして保存
+    sortedDishes[category] = recipes.reduce((acc, { dish, foods }) => {
+      acc[dish] = foods;
+      return acc;
+    }, {});
+  }
+
+  return sortedDishes;
+}
+
 // 画像ファイルパスを生成するための関数
 function getFoodImagePath(food) {
   const imageMap = {
@@ -32,7 +56,6 @@ function getFoodImagePath(food) {
   };
   return `img/foods/svg/${imageMap[food] || 'default.svg'}.svg`;
 }
-
 
 // カテゴリ選択時に料理リストを更新する関数
 function updateFoodOptions(selectedCategory) {
@@ -65,32 +88,6 @@ function selectFirstFoodOption() {
   },50)
 
 }
-
-
-// カテゴリ内の料理を合計食材数が多い順にソートする関数
-function sortDishesByTotalFoods(dishes) {
-  const sortedDishes = {};
-
-  for (const category in dishes) {
-    // 各料理の合計食材数を計算
-    const recipes = Object.entries(dishes[category]).map(([dish, foods]) => {
-      const totalFoods = Object.values(foods).reduce((sum, amount) => sum + amount, 0);
-      return { dish, foods, totalFoods };
-    });
-
-    // 合計食材数でソート
-    recipes.sort((a, b) => b.totalFoods - a.totalFoods);
-
-    // ソートした結果を新しいオブジェクトとして保存
-    sortedDishes[category] = recipes.reduce((acc, { dish, foods }) => {
-      acc[dish] = foods;
-      return acc;
-    }, {});
-  }
-
-  return sortedDishes;
-}
-
 
 // 料理選択時のテーブル更新
 function updateFoods() {
