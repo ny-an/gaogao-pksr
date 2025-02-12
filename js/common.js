@@ -89,17 +89,26 @@ function selectFirstFoodOption() {
 
 }
 
-// 料理選択時のテーブル更新
-function updateFoods() {
+// 表示中の料理の食材リストを取得する関数
+const getViewingFoods = () => {
   const selectedCategoryButton = document.querySelector('.category-btn.active');
   const selectedCategory = selectedCategoryButton ? selectedCategoryButton.getAttribute('data-category') : null;
   const selectedDish = foodSelect.value;
+  const foods = dishes[selectedCategory][selectedDish];
+
+  return foods;
+}
+
+// 料理選択時のテーブル更新
+function updateFoods() {
+
+  // 表示中の食材取得
+  const foods = getViewingFoods();
 
   foodTableBody.innerHTML = ""; // テーブルの内容を初期化
   let sum1 = 0, sum3 = 0, sum15 = 0, sum21 = 0;
 
-  if (selectedCategory && selectedDish && dishes[selectedCategory] && dishes[selectedCategory][selectedDish]) {
-    const foods = dishes[selectedCategory][selectedDish];
+  if (foods) {
     let rowsHtml = ""; // HTML文字列を一度に生成
 
     // 各食材ごとに行のHTMLを作成

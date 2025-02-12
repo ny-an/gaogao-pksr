@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     creditModal.style.display = 'block';
 
     // 花火だドン！
-    startSchoolPride();
+    startSideFire();
   });
 
   // モーダルの「×」ボタンをクリックしてモーダルを閉じる

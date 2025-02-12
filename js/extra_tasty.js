@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
         element.classList.add('doubled');
         // Extra Tastyアイコンを表示
         energyTastyIcon.style.display = 'block';
+
+        // 花火
+        startCentralFire();
       }
     }
 

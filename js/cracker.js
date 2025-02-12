@@ -1,14 +1,39 @@
 // @see https://github.com/catdad/canvas-confetti
 
-function startFire() {
+// 表示中の料理の食材カラーを取得
+function getDishesTableFoodColors(){
+
+  // 表示中の食材取得
+  const foods = getViewingFoods();
+
+  // 食材カラー表からカラーコードを取得
+  const viewingFoodColors = [];
+  for (const foodName in foods) {
+    viewingFoodColors.push(foodColorMap[foodName]);
+  }
+
+  // カラー数が足りない場合は、既存カラーを増やす
+  while (viewingFoodColors.length < 4) {
+    viewingFoodColors.push(viewingFoodColors[viewingFoodColors.length % viewingFoodColors.length]);
+  }
+
+  return viewingFoodColors;
+}
+
+// 中央から
+function startCentralFire() {
   const count = 200;
   const defaults = {
     origin: {y: 0.7}
   };
 
+  // 食材に合わせたカラーを取得
+  const colors = getDishesTableFoodColors();
+
   function fire(particleRatio, opts) {
     confetti(Object.assign({}, defaults, opts, {
-      particleCount: Math.floor(count * particleRatio)
+      particleCount: Math.floor(count * particleRatio),
+      colors: colors
     }));
   }
 
@@ -36,11 +61,12 @@ function startFire() {
   });
 }
 
-function startSchoolPride(second=1){
+// 横から
+function startSideFire(second=1){
   const end = Date.now() + ( second * 1000);
 
-  // go Buckeyes!
-  const colors = ['#D18298','#7AB7DD','#C3D09E', '#ffffff'];
+  // 食材に合わせたカラーを取得
+  const colors = getDishesTableFoodColors();
 
   (function frame() {
     confetti({
