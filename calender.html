@@ -29,14 +29,16 @@
     <br />
 
     <!-- 1週間の総合エナジー表示 -->
-    <div id="weeklyEnergy" class="weekly-energy">週間エナジー：0</div>
+    <div id="weeklyEnergy" class="weekly-energy">週間エナジー：<span id="weeklyEnergyNum">0</span></div>
 
     <!-- 週の選択 -->
     <div id="weekDisplay">
       表示中の週: <span id="currentWeek"></span>
+      <br />
+      <span id="mondayDate"></span>〜
     </div>
+
     <div id="weekSelectorContainer">
-      過去の週を選択:
       <select id="weekSelector"></select>
     </div>
 

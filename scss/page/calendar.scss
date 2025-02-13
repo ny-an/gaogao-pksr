@@ -13,6 +13,23 @@ $table-padding: 10px;
     color: $body-color;
   }
 
+  #weeklyEnergy{
+    #weeklyEnergyNum {
+      font-family: 'Montserrat', sans-serif; // 本家っぽいMontserratフォントを適用
+      color: #FD6772;
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+  }
+
+  #weekDisplay{
+    margin-top: 1.5rem;
+  }
+
+  #weekSelectorContainer{
+    margin-top: 1.5rem;
+  }
+
   .calendar-container {
     max-width: $container-max-width;
     margin: 0 auto;

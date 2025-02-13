@@ -90,9 +90,9 @@ function recalcEnergyTotals() {
 
   // 週間合計の計算と表示（#weeklyEnergyの更新）
   const weeklyTotal = days.reduce((sum, day) => sum + dailyTotals[day], 0);
-  const weeklyElement = document.getElementById("weeklyEnergy");
-  if (weeklyElement) {
-    weeklyElement.innerText = "週間エナジー：" + weeklyTotal.toLocaleString();
+  const weeklyNumElement = document.getElementById("weeklyEnergyNum");
+  if (weeklyNumElement) {
+    weeklyNumElement.innerText = weeklyTotal.toLocaleString();
   }
 }
 
@@ -143,6 +143,11 @@ async function populateWeekSelector() {
   // 存在する週があれば初期表示にセット
   if (validWeeks.length > 0) {
     document.getElementById("currentWeek").innerText = validWeeks[0];
+
+    // 月曜日の日付を計算して表示
+    const mondayDate = getMondayDateFromWeek(validWeeks[0]);
+    document.getElementById("mondayDate").innerText = mondayDate;
+
   } else {
     // 週データが存在しなければ、空のデータで作成
     const newWeekRecord = {
@@ -162,6 +167,10 @@ document.getElementById("weekSelector").addEventListener("change", event => {
 
   const selectedWeek = event.target.value;
   document.getElementById("currentWeek").innerText = selectedWeek;
+
+  // 月曜日の日付を計算して表示
+  const mondayDate = getMondayDateFromWeek(selectedWeek);
+  document.getElementById("mondayDate").innerText = mondayDate;
 
   // table自体のdata-week属性を更新
   const calendarTable = document.querySelector(".calendar-table");
