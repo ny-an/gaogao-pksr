@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日記帳</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/calendar.css">
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q5BGCQDCV6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Q5BGCQDCV6');
+  </script>
+
+</head>
+<body>
+<div class="calendar-container">
+  <h1>仮・日記帳</h1>
+
+  <!-- 1週間の総合エナジー表示 -->
+  <div id="weeklyEnergy" class="weekly-energy">週間エナジー：0</div>
+
+  <!-- 週の選択 -->
+  <div id="weekDisplay">
+    表示中の週: <span id="currentWeek"></span>
+  </div>
+  <div id="weekSelectorContainer">
+    過去の週を選択:
+    <select id="weekSelector"></select>
+  </div>
+
+  <!-- カレンダーTable -->
+  <table class="calendar-table" data-week="">
+    <thead>
+    <tr>
+      <th></th>
+      <th>月</th>
+      <th>火</th>
+      <th>水</th>
+      <th>木</th>
+      <th>金</th>
+      <th>土</th>
+      <th>日</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 朝 -->
+    <tr>
+      <th class="meal-type">朝</th>
+      <td class="day-cell" data-day="月" data-meal="朝"></td>
+      <td class="day-cell" data-day="火" data-meal="朝"></td>
+      <td class="day-cell" data-day="水" data-meal="朝"></td>
+      <td class="day-cell" data-day="木" data-meal="朝"></td>
+      <td class="day-cell" data-day="金" data-meal="朝"></td>
+      <td class="day-cell" data-day="土" data-meal="朝"></td>
+      <td class="day-cell" data-day="日" data-meal="朝"></td>
+    </tr>
+    <!-- 昼 -->
+    <tr>
+      <th class="meal-type">昼</th>
+      <td class="day-cell" data-day="月" data-meal="昼"></td>
+      <td class="day-cell" data-day="火" data-meal="昼"></td>
+      <td class="day-cell" data-day="水" data-meal="昼"></td>
+      <td class="day-cell" data-day="木" data-meal="昼"></td>
+      <td class="day-cell" data-day="金" data-meal="昼"></td>
+      <td class="day-cell" data-day="土" data-meal="昼"></td>
+      <td class="day-cell" data-day="日" data-meal="昼"></td>
+    </tr>
+    <!-- 夜 -->
+    <tr>
+      <th class="meal-type">夜</th>
+      <td class="day-cell" data-day="月" data-meal="夜"></td>
+      <td class="day-cell" data-day="火" data-meal="夜"></td>
+      <td class="day-cell" data-day="水" data-meal="夜"></td>
+      <td class="day-cell" data-day="木" data-meal="夜"></td>
+      <td class="day-cell" data-day="金" data-meal="夜"></td>
+      <td class="day-cell" data-day="土" data-meal="夜"></td>
+      <td class="day-cell" data-day="日" data-meal="夜"></td>
+    </tr>
+    </tbody>
+    <!-- 各曜日の合計エナジーを表示する行 -->
+    <tfoot>
+    <tr class="daily-total-row">
+      <td>合計</td>
+      <td data-day="月" class="daily-total"></td>
+      <td data-day="火" class="daily-total"></td>
+      <td data-day="水" class="daily-total"></td>
+      <td data-day="木" class="daily-total"></td>
+      <td data-day="金" class="daily-total"></td>
+      <td data-day="土" class="daily-total"></td>
+      <td data-day="日" class="daily-total"></td>
+    </tr>
+    </tfoot>
+
+  </table>
+</div>
+
+<!-- 画面全体を覆うローディングオーバーレイ -->
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+  <div class="spinner"></div>
+</div>
+
+<!-- 共通で使用するhiddenなファイル入力 -->
+<input type="file" id="hiddenFileInput" accept="image/*" style="display:none">
+
+<!-- DB, 画像圧縮などの機能を読み込み -->
+<script src="/js/lib/tesseract.min.js"></script>
+<script src="js/calendar/loading.js"></script>
+<script src="js/calendar/settings.js"></script>
+<script src="js/calendar/db.js"></script>
+<script src="js/calendar/reset.js"></script>
+<script src="js/calendar/render.js"></script>
+<script src="js/calendar/imageCompress.js"></script>
+<script src="js/calendar/calendar.js"></script>
+
+</body>
+</html>
