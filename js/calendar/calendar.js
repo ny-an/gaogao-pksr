@@ -144,8 +144,8 @@ function setupEventListeners() {
       await updateCellDisplay(currentCell, energy, compressedImage);
 
     } catch (error) {
-      displayEl.innerText = "OCR/圧縮失敗";
-      alert("OCR失敗。手入力してください！");
+      // displayEl.innerText = "OCR/圧縮失敗";
+      alert("画像解析失敗！手入力してください！！");
       console.error(error);
     }finally {
       hideLoading(); // OCR処理完了後にローディング非表示
