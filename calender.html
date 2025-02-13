@@ -46,69 +46,71 @@
     </div>
 
     <!-- カレンダーTable -->
-    <table class="calendar-table" data-week="">
-      <thead>
-      <tr>
-        <th></th>
-        <th>月</th>
-        <th>火</th>
-        <th>水</th>
-        <th>木</th>
-        <th>金</th>
-        <th>土</th>
-        <th>日</th>
-      </tr>
-      </thead>
-      <tbody>
-      <!-- 朝 -->
-      <tr>
-        <th class="meal-type">朝</th>
-        <td class="day-cell" data-day="月" data-meal="朝"></td>
-        <td class="day-cell" data-day="火" data-meal="朝"></td>
-        <td class="day-cell" data-day="水" data-meal="朝"></td>
-        <td class="day-cell" data-day="木" data-meal="朝"></td>
-        <td class="day-cell" data-day="金" data-meal="朝"></td>
-        <td class="day-cell" data-day="土" data-meal="朝"></td>
-        <td class="day-cell" data-day="日" data-meal="朝"></td>
-      </tr>
-      <!-- 昼 -->
-      <tr>
-        <th class="meal-type">昼</th>
-        <td class="day-cell" data-day="月" data-meal="昼"></td>
-        <td class="day-cell" data-day="火" data-meal="昼"></td>
-        <td class="day-cell" data-day="水" data-meal="昼"></td>
-        <td class="day-cell" data-day="木" data-meal="昼"></td>
-        <td class="day-cell" data-day="金" data-meal="昼"></td>
-        <td class="day-cell" data-day="土" data-meal="昼"></td>
-        <td class="day-cell" data-day="日" data-meal="昼"></td>
-      </tr>
-      <!-- 夜 -->
-      <tr>
-        <th class="meal-type">夜</th>
-        <td class="day-cell" data-day="月" data-meal="夜"></td>
-        <td class="day-cell" data-day="火" data-meal="夜"></td>
-        <td class="day-cell" data-day="水" data-meal="夜"></td>
-        <td class="day-cell" data-day="木" data-meal="夜"></td>
-        <td class="day-cell" data-day="金" data-meal="夜"></td>
-        <td class="day-cell" data-day="土" data-meal="夜"></td>
-        <td class="day-cell" data-day="日" data-meal="夜"></td>
-      </tr>
-      </tbody>
-      <!-- 各曜日の合計エナジーを表示する行 -->
-      <tfoot>
-      <tr class="daily-total-row">
-        <td>合計</td>
-        <td data-day="月" class="daily-total"></td>
-        <td data-day="火" class="daily-total"></td>
-        <td data-day="水" class="daily-total"></td>
-        <td data-day="木" class="daily-total"></td>
-        <td data-day="金" class="daily-total"></td>
-        <td data-day="土" class="daily-total"></td>
-        <td data-day="日" class="daily-total"></td>
-      </tr>
-      </tfoot>
+    <div class="table-wrapper">
+      <table class="calendar-table" data-week="">
+        <thead>
+        <tr>
+          <th></th>
+          <th>月</th>
+          <th>火</th>
+          <th>水</th>
+          <th>木</th>
+          <th>金</th>
+          <th>土</th>
+          <th>日</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 朝 -->
+        <tr>
+          <th class="meal-type">朝</th>
+          <td class="day-cell" data-day="月" data-meal="朝"></td>
+          <td class="day-cell" data-day="火" data-meal="朝"></td>
+          <td class="day-cell" data-day="水" data-meal="朝"></td>
+          <td class="day-cell" data-day="木" data-meal="朝"></td>
+          <td class="day-cell" data-day="金" data-meal="朝"></td>
+          <td class="day-cell" data-day="土" data-meal="朝"></td>
+          <td class="day-cell" data-day="日" data-meal="朝"></td>
+        </tr>
+        <!-- 昼 -->
+        <tr>
+          <th class="meal-type">昼</th>
+          <td class="day-cell" data-day="月" data-meal="昼"></td>
+          <td class="day-cell" data-day="火" data-meal="昼"></td>
+          <td class="day-cell" data-day="水" data-meal="昼"></td>
+          <td class="day-cell" data-day="木" data-meal="昼"></td>
+          <td class="day-cell" data-day="金" data-meal="昼"></td>
+          <td class="day-cell" data-day="土" data-meal="昼"></td>
+          <td class="day-cell" data-day="日" data-meal="昼"></td>
+        </tr>
+        <!-- 夜 -->
+        <tr>
+          <th class="meal-type">夜</th>
+          <td class="day-cell" data-day="月" data-meal="夜"></td>
+          <td class="day-cell" data-day="火" data-meal="夜"></td>
+          <td class="day-cell" data-day="水" data-meal="夜"></td>
+          <td class="day-cell" data-day="木" data-meal="夜"></td>
+          <td class="day-cell" data-day="金" data-meal="夜"></td>
+          <td class="day-cell" data-day="土" data-meal="夜"></td>
+          <td class="day-cell" data-day="日" data-meal="夜"></td>
+        </tr>
+        </tbody>
+        <!-- 各曜日の合計エナジーを表示する行 -->
+        <tfoot>
+        <tr class="daily-total-row">
+          <td>合計</td>
+          <td data-day="月" class="daily-total"></td>
+          <td data-day="火" class="daily-total"></td>
+          <td data-day="水" class="daily-total"></td>
+          <td data-day="木" class="daily-total"></td>
+          <td data-day="金" class="daily-total"></td>
+          <td data-day="土" class="daily-total"></td>
+          <td data-day="日" class="daily-total"></td>
+        </tr>
+        </tfoot>
 
-    </table>
+      </table>
+    </div>
   </div>
 
   <!-- 画面全体を覆うローディングオーバーレイ -->
