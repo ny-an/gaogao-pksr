@@ -1,0 +1,111 @@
+// 変数定義
+$container-max-width: 800px;
+$body-color: #333;
+$table-border: 1px solid #ccc;
+$header-bg: #eee;
+$meal-type-bg: #ddd;
+$text-muted: #555;
+$table-padding: 10px;
+
+#page-calendar {
+
+  &{
+    color: $body-color;
+  }
+
+  .calendar-container {
+    max-width: $container-max-width;
+    margin: 0 auto;
+  }
+
+  .calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    text-align: center;
+
+    overflow-x: auto;
+    white-space: nowrap;
+
+    th,
+    td {
+      border: $table-border;
+      padding: $table-padding;
+    }
+
+    th {
+      background-color: $header-bg;
+    }
+
+    .meal-type {
+      background-color: $meal-type-bg;
+      font-weight: bold;
+    }
+
+    .day-cell {
+      vertical-align: top;
+      min-height: 80px;
+    }
+
+    .dishes-name {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .energy-value {
+      font-size: 12px;
+      color: $text-muted;
+    }
+
+    thead {
+      // ヘッダー固有のスタイルがあればここに記述
+    }
+
+    tbody {
+      // 各食事時間ごとのスタイルがあればここに記述
+    }
+
+    tfoot {
+      .daily-total-row {
+        td {
+          &:first-child {
+            // 合計列タイトル等にスタイルを指定したい場合
+          }
+        }
+      }
+    }
+  }
+
+
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
+
+}
