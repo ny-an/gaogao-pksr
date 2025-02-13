@@ -104,6 +104,7 @@ async function populateWeekSelector() {
   const weekSelector = document.getElementById("weekSelector");
   weekSelector.innerHTML = "";
   const currentDate = new Date();
+  const currentWeekStr = getISOWeekString(currentDate);
   const weeksToShow = 100; // 遡り表示する週数
   const validWeeks = [];
 
@@ -123,6 +124,15 @@ async function populateWeekSelector() {
         option.value = weekStr;
         option.text = weekStr;
         weekSelector.appendChild(option);
+      }else{
+        // 何もないデータ状態の場合は、現在の週だけ表示する
+        if (weekStr === currentWeekStr) {
+          validWeeks.push(weekStr);
+          const option = document.createElement("option");
+          option.value = weekStr;
+          option.text = weekStr;
+          weekSelector.appendChild(option);
+        }
       }
     } catch (error) {
       // データがなければエラーとなる可能性があるので、その場合は何もしない（スキップ）
@@ -134,7 +144,15 @@ async function populateWeekSelector() {
   if (validWeeks.length > 0) {
     document.getElementById("currentWeek").innerText = validWeeks[0];
   } else {
-    document.getElementById("currentWeek").innerText = "データなし";
+    // 週データが存在しなければ、空のデータで作成
+    const newWeekRecord = {
+      week: currentWeekStr,
+      data: {} // 空の初期状態
+    };
+    await dbAPI.saveWeeklyMenu(newWeekRecord);
+    console.log("新しい週データを自動作成しました:", currentWeekStr);
+
+    document.getElementById("currentWeek").innerText = currentWeekStr;
   }
 }
 

@@ -21,9 +21,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (weekRecord && weekRecord.data) {
       populateCalendar(weekRecord.data);
     } else {
+
+      const currentDate = new Date();
+      const weekStr = getISOWeekString(currentDate);
+
       // 週データが存在しなければ、空のデータで作成
       const newWeekRecord = {
-        week: selectedWeek,
+        week: weekStr,
         data: {} // 空の初期状態
       };
       await dbAPI.saveWeeklyMenu(newWeekRecord);
