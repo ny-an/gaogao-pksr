@@ -75,6 +75,7 @@ $table-padding: 10px;
       min-height: 80px;
 
       .menu-item {}
+
       .menu-image{
         img{
           width: 100px;
@@ -102,11 +103,6 @@ $table-padding: 10px;
       margin-bottom: 5px;
     }
 
-    .energy-value {
-      font-size: 12px;
-      color: $text-muted;
-    }
-
     thead {
       // ヘッダー固有のスタイルがあればここに記述
     }
@@ -127,6 +123,7 @@ $table-padding: 10px;
   }
 
 
+  // loading表示
   .loading-overlay {
     position: fixed;
     top: 0;
