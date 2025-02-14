@@ -166,7 +166,7 @@ async function updateCellDisplay(cell, energy, compressedImage) {
   // セル表示更新：料理名は今回は空文字とする
   cell.innerHTML = `
     <div class="menu-item"></div>
-    <div class="energy-display">エナジー: ${energy.toLocaleString()}</div>
+    <div class="energy-display">${energy.toLocaleString()}</div>
     <div class="menu-image"><img src="${compressedImage}" width="50"></div>
     <button class="btn-reset">リセット</button>
   `;

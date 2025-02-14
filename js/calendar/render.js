@@ -18,7 +18,7 @@ function populateCalendar(weekData) {
 // --- カレンダーのセル表示更新 ---
 function updateCellContent(cell, record) {
   let content = `<div class="menu-item">${record.dish || ""}</div>`
-    +`<div class="energy-display">エナジー: ${(record.energy || 0).toLocaleString()}</div>`;
+    +`<div class="energy-display">${(record.energy || 0).toLocaleString()}</div>`;
   if (record.energy) {
     content += `<div class="menu-image"><img src="${record.image}" width="50"></div>`;
   }
@@ -65,10 +65,9 @@ function recalcEnergyTotals() {
     if (energyDisplay) {
       // 表示例："エナジー: 1,234"
       const text = energyDisplay.innerText;
-      const match = text.match(/エナジー:\s*([\d,]+)/);
-      if (match && match[1]) {
+      if (text) {
         // カンマを除去して数値に変換
-        const energy = parseInt(match[1].replace(/,/g, ""), 10);
+        const energy = parseInt(text.replace(/,/g, ""), 10);
         if (!isNaN(energy)) {
           const day = cell.getAttribute("data-day");
           if (dailyTotals.hasOwnProperty(day)) {
