@@ -7,7 +7,7 @@ const total15 = document.getElementById('total15');
 const total21 = document.getElementById('total21');
 
 // 並べ替え済み料理を使用する
-const dishes = sortDishesByTotalFoods(org_dishes)
+const dishes = typeof org_dishes !== 'undefined' ? sortDishesByTotalFoods(org_dishes) : {};
 
 // カテゴリ内の料理を合計食材数が多い順にソートする関数
 function sortDishesByTotalFoods(dishes) {
@@ -177,3 +177,17 @@ function superReload() {
     window.location.href = url;
   });
 }
+
+// titleページ遷移：クリックイベントを設定
+document.getElementById('title').addEventListener('click', () => {
+  console.log('titleページ遷移');
+  const body_id = document.querySelector('body').id;
+  const currentPage = body_id.split('-')[1];
+  console.log(currentPage);
+
+  if (currentPage === 'index') {
+    location.href = 'calender.html?ver=' + CACHE_VER;
+  } else if (currentPage === 'calendar') {
+    location.href = 'index.html?ver=' + CACHE_VER;
+  }
+});
