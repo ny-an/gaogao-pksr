@@ -18,7 +18,7 @@ function populateCalendar(weekData) {
 // --- カレンダーのセル表示更新 ---
 function updateCellContent(cell, record) {
   let content = `<div class="menu-item">${record.dish || ""}</div>`
-    +`<div class="energy-display">${(record.energy || 0).toLocaleString()}</div>`;
+    +`<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
   if (record.energy) {
     content += `<div class="menu-image"><img src="${record.image}" ></div>`;
   }
@@ -43,7 +43,7 @@ function setDefaultCells() {
 
 // セルの表示を初期状態に戻す
 function setDefaultCell(cell) {
-  cell.innerHTML = `<div class="energy-display"></div>
+  cell.innerHTML = `<div class="energy-value"></div>
     <div class="action-buttons">
       <button class="btn-ocr">画像</button>
       <button class="btn-manual">入力</button>
@@ -61,7 +61,7 @@ function recalcEnergyTotals() {
   // 全てのセルからエナジー値を集計
   const cells = document.querySelectorAll(".day-cell");
   cells.forEach(cell => {
-    const energyDisplay = cell.querySelector(".energy-display");
+    const energyDisplay = cell.querySelector(".energy-value");
     if (energyDisplay) {
       // 表示例："エナジー: 1,234"
       const text = energyDisplay.innerText;

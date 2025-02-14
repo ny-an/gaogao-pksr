@@ -73,6 +73,7 @@ $table-padding: 10px;
     .day-cell {
       vertical-align: top;
       min-height: 80px;
+      width: 120px;
 
       .menu-item {}
 
@@ -82,7 +83,7 @@ $table-padding: 10px;
         }
       }
 
-      .energy-display{
+      .energy-value{
         display: flex;
         justify-content: center;
         text-align: center;
@@ -91,6 +92,7 @@ $table-padding: 10px;
         font-family: "Montserrat", sans-serif;
         //color: #fd6772;
         font-weight: 700;
+        margin: 10px 0 1rem 0;
 
       }
       .action-buttons{
