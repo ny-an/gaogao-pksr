@@ -102,7 +102,7 @@ function setupEventListeners() {
     const file = event.target.files[0];
     if (!file || !currentCell) return;
 
-    const displayEl = currentCell.querySelector(".energy-display");
+    const displayEl = currentCell.querySelector(".energy-value");
     displayEl.innerText = "OCR処理中...";
 
 
@@ -166,7 +166,7 @@ async function updateCellDisplay(cell, energy, compressedImage) {
   // セル表示更新：料理名は今回は空文字とする
   cell.innerHTML = `
     <div class="menu-item"></div>
-    <div class="energy-display">${energy.toLocaleString()}</div>
+    <div class="energy-value">${energy.toLocaleString()}</div>
     <div class="menu-image"><img src="${compressedImage}" width="50"></div>
     <button class="btn-reset">リセット</button>
   `;
