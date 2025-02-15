@@ -78,7 +78,7 @@ function setupEventListeners() {
     }
 
     // 「リセット」ボタンの処理
-    if (event.target.classList.contains("btn-reset")) {
+    if (event.target.classList.contains("action-reset")) {
       const cell = event.target.closest(".day-cell");
       resetCell(cell).then(() => {
         console.log("リセット完了");
@@ -86,10 +86,9 @@ function setupEventListeners() {
     }
   });
 
-  // リセットボタン（動的生成された要素）のイベントをデリゲーションで設定
+  // リセット（動的生成された要素）のイベントをデリゲーションで設定
   document.addEventListener("click", event => {
-    // リセットボタン (btn-reset) の処理
-    if (event.target.classList.contains("btn-reset")) {
+    if (event.target.classList.contains("action-reset")) {
       const cell = event.target.closest(".day-cell");
       resetCell(cell).then(() => {
         console.log("リセット完了");
@@ -167,8 +166,10 @@ async function updateCellDisplay(cell, energy, compressedImage) {
   cell.innerHTML = `
     <div class="menu-item"></div>
     <div class="energy-value">${energy.toLocaleString()}</div>
-    <div class="menu-image"><img src="${compressedImage}" width="50"></div>
-    <button class="btn-reset">リセット</button>
+    <div class="menu-image action-reset">
+        <img src="${compressedImage}" width="50">
+        <button class="delete-image-btn action-reset">×</button>
+    </div>
   `;
 
   // IndexedDB 更新: 現在のセルに対応するデータを更新

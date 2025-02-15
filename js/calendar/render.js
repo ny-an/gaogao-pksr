@@ -20,11 +20,12 @@ function updateCellContent(cell, record) {
   let content = `<div class="menu-item">${record.dish || ""}</div>`
     +`<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
   if (record.energy) {
-    content += `<div class="menu-image"><img src="${record.image}" ></div>`;
+    content += `<div class="menu-image">
+            <img src="${record.image}" >
+            <button class="delete-image-btn action-reset">×</button>
+        </div>`;
   }
-  // リセットボタンを追加
   content += `<div class="action-buttons">
-                <button class="btn-reset">リセット</button>
               </div>`;
 
   cell.innerHTML = content;
