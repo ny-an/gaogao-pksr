@@ -5,7 +5,7 @@ $table-border: 1px solid #ccc;
 $header-bg: #eee;
 $meal-type-bg: #ddd;
 $text-muted: #555;
-$table-padding: 5px;
+$table-padding: 3px;
 
 #page-calendar {
 
@@ -75,10 +75,11 @@ $table-padding: 5px;
       margin-bottom: 5px;
     }
 
+
     thead {
-      // ヘッダー固有のスタイルがあればここに記述
       .meal-type {
         width: 30px;  // 各食事時間の列幅
+        font-size: 16px;
       }
     }
 
@@ -86,6 +87,7 @@ $table-padding: 5px;
       // 各食事時間ごとのスタイルがあればここに記述
       th{
         background-color: $meal-type-bg;
+        font-size: 16px;
         font-weight: bold;
         width: 30px;
       }
