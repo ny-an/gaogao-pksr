@@ -35,14 +35,16 @@
     <div id="weeklyEnergy" class="weekly-energy">週間エナジー：<span id="weeklyEnergyNum">0</span></div>
 
     <!-- 週の選択 -->
-    <div id="weekDisplay">
+    <div id="weekDisplay" style="display: none;">
       表示中の週: <span id="currentWeek"></span>
-      <br />
-      <span id="mondayDate"></span>〜
     </div>
 
     <div id="weekSelectorContainer">
       <select id="weekSelector"></select>
+
+      <div style="text-align: center;">
+        <span id="mondayDate"></span> 〜 <span id="sundayDate"></span>
+      </div>
     </div>
 
     <!-- カレンダーTable -->

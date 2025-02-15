@@ -156,7 +156,21 @@ async function populateWeekSelector() {
 
     // 月曜日の日付を計算して表示
     const mondayDate = getMondayDateFromWeek(validWeeks[0]);
-    document.getElementById("mondayDate").innerText = mondayDate;
+    const mondayDateObj = new Date(mondayDate);
+    const formattedMondayDate = mondayDateObj.toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    document.getElementById("mondayDate").innerText = formattedMondayDate;
+
+    // 日曜も追加
+    const sundayDate = new Date(mondayDate);
+    sundayDate.setDate(sundayDate.getDate() + 6);
+    const formattedSundayDate = sundayDate.toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    document.getElementById("sundayDate").innerText = formattedSundayDate;
 
   } else {
     // 週データが存在しなければ、空のデータで作成

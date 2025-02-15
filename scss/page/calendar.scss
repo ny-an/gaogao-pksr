@@ -33,6 +33,14 @@ $table-padding: 5px;
 
   #weekSelectorContainer{
     margin-top: 1.5rem;
+
+    select#weekSelector{
+      text-align: center;
+      margin-bottom: 6px;
+      option{
+        text-align: center;
+      }
+    }
   }
 
   .calendar-container {
@@ -43,14 +51,12 @@ $table-padding: 5px;
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
-      margin-top: 20px;
     }
   }
 
   .calendar-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
     text-align: center;
 
     th,
