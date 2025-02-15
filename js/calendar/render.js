@@ -53,46 +53,56 @@ function setDefaultCell(cell) {
 }
 
 // エナジー合計を再計算する関数
-function recalcEnergyTotals() {
+async function recalcEnergyTotals() {
+  console.log('recalcEnergyTotals start');
+
+  const selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
+  const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
   const days = ["月", "火", "水", "木", "金", "土", "日"];
-  // 曜日ごとの合計を初期化
   const dailyTotals = {};
+
+  // 各曜日の合計を初期化
   days.forEach(day => dailyTotals[day] = 0);
 
-  // 全てのセルからエナジー値を集計
-  const cells = document.querySelectorAll(".day-cell");
-  cells.forEach(cell => {
-    const energyDisplay = cell.querySelector(".energy-value");
-    if (energyDisplay) {
-      // 表示例："エナジー: 1,234"
-      const text = energyDisplay.innerText;
-      if (text) {
-        // カンマを除去して数値に変換
-        const energy = parseInt(text.replace(/,/g, ""), 10);
-        if (!isNaN(energy)) {
-          const day = cell.getAttribute("data-day");
-          if (dailyTotals.hasOwnProperty(day)) {
-            dailyTotals[day] += energy;
+  // DBデータから各曜日の合計を計算
+  if (weekRecord && weekRecord.data) {
+    days.forEach(day => {
+      if (weekRecord.data[day]) {
+        console.log('day:'+day);
+        ["朝", "昼", "夜"].forEach(meal => {
+          if (weekRecord.data[day][meal] && weekRecord.data[day][meal].energy) {
+            console.log('meal:'+meal);
+            console.log('energy:',weekRecord.data[day][meal].energy);
+
+            // energyが配列の場合は最初の要素を取得
+            let energyValue = Array.isArray(weekRecord.data[day][meal].energy)
+              ? weekRecord.data[day][meal].energy[0]
+              : weekRecord.data[day][meal].energy;
+
+            // 文字列化してからカンマを除去
+            energyValue = String(energyValue).replace(/,/g, '');
+
+            // 数値に変換
+            const energy = parseInt(energyValue, 10);
+
+            if (!isNaN(energy)) {
+              dailyTotals[day] += energy;
+            }
           }
-        }
+        });
       }
-    }
-  });
+    });
+  }
 
-  // 各曜日の合計をtfootのセルに反映
-  const dailyTotalCells = document.querySelectorAll(".daily-total");
-  dailyTotalCells.forEach(cell => {
-    const day = cell.getAttribute("data-day");
-    if (dailyTotals.hasOwnProperty(day)) {
-      cell.innerText = dailyTotals[day].toLocaleString();
-    }
-  });
+  console.log('dailyTotals:',dailyTotals);
 
-  // 週間合計の計算と表示（#weeklyEnergyの更新）
-  const weeklyTotal = days.reduce((sum, day) => sum + dailyTotals[day], 0);
+  // 週間合計の計算と表示
+  const weeklyTotal = Object.values(dailyTotals).reduce((sum, value) => sum + value, 0);
   const weeklyNumElement = document.getElementById("weeklyEnergyNum");
+  const weeklyTotalElement = document.getElementById("weekly-total");
   if (weeklyNumElement) {
     weeklyNumElement.innerText = weeklyTotal.toLocaleString();
+    weeklyTotalElement.innerText = weeklyTotal.toLocaleString();
   }
 }
 
