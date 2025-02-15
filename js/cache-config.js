@@ -1,2 +1,2 @@
 // キャッシュバージョンの設定（更新するたびに変更）
-const CACHE_VER = 'v2.07';
+const CACHE_VER = 'v2.08';
