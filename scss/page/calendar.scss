@@ -7,6 +7,10 @@ $meal-type-bg: #ddd;
 $text-muted: #555;
 $table-padding: 3px;
 
+$energy-font-family: 'Montserrat', sans-serif;
+$energy-color:#FEA824;
+$extra-tasty-color:#FD6772;
+
 #page-calendar {
 
   &{
@@ -20,8 +24,8 @@ $table-padding: 3px;
 
   #weeklyEnergy{
     #weeklyEnergyNum {
-      font-family: 'Montserrat', sans-serif; // 本家っぽいMontserratフォントを適用
-      color: #FD6772;
+      font-family: $energy-font-family;
+      color: $extra-tasty-color;
       font-weight: 700;
       font-size: 1.2rem;
     }
@@ -58,6 +62,7 @@ $table-padding: 3px;
     width: 100%;
     border-collapse: collapse;
     text-align: center;
+    max-width: 100%;
 
     th,
     td {
@@ -114,7 +119,7 @@ $table-padding: 3px;
             right: 5px;
             width: 20px;
             height: 20px;
-            border-radius: 50%;
+            border-radius: 10px;
             background: rgba(128, 128, 128, 0.7);  // グレーの半透明
             color: white;
             border: none;
@@ -133,9 +138,14 @@ $table-padding: 3px;
           font-size: 16px;
 
           font-family: "Montserrat", sans-serif;
-          color: #fd6772;
+          color: $energy-color;
           font-weight: 400;
           margin: 5px 0;
+
+          &.extra-tasty{
+            color: $extra-tasty-color;
+          }
+
         }
 
         .action-buttons {
@@ -160,8 +170,8 @@ $table-padding: 3px;
           width: 30px;
         }
         td.daily-total{
-          font-family: "Montserrat", sans-serif;
-          color: #fd6772;
+          font-family: $energy-font-family;
+          color: $extra-tasty-color;
           font-weight: 700;
           font-size: 1.2rem;
         }
