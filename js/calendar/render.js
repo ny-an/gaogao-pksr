@@ -107,6 +107,12 @@ async function recalcEnergyTotals() {
 }
 
 
+// energy-valueクリック時の大成功classトグル処理
+document.addEventListener("click", event => {
+  if (event.target.classList.contains("energy-value")) {
+    event.target.classList.toggle("extra-tasty");
+  }
+});
 
 
 // IndexedDBにデータのある週だけ表示するための週セレクター初期化関数

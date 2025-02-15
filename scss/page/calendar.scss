@@ -142,8 +142,11 @@ $extra-tasty-color:#FD6772;
           font-weight: 400;
           margin: 5px 0;
 
+          cursor: pointer; // クリック可能なことを示す
+
           &.extra-tasty{
             color: $extra-tasty-color;
+            font-weight: bold;
           }
 
         }
