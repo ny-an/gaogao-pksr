@@ -5,7 +5,7 @@ $table-border: 1px solid #ccc;
 $header-bg: #eee;
 $meal-type-bg: #ddd;
 $text-muted: #555;
-$table-padding: 10px;
+$table-padding: 5px;
 
 #page-calendar {
 
@@ -53,8 +53,6 @@ $table-padding: 10px;
     margin-top: 20px;
     text-align: center;
 
-    min-width: 800px;
-
     th,
     td {
       border: $table-border;
@@ -65,45 +63,6 @@ $table-padding: 10px;
       background-color: $header-bg;
     }
 
-    .meal-type {
-      background-color: $meal-type-bg;
-      font-weight: bold;
-    }
-
-    .day-cell {
-      vertical-align: top;
-      min-height: 80px;
-      width: 120px;
-
-      .menu-item {}
-
-      .menu-image{
-        img{
-          width: 100px;
-        }
-      }
-
-      .energy-value{
-        display: flex;
-        justify-content: center;
-        text-align: center;
-        font-size: 20px;
-
-        font-family: "Montserrat", sans-serif;
-        color: #fd6772;
-        font-weight: 400;
-        margin: 10px 0 1rem 0;
-
-      }
-      .action-buttons{
-        display: flex;
-        flex-direction: column;
-        button{
-          font-size: 10px;
-          margin-bottom: 5px;
-        }
-      }
-    }
 
     .dishes-name {
       font-size: 14px;
@@ -112,18 +71,78 @@ $table-padding: 10px;
 
     thead {
       // ヘッダー固有のスタイルがあればここに記述
+      .meal-type {
+        width: 30px;  // 各食事時間の列幅
+      }
     }
 
     tbody {
       // 各食事時間ごとのスタイルがあればここに記述
+      th{
+        background-color: $meal-type-bg;
+        font-weight: bold;
+        width: 30px;
+      }
+      td.day-cell {
+        position: relative;
+        vertical-align: top;
+        height: 90px;
+
+        .menu-item {
+          font-size: 12px;
+        }
+
+        .menu-image {
+          img {
+            height: 50px;
+            width: 80px;
+            object-fit: cover;
+            object-position: 0 -60px;
+          }
+        }
+
+        .energy-value {
+          display: flex;
+          justify-content: center;
+          text-align: center;
+          font-size: 16px;
+
+          font-family: "Montserrat", sans-serif;
+          color: #fd6772;
+          font-weight: 400;
+          margin: 5px 0;
+        }
+
+        .action-buttons {
+          display: flex;
+          flex-direction: column;
+
+          button {
+            font-size: 10px;
+            padding: 3px;
+            margin-bottom: 3px;
+          }
+        }
+
+        .btn-reset {
+          display: none;
+        }
+      }
+
     }
 
     tfoot {
       .daily-total-row {
-        td {
-          &:first-child {
-            // 合計列タイトル等にスタイルを指定したい場合
-          }
+        th{
+          background-color: $meal-type-bg;
+          font-weight: bold;
+          width: 30px;
+        }
+        td.daily-total{
+          font-family: "Montserrat", sans-serif;
+          color: #fd6772;
+          font-weight: 700;
+          font-size: 1.2rem;
         }
       }
     }

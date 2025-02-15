@@ -138,7 +138,7 @@ function setupEventListeners() {
       console.log('energy:',energy);
 
       // 画像を圧縮してBase64へ変換（例: 最大150×150）
-      const compressedImage = await compressImage(file, 150, 150);
+      const compressedImage = await compressImage(file, 300, 300);
 
       // セルの更新およびIndexedDBの更新
       await updateCellDisplay(currentCell, energy, compressedImage);
