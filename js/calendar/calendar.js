@@ -37,6 +37,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       setDefaultCells();
 
     }
+
+    // 全エネルギー表示
+    await recalcCumulativeEnergy();
+
   } catch (error) {
     console.error("IndexedDBエラー:", error);
   }
@@ -178,4 +182,104 @@ async function updateCellDisplay(cell, energy, compressedImage) {
   // エナジー合計の更新
   recalcEnergyTotals();
 
+}
+
+
+// 週ごとのエナジー合計を再計算する関数
+async function recalcEnergyTotals() {
+  console.log('recalcEnergyTotals start');
+
+  const selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
+  const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
+  const days = ["月", "火", "水", "木", "金", "土", "日"];
+  const dailyTotals = {};
+
+  // 各曜日の合計を初期化
+  days.forEach(day => dailyTotals[day] = 0);
+
+  // DBデータから各曜日の合計を計算
+  if (weekRecord && weekRecord.data) {
+    days.forEach(day => {
+      if (weekRecord.data[day]) {
+        console.log('day:'+day);
+        ["朝", "昼", "夜"].forEach(meal => {
+          if (weekRecord.data[day][meal] && weekRecord.data[day][meal].energy) {
+            console.log('meal:'+meal);
+            console.log('energy:',weekRecord.data[day][meal].energy);
+
+            // energyが配列の場合は最初の要素を取得
+            let energyValue = Array.isArray(weekRecord.data[day][meal].energy)
+              ? weekRecord.data[day][meal].energy[0]
+              : weekRecord.data[day][meal].energy;
+
+            // 文字列化してからカンマを除去
+            energyValue = String(energyValue).replace(/,/g, '');
+
+            // 数値に変換
+            const energy = parseInt(energyValue, 10);
+
+            if (!isNaN(energy)) {
+              dailyTotals[day] += energy;
+            }
+          }
+        });
+      }
+    });
+  }
+
+  console.log('dailyTotals:',dailyTotals);
+
+  // 週間合計の計算と表示
+  const weeklyTotal = Object.values(dailyTotals).reduce((sum, value) => sum + value, 0);
+  const weeklyNumElement = document.getElementById("weeklyEnergyNum");
+  const weeklyTotalElement = document.getElementById("weekly-total");
+  if (weeklyNumElement) {
+    weeklyNumElement.innerText = weeklyTotal.toLocaleString();
+    weeklyTotalElement.innerText = weeklyTotal.toLocaleString();
+  }
+
+  // ついでに全エナジー表示更新
+  await recalcCumulativeEnergy();
+}
+
+// 全データの累計エナジーを再計算する関数
+async function recalcCumulativeEnergy() {
+  try {
+    const allWeekRecords = await dbAPI.getAllWeeklyMenus();
+    const days = ["月", "火", "水", "木", "金", "土", "日"];
+    const meals = ["朝", "昼", "夜"];
+    let totalEnergy = 0;
+
+    allWeekRecords.forEach(weekRecord => {
+      if (weekRecord && weekRecord.data) {
+        days.forEach(day => {
+          if (weekRecord.data[day]) {
+            meals.forEach(meal => {
+              const record = weekRecord.data[day][meal];
+              if (record && record.energy) {
+                // energyが配列の場合は最初の要素を取得
+                let energyValue = Array.isArray(record.energy)
+                  ? record.energy[0]
+                  : record.energy;
+                // 数値として扱えるように、文字列のカンマを除去してから parseInt
+                energyValue = parseInt(String(energyValue).replace(/,/g, ''), 10);
+                if (!isNaN(energyValue)) {
+                  totalEnergy += energyValue;
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // 全データの累計エナジーの表示更新
+    const allEnergyNumEl = document.getElementById("allEnergyNum");
+
+    if (allEnergyNumEl) {
+      allEnergyNumEl.innerText = totalEnergy.toLocaleString();
+    }
+  } catch (error) {
+    console.error("累計エナジー計算エラー:", error);
+  }
 }

@@ -78,9 +78,22 @@ function getWeeklyMenu(week) {
   });
 }
 
+// 週ごとの全メニューを取得する関数（全件取得）
+function getAllWeeklyMenus() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(["weeklyMenus"], "readonly");
+    const store = transaction.objectStore("weeklyMenus");
+    const request = store.getAll();
+    request.onsuccess = (event) => resolve(event.target.result || []);
+    request.onerror = (event) => reject(event.target.error);
+  });
+}
+
+
 // 他のスクリプトから利用できるようにグローバルにセット
 window.dbAPI = {
   openDatabase,
   saveWeeklyMenu,
   getWeeklyMenu,
+  getAllWeeklyMenus,
 };
