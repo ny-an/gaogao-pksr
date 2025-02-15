@@ -53,9 +53,10 @@ function setDefaultCell(cell) {
 }
 
 
-// energy-valueクリック時の大成功classトグル処理
+// calender画面のエナジー大成功classトグル処理
 document.addEventListener("click", event => {
-  if (event.target.classList.contains("energy-value")) {
+  // エナジー値 or 画像のクリックイベント
+  if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
     event.target.classList.toggle("extra-tasty");
   }
 });
