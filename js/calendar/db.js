@@ -54,7 +54,11 @@ async function updateWeeklyRecord(cell, recordData) {
 
 }
 
-// 週ごとのメニューを保存する関数
+/**
+ * 週ごとのメニューを保存する関数
+ * @param {WeekRecord} weekRecord
+ * @return {Promise<unknown>}
+ */
 function saveWeeklyMenu(weekRecord) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(["weeklyMenus"], "readwrite");
@@ -66,7 +70,11 @@ function saveWeeklyMenu(weekRecord) {
   });
 }
 
-// 指定した週のメニューを取得する関数
+/**
+ * 指定した週のメニューを取得する関数
+ * @param {ISOWeek} week
+ * @return {Promise<unknown>}
+ */
 function getWeeklyMenu(week) {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(["weeklyMenus"], "readonly");
@@ -78,7 +86,10 @@ function getWeeklyMenu(week) {
   });
 }
 
-// 週ごとの全メニューを取得する関数（全件取得）
+/**
+ * 週ごとの全メニューを取得する関数（全件取得）
+ * @return {Promise<unknown>}
+ */
 function getAllWeeklyMenus() {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(["weeklyMenus"], "readonly");
