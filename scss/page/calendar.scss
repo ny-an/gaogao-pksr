@@ -133,7 +133,7 @@ $extra-tasty-color:#FD6772;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            padding: 0;
+            line-height: 1; // safari用中心揃え
           }
         }
 
