@@ -30,6 +30,15 @@ function updateCellContent(cell, record) {
 
   cell.innerHTML = content;
 
+  // DBに保存されたデータの extra プロパティが true なら、エナジー要素に extra-tasty クラスを追加
+  if (record.extra) {
+    const energyElement = cell.querySelector(".energy-value");
+    if (energyElement) {
+      energyElement.classList.add("extra-tasty");
+    }
+  }
+
+
   // セルの内容を書き換えないエナジー合計専用関数を呼び出す
   recalcEnergyTotals();
 
@@ -55,12 +64,61 @@ function setDefaultCell(cell) {
 
 // calender画面のエナジー大成功classトグル処理
 document.addEventListener("click", event => {
-  // エナジー値 or 画像のクリックイベント
+  // event.target が存在し、HTMLElement か確認
+  if (!(event.target instanceof Element)) return;
+
+  // energy-value または menu-image の場合のみ処理
   if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
-    event.target.classList.toggle("extra-tasty");
+
+    // クリックされた要素の祖先からセル要素を取得
+    const cell = event.target.closest(".day-cell");
+    let targetEl = event.target;
+
+    // クリックされたが menu-image の場合、対象は energy-value 要素に変更
+    if (event.target.classList.contains("menu-image") && cell) {
+      const energyEl = cell.querySelector(".energy-value");
+      if (energyEl) {
+        targetEl = energyEl;
+      }
+    }
+
+    // 対象要素に対してクラスの付与状況を反転
+    targetEl.classList.toggle("extra-tasty");
+
+    if (cell) {
+      // DB 更新：クラスの有無に応じて extra フラグを更新
+      const extra = targetEl.classList.contains("extra-tasty");
+      updateExtraFlag(cell, extra);
+    }
   }
 });
 
+/**
+ * 指定のセルのDBレコードに extra プロパティを更新する関数
+ * @param {HTMLElement} cell - 更新対象のセル (.day-cell)
+ * @param {boolean} extra - 付与する extra のフラグ
+ */
+function updateExtraFlag(cell, extra) {
+  const calendarTable = document.querySelector(".calendar-table");
+  const selectedWeek = calendarTable.getAttribute("data-week");
+  dbAPI.getWeeklyMenu(selectedWeek)
+    .then(weekRecord => {
+      if (!weekRecord) {
+        weekRecord = { week: selectedWeek, data: {} };
+      }
+      const day = cell.getAttribute("data-day");
+      const meal = cell.getAttribute("data-meal");
+      if (!weekRecord.data[day]) {
+        weekRecord.data[day] = {};
+      }
+      if (!weekRecord.data[day][meal]) {
+        weekRecord.data[day][meal] = {};
+      }
+      weekRecord.data[day][meal].extra = extra;
+      return dbAPI.saveWeeklyMenu(weekRecord);
+    })
+    .catch(error => console.error("DB更新(Extra)エラー:", error));
+}
 
 // IndexedDBにデータのある週だけ表示するための週セレクター初期化関数
 async function populateWeekSelector() {
