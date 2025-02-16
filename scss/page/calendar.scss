@@ -124,7 +124,7 @@ $extra-tasty-color:#FD6772;
             right: 5px;
             width: 20px;
             height: 20px;
-            border-radius: 10px;
+            border-radius: 50%;
             background: rgba(128, 128, 128, 0.7);  // グレーの半透明
             color: white;
             border: none;
@@ -133,7 +133,10 @@ $extra-tasty-color:#FD6772;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            line-height: 1; // safari用中心揃え
+            // safari用
+            line-height: 1;
+            vertical-align: middle;
+            padding: 0;
           }
         }
 
