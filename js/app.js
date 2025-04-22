@@ -1,6 +1,9 @@
 // body
 document.addEventListener('DOMContentLoaded', () => {
 
+  // 設定関連のselect要素を初期化
+  initializeSettingOptions();
+
   // カテゴリ選択が変更された際の処理
   categoryButtons.forEach(button => {
     button.addEventListener('click', function () {

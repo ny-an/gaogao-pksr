@@ -115,3 +115,28 @@ function handleSettingChange() {
   saveSettings();
   updateFoods(); // エナジーを再計算
 }
+
+// 設定関連のselect要素の初期化
+function initializeSettingOptions() {
+
+  const fbSelect = document.getElementById('fbBonus');
+  const recipeLevelSelect = document.getElementById('recipeLevel');
+
+  // FBボーナスのoption生成
+  fbSelect.innerHTML = ''; // 既存のoptionをクリア
+  for(let i = 0; i <= FB_BONUS_MAX; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    fbSelect.appendChild(option);
+  }
+
+  // レシピレベルのoption生成
+  recipeLevelSelect.innerHTML = ''; // 既存のoptionをクリア
+  for(let i = 1; i <= RECIPE_LEVEL_MAX; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    recipeLevelSelect.appendChild(option);
+  }
+}
