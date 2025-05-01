@@ -29,6 +29,9 @@ function getCookingEnergy() {
   const energy = dishesEnergyList[selectedDish] || 0;
   console.log('energy:',energy)
 
+  // 既存設定がlocalstorageに保存されている場合は取得
+  loadSettings();
+
   // 料理レシピボーナス
   const recipeLevel = parseInt(document.getElementById('recipeLevel').value, 10);
   const recipeBonus = recipeLevelBonusList[recipeLevel] || 0;
