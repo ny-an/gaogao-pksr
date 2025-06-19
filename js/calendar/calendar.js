@@ -1,3 +1,4 @@
+import { extractRedTextImage } from './ocr.js';
 
 // --- DOM初期化とDBからのデータ反映 ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -118,9 +119,12 @@ function setupEventListeners() {
       // loading表示
       showLoading();
 
+      // HSV処理で読みやすくする
+      const redOnlyBlob = await extractRedTextImage(file);
+
       // OCRでエナジー値（数字のみ）を抽出
       const { data: { text } } = await Tesseract.recognize(
-        file,
+        redOnlyBlob,
         "eng", // 必要に応じて 'jpn' に変更
         { logger: m => console.log(m) }
       );
