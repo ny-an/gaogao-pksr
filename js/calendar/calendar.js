@@ -1,5 +1,3 @@
-import { extractRedTextImage } from './ocr.js';
-
 // --- DOM初期化とDBからのデータ反映 ---
 document.addEventListener("DOMContentLoaded", async () => {
   try {
