@@ -118,11 +118,11 @@ function setupEventListeners() {
       showLoading();
 
       // HSV処理で読みやすくする
-      const redOnlyBlob = await extractRedTextImage(file);
+      // const redOnlyBlob = await extractRedTextImage(file);
 
       // OCRでエナジー値（数字のみ）を抽出
       const { data: { text } } = await Tesseract.recognize(
-        redOnlyBlob,
+        file,
         "eng", // 必要に応じて 'jpn' に変更
         { logger: m => console.log(m) }
       );
