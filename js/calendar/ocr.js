@@ -30,7 +30,7 @@ function rgbToHsv(r, g, b) {
  * @param {File} file - 入力画像ファイル
  * @returns {Promise<Blob>} - 二値化画像のBlob（PNG）
  */
-export async function extractRedTextImage(file) {
+async function extractRedTextImage(file) {
   return new Promise((resolve, reject) => {
     const image = new Image();
     const canvas = document.createElement("canvas");
