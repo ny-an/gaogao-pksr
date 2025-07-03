@@ -88,6 +88,26 @@
         margin-bottom: 2.5rem;
     }
 
+    #foodSumTable td:first-child {
+        position: relative;
+        padding: 8px;
+    }
+
+    .duplicate-count {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        font-size: 12px;
+        color: #ff0000;
+        font-weight: bold;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 1px 3px;
+        border-radius: 2px;
+        min-width: 14px;
+        text-align: center;
+    }
+
+
 
 </style>
 
@@ -259,10 +279,26 @@
     const maxFoodCounts = {};
     // 食材の使用回数（料理の選択回数）を記録するオブジェクト
     const dishCounts = {};
+    // 食材の重複回数を記録
+    const duplicateCounts = {};
 
     // 各料理をカウント
     selectedDishes.forEach(dishName => {
       dishCounts[dishName] = (dishCounts[dishName] || 0) + 1;
+    });
+
+    // 食材の重複回数を計算
+    selectedDishes.forEach(dishName => {
+      const category = Object.keys(org_dishes).find(cat =>
+        Object.keys(org_dishes[cat]).includes(dishName)
+      );
+
+      if (category && org_dishes[category][dishName]) {
+        const ingredients = org_dishes[category][dishName];
+        Object.keys(ingredients).forEach(food => {
+          duplicateCounts[food] = (duplicateCounts[food] || 0) + 1;
+        });
+      }
     });
 
     // 料理ごとに食材の最大使用数を計算
@@ -313,6 +349,14 @@
       foodImg.style.width = '30px';
       foodImg.style.height = '30px';
       foodCell.appendChild(foodImg);
+
+      // 重複回数が2以上の場合のみ表示
+      if (duplicateCounts[food] > 1) {
+        const duplicateSpan = document.createElement('span');
+        duplicateSpan.className = 'duplicate-count';
+        duplicateSpan.textContent = duplicateCounts[food];
+        foodCell.appendChild(duplicateSpan);
+      }
 
       row.appendChild(foodCell);
       row.innerHTML += `
