@@ -39,7 +39,8 @@
 // 料理
 .food-select{
   display: flex;
-  gap: 12px;
+  justify-content: space-around;
+  width: 100%;
 }
 
 table {

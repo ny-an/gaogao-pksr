@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ポケスリ食材積立表 | がおがおぷーん </title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）におけるレシピ・食材エネルギーに特化した計算ツールです。カレー・サラダ・デザートなどの種類にも対応し、シンプル簡単に表示！大成功(2倍)や日曜大成功（3倍）時のエネルギー計算や追加食材のエネルギー計算、もちろんFBボーナスやイベントボーナスの計算にも対応しています！！">
+
+    <meta name="keywords" content="ポケスリ、ポケモンスリープ、カレンダー, イベント, エネルギー管理, エネルギー計算, 自動OCR" />
+    <meta name="author" content="@GaoGaoPuuun" />
+    <meta property="og:title" content="ポケスリ食材積立表 | がおがおぷーん" />
+    <meta property="og:description" content="ポケモンスリープのカレンダー作成・イベント管理が簡単に行える便利なツール。"/>
+    <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ポケスリ食材積立表 | お食事管理ツール" />
+    <meta name="twitter:description" content="カレンダー作成・イベント管理が簡単に行えるツールです！！" />
+    <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+
+    <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q5BGCQDCV6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Q5BGCQDCV6');
+    </script>
+
+    <!-- PWA対応-->
+    <link rel="manifest" href="manifest.json">
+
+</head>
+<body id="page-index">
+
+<!-- TODO:add css -->
+<style>
+    .selected-dish {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px;
+        margin: 5px 0;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+
+    .selected-dish button {
+        background: none;
+        border: none;
+        color: #ff0000;
+        cursor: pointer;
+        padding: 0 5px;
+    }
+
+    .save-button {
+        margin-left: 10px;
+        padding: 5px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        height: 2rem;
+    }
+
+    .save-button:hover {
+        background-color: #45a049;
+    }
+
+    .sort-indicator {
+        font-size: 18px;
+        display: inline-block;
+        margin-left: 4px;
+        transition: transform 0.3s ease;
+    }
+
+    th:hover .sort-indicator {
+        opacity: 0.7;
+    }
+
+    /* 画面下余白 */
+    #foodSumTable{
+        margin-bottom: 2.5rem;
+    }
+
+
+</style>
+
+
+<div class="container">
+
+    <h1 id="title">ポケスリ積立表</h1>
+
+    <!-- カテゴリ選択をボタン式に変更 -->
+    <div class="category-select">
+        <div class="category-buttons">
+            <button type="button" data-category="サラダ" class="category-btn">サラダ</button>
+            <button type="button" data-category="カレー" class="category-btn">カレー</button>
+            <button type="button" data-category="デザート" class="category-btn">デザート</button>
+        </div>
+    </div>
+
+    <div class="food-select">
+        <select id="foodSelect">
+            <option value="">-- 料理を選択 --</option>
+        </select>
+
+        <!-- 追加ボタン配置 -->
+    </div>
+
+    <!-- 選択済み料理エリア -->
+    <div id="selectedFoodsContainer" class="selected-foods-container">
+        <!-- 料理名を縦に羅列、 -->
+        <div>
+        </div>
+    </div>
+
+    <!-- 食材数表示 -->
+    <table id="foodSumTable">
+        <thead>
+            <tr>
+                <th>食材</th>
+                <th>1食</th>
+                <th>2食</th>
+                <th>3食</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 食材データがここに挿入されます -->
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td>合計</td>
+                <td id="total1">0</td>
+                <td id="total2">0</td>
+                <td id="total3">0</td>
+            </tr>
+        </tfoot>
+    </table>
+
+</div>
+
+<!-- クレジットモーダル -->
+<div id="creditModal" class="modal">
+    <div class="modal-content">
+        <div class="creditBody">
+            <span class="close">&times;</span>
+            <h2>クレジット</h2>
+            <p id="app-version"></p>
+            <p>
+                <img src="img/cute_cook.svg" alt="あぷり" />
+                <span>@<a href="https://x.com/GaoGaoPuuun" target="_blank">ぷーん</a></span>
+            </p>
+            <p>
+                <img src="img/palette.svg" alt="いらすと" />
+                <span>@<a href="https://x.com/2harpker" target="_blank">ちゃんりわ</a></span>
+            </p>
+
+            <div>
+                <a href="calender.html">日記帳</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 設定アイコン -->
+<div class="settings-icon">
+    <img src="img/spoon.svg" alt="設定" />
+</div>
+
+<!-- PWA -->
+<script src="js/pwa.js"></script>
+
+<!-- data -->
+<script src="js/cache-config.js"></script>
+<script src="js/google_script.js"></script>
+<script src="js/data/dishes.js"></script>
+<script src="js/data/foods.js"></script>
+<script src="js/lib/confetti.mini.js"></script>
+<!--<script src="js/extra_tasty.js"></script>-->
+
+<!-- logic -->
+<script src="js/common.js"></script>
+<script src="js/dishes_setting.js"></script>
+
+<!-- DOM event -->
+<script src="js/setting_icon.js"></script>
+<!--<script src="js/dishes_energy.js"></script>-->
+<!--<script src="js/extra_foods.js"></script>-->
+
+<!-- メイン -->
+<script src="js/app.js"></script>
+
+<!-- stock main js -->
+<script defer>
+  // 選択された料理を保存するための配列
+  let selectedDishes = [];
+
+  // 食材ソート順
+  let sortOrder = 'desc'; // 初期値は降順（多い順）
+
+  // DOMが読み込まれた後に実行
+  document.addEventListener('DOMContentLoaded', function() {
+    // 保存ボタンの作成と追加
+    const saveButton = document.createElement('button');
+    saveButton.textContent = '+';
+    saveButton.classList.add('save-button');
+    document.querySelector('.food-select').appendChild(saveButton);
+
+    // 保存ボタンのクリックイベント
+    saveButton.addEventListener('click', function() {
+      const selectedDish = document.getElementById('foodSelect').value;
+      if (selectedDish) {
+        // 選択された料理を配列に追加
+        selectedDishes.push(selectedDish);
+
+        // 選択された料理を表示エリアに追加
+        updateSelectedFoodsDisplay();
+
+        // 食材テーブルを更新
+        updateFoodTable();
+      }
+    });
+  });
+
+  // 選択された料理の表示を更新する関数
+  function updateSelectedFoodsDisplay() {
+    const container = document.getElementById('selectedFoodsContainer');
+    container.innerHTML = '';
+
+    selectedDishes.forEach((dish, index) => {
+      const dishElement = document.createElement('div');
+      dishElement.className = 'selected-dish';
+      dishElement.textContent = dish;
+
+      // 削除ボタンの追加
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = '×';
+      deleteButton.onclick = () => {
+        selectedDishes.splice(index, 1);
+        updateSelectedFoodsDisplay();
+        updateFoodTable();
+      };
+
+      dishElement.appendChild(deleteButton);
+      container.appendChild(dishElement);
+    });
+  }
+
+  // 食材テーブルを更新する関数
+  function updateFoodTable() {
+
+    // 食材ごとの最大使用数を記録するオブジェクト
+    const maxFoodCounts = {};
+    // 食材の使用回数（料理の選択回数）を記録するオブジェクト
+    const dishCounts = {};
+
+    // 各料理をカウント
+    selectedDishes.forEach(dishName => {
+      dishCounts[dishName] = (dishCounts[dishName] || 0) + 1;
+    });
+
+    // 料理ごとに食材の最大使用数を計算
+    for (const [dishName, count] of Object.entries(dishCounts)) {
+      const category = Object.keys(org_dishes).find(cat =>
+        Object.keys(org_dishes[cat]).includes(dishName)
+      );
+
+      if (category && org_dishes[category][dishName]) {
+        const ingredients = org_dishes[category][dishName];
+
+        // 各食材について処理
+        Object.entries(ingredients).forEach(([food, amount]) => {
+          // その料理での食材の合計使用数 (料理の選択回数 × 1回あたりの使用数)
+          const totalAmount = amount * count;
+
+          // 現在の最大値と比較して、大きい方を保持
+          maxFoodCounts[food] = Math.max(
+            maxFoodCounts[food] || 0,
+            totalAmount
+          );
+        });
+      }
+    }
+
+    // ソート関数
+    const sortFoods = (foods) => {
+      return foods.sort((a, b) => {
+        const comparison = sortOrder === 'desc' ? b[1] - a[1] : a[1] - b[1];
+        return comparison;
+      });
+    };
+    const sortedFoods = sortFoods(Object.entries(maxFoodCounts));
+
+    // テーブルの更新
+    const tbody = document.querySelector('#foodSumTable tbody');
+    tbody.innerHTML = '';
+
+    let total1 = 0;
+    sortedFoods.forEach(([food, count]) => {
+      const row = document.createElement('tr');
+
+      // 食材セルに画像を追加
+      const foodCell = document.createElement('td');
+      const foodImg = document.createElement('img');
+      foodImg.src = getFoodImagePath(food);
+      foodImg.alt = food;
+      foodImg.style.width = '30px';
+      foodImg.style.height = '30px';
+      foodCell.appendChild(foodImg);
+
+      row.appendChild(foodCell);
+      row.innerHTML += `
+            <td>${count}</td>
+            <td>${count * 2}</td>
+            <td>${count * 3}</td>
+        `;
+      tbody.appendChild(row);
+
+
+      total1 += count;
+    });
+
+    // 合計の更新
+    document.getElementById('total1').textContent = total1;
+    document.getElementById('total2').textContent = total1 * 2;
+    document.getElementById('total3').textContent = total1 * 3;
+  }
+
+  // DOM読み込み後にイベントリスナーを設定
+  document.addEventListener('DOMContentLoaded', () => {
+    // 食材数のヘッダーセルにクリックイベントを追加
+    const foodHeader = document.querySelector('#foodSumTable th:nth-child(2)');
+
+    if (foodHeader) {
+      foodHeader.style.cursor = 'pointer';
+      foodHeader.title = 'クリックで並び替え';
+
+      // ソート順表示用の要素を追加
+      const sortIndicator = document.createElement('span');
+      sortIndicator.classList.add('sort-indicator');
+      sortIndicator.textContent = ' ▼';
+      foodHeader.appendChild(sortIndicator);
+
+      foodHeader.addEventListener('click', () => {
+        sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+        sortIndicator.textContent = sortOrder === 'desc' ? ' ▼' : ' ▲';
+        updateFoodTable();
+      });
+    }
+  });
+
+
+</script>
+
+<!-- 遊び -->
+<script src="js/cracker.js"></script>
+
+</body>
+</html>
