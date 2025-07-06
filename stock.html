@@ -98,6 +98,7 @@
         padding: 8px;
     }
 
+    /** 重複カウント **/
     .duplicate-count {
         position: absolute;
         bottom: 2px;
@@ -110,6 +111,16 @@
         border-radius: 2px;
         min-width: 14px;
         text-align: center;
+    }
+
+    /** グレーアウト **/
+    #foodSumTable tbody tr {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    #foodSumTable tbody tr.selected {
+        background-color: #9cd59e;
     }
 
 
@@ -350,6 +361,11 @@
     let total1 = 0;
     sortedFoods.forEach(([food, count]) => {
       const row = document.createElement('tr');
+
+      // クリックイベントを追加
+      row.addEventListener('click', function() {
+        this.classList.toggle('selected');
+      });
 
       // 食材セルに画像を追加
       const foodCell = document.createElement('td');
