@@ -35,98 +35,7 @@
     <link rel="manifest" href="manifest.json">
 
 </head>
-<body id="page-index">
-
-<!-- extra css -->
-<style>
-
-    #selectedFoodsContainer {
-        margin-bottom: 12px;
-    }
-
-    .selected-dish {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 5px;
-        margin: 5px 0;
-        background: #f5f5f5;
-        border-radius: 4px;
-    }
-
-    .selected-dish button {
-        background: none;
-        border: none;
-        color: #ff0000;
-        cursor: pointer;
-        padding: 0 5px;
-    }
-
-    .save-button {
-        margin-left: 10px;
-        padding: 5px 15px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        height: 2rem;
-    }
-
-    .save-button:hover {
-        background-color: #45a049;
-    }
-
-    .sort-indicator {
-        font-size: 18px;
-        display: inline-block;
-        margin-left: 4px;
-        transition: transform 0.3s ease;
-    }
-
-    th:hover .sort-indicator {
-        opacity: 0.7;
-    }
-
-    /* 画面下余白 */
-    #foodSumTable{
-        margin-bottom: 2.5rem;
-    }
-
-    #foodSumTable td:first-child {
-        position: relative;
-        padding: 8px;
-    }
-
-    /** 重複カウント **/
-    .duplicate-count {
-        position: absolute;
-        bottom: 2px;
-        right: 2px;
-        font-size: 12px;
-        color: #ff0000;
-        font-weight: bold;
-        background: rgba(255, 255, 255, 0.8);
-        padding: 1px 3px;
-        border-radius: 2px;
-        min-width: 14px;
-        text-align: center;
-    }
-
-    /** グレーアウト **/
-    #foodSumTable tbody tr {
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-
-    #foodSumTable tbody tr.selected {
-        background-color: #9cd59e;
-    }
-
-
-
-</style>
-
+<body id="page-stock">
 
 <div class="container">
 
@@ -179,6 +88,46 @@
         </tfoot>
     </table>
 
+    <!-- 使い方 -->
+    <div class="usage-guide">
+        <h2>積立表について</h2>
+        <div class="guide-content">
+            <p class="guide-description">
+                積立表は、翌週の狙いの料理を作るために食材を何個用意すればいいか計算するツールです。
+                料理カテゴリーに関わらず、食材を何個用意すればよいか計算ができます。
+                <br /><br />
+                必要な食材が最も多いレシピの数が反映されるため、どの料理が来ても対応できる必要最低限の食材数が確認できます。
+            </p>
+
+            <h3>使い方</h3>
+            <ol class="guide-steps">
+                <li>
+                    翌週作りたい料理を選択してください。
+                    サラダとカレーの両方から選んだり、複数選択もできます。
+                </li>
+                <li>
+                    同じ食材が複数の料理で使用される場合、食材アイコンの右下に重複した数が表示されます。
+                    重複した場合の素材の数は、一番多く使う料理の数で表示・計算しています。
+
+                    <div class="example-box">
+                        <p>例：キノコが必要な料理を2つ選択した場合</p>
+                        <ul>
+                            <li>料理A：キノコ2個使用</li>
+                            <li>料理B：キノコ5個使用</li>
+                            <li>→ キノコのアイコンに「2」と表示され、必要数は5個として計算されます</li>
+                        </ul>
+                    </div>
+
+                </li>
+                <li>
+                    食材の行をクリックすると、行の色が変わります。
+                    確認済みの食材を見分けるのに使えます。
+                </li>
+            </ol>
+
+        </div>
+    </div>
+
 </div>
 
 <!-- クレジットモーダル -->
@@ -203,6 +152,13 @@
                 <a href="calender.html">日記帳</a>
                 　
                 <a href="stock.html">積立表</a>
+            </div>
+
+            <div id="usage-display-button">
+                <p>
+                    使い方
+                    <span class="question-icon">?</span>
+                </p>
             </div>
 
         </div>
@@ -267,6 +223,13 @@
         updateFoodTable();
       }
     });
+
+    // 使い方表示
+    const usageButton = document.querySelector('#usage-display-button');
+    usageButton.addEventListener('click', function() {
+      document.querySelector('.usage-guide').classList.toggle('display');
+    });
+
   });
 
   // 選択された料理の表示を更新する関数

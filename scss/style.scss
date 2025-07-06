@@ -9,6 +9,7 @@
 
 // 別ページ
 @import "page/calendar";
+@import "page/stock";
 
 // メイン
 @import "body";
@@ -22,4 +23,5 @@
 @import "components/select";
 @import "components/energy";
 @import "components/extraFoods";
+@import "components/usage";
 
