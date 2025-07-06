@@ -102,6 +102,9 @@ const getViewingFoods = () => {
 // 料理選択時のテーブル更新
 function updateFoods() {
 
+  // 対象のHTMLないとskip
+  if(!foodTableBody){return;}
+
   // 表示中の食材取得
   const foods = getViewingFoods();
 
