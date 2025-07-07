@@ -88,6 +88,13 @@
         </tfoot>
     </table>
 
+    <!-- 未使用食材表示エリア -->
+    <div id="unusedFoodsContainer" class="unused-foods-container">
+        <h3>使用しない食材</h3>
+        <div class="unused-foods-grid"></div>
+    </div>
+
+
     <!-- 使い方 -->
     <div class="usage-guide">
         <h2>積立表について</h2>
@@ -256,6 +263,39 @@
     });
   }
 
+  // 使用しない食材のテーブル
+  function updateUnusedFoodsDisplay(maxFoodCounts) {
+    // 使用されている食材のセットを作成
+    const usedFoods = new Set(Object.keys(maxFoodCounts));
+
+    // すべての食材のリストを取得（org_dishesから）
+    const allFoods = new Set();
+    for (const category in org_dishes) {
+      for (const dish in org_dishes[category]) {
+        for (const food in org_dishes[category][dish]) {
+          allFoods.add(food);
+        }
+      }
+    }
+
+    // 未使用食材を特定
+    const unusedFoods = Array.from(allFoods).filter(food => !usedFoods.has(food));
+
+    // 未使用食材を表示
+    const unusedFoodsGrid = document.querySelector('.unused-foods-grid');
+    unusedFoodsGrid.innerHTML = '';
+
+    unusedFoods.forEach(food => {
+      const foodImg = document.createElement('img');
+      foodImg.src = getFoodImagePath(food);
+      foodImg.alt = food;
+      foodImg.title = food;
+      unusedFoodsGrid.appendChild(foodImg);
+    });
+
+  }
+
+
   // 食材テーブルを更新する関数
   function updateFoodTable() {
 
@@ -363,6 +403,9 @@
     document.getElementById('total1').textContent = total1;
     document.getElementById('total2').textContent = total1 * 2;
     document.getElementById('total3').textContent = total1 * 3;
+
+    // 使用しない食材テーブル
+    updateUnusedFoodsDisplay(maxFoodCounts)
   }
 
   // DOM読み込み後にイベントリスナーを設定
@@ -386,6 +429,9 @@
         updateFoodTable();
       });
     }
+
+    // 使用しない食材テーブルを空でセット
+    updateUnusedFoodsDisplay({});
   });
 
 

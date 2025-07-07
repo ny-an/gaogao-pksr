@@ -1,5 +1,6 @@
 #page-stock {
 
+  // 選択した料理一覧
   #selectedFoodsContainer {
     margin-bottom: 12px;
 
@@ -12,6 +13,7 @@
       background: #f5f5f5;
       border-radius: 4px;
 
+      // 削除ボタン
       button {
         background: none;
         border: none;
@@ -22,6 +24,7 @@
     }
   }
 
+  // 料理の保存ボタン
   .save-button {
     margin-left: 10px;
     padding: 5px 15px;
@@ -38,9 +41,8 @@
   }
 
 
-  /* 画面下余白 */
+  /* Main:食材テーブル */
   #foodSumTable {
-    margin-bottom: 2.5rem;
 
     th:hover .sort-indicator {
       opacity: 0.7;
@@ -81,5 +83,31 @@
     text-align: center;
   }
 
+
+  /**　使用しない食材テーブル  */
+  .unused-foods-container {
+    margin-top: 20px;
+    margin-bottom: 2.5rem;
+    padding: 10px;
+
+    h3 {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #666;
+    }
+
+    .unused-foods-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(40px, 1fr));
+      gap: 10px;
+      padding: 10px;
+
+      img {
+        width: 30px;
+        height: 30px;
+        opacity: 0.6;
+      }
+    }
+  }
 
 }
