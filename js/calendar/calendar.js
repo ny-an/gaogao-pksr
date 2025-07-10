@@ -326,6 +326,23 @@ async function recalcCumulativeEnergy() {
   }
 }
 
+// カレンダーTableに日付を設定する関数を追加
+function updateWeekDates(weekString) {
+  const mondayDate = new Date(getMondayDateFromWeek(weekString));
+
+  days.forEach((day, index) => {
+    const currentDate = new Date(mondayDate);
+    currentDate.setDate(mondayDate.getDate() + index);
+
+    // 各曜日に対応する日付要素を取得
+    const dateElements = document.querySelectorAll('.date-container');
+    const dateEl = dateElements[index].querySelector('.date');
+
+    if (dateEl) {
+      dateEl.textContent = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
+    }
+  });
+}
 
 // 週間まとめモーダル表示
 function initWeeklyMenuModal() {

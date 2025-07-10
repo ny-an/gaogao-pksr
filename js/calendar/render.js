@@ -194,6 +194,17 @@ async function populateWeekSelector() {
 
     document.getElementById("currentWeek").innerText = currentWeekStr;
   }
+
+  // 週の選択が変更されたときのイベントリスナー
+  weekSelector.addEventListener("change", (event) => {
+    const selectedWeek = event.target.value;
+    updateWeekDates(selectedWeek);  // 日付を更新
+  });
+
+  // 初期表示時の日付設定
+  const currentWeek = weekSelector.value;
+  updateWeekDates(currentWeek);
+
 }
 
 

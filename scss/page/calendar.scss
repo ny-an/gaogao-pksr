@@ -100,6 +100,18 @@ $extra-tasty-color:#FD6772;
         font-size: 16px;
         font-weight: bold;
         width: 30px;
+
+        .date-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .date {
+          font-size: 0.8em;
+          color: #666;
+          margin-bottom: 2px;
+        }
       }
       td.day-cell {
         position: relative;
