@@ -101,6 +101,8 @@ function setupEventListeners() {
 
   // hiddenFileInput: 画像アップロード後にOCRと画像圧縮を実施しDB更新
   hiddenFileInput.addEventListener("change", async event => {
+    console.log("hiddenFileInput change");
+
     const file = event.target.files[0];
     if (!file || !currentCell) return;
 
@@ -112,13 +114,28 @@ function setupEventListeners() {
     // const actionButtonEl = currentCell.querySelector(".action-button");
     // actionButtonEl.innerHTML = "";
 
+    function processOcrText(text) {
+      return text
+        .split('\n')
+        .map(line => line.trim()) // 空白を削除
+        .filter(line => line.length > 0) // 空行を除外
+        .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
+        .map(line => {
+          // カンマと小数点を含む数字を処理
+          const cleanedNumber = line
+            .replace(/,/g, '') // カンマを削除
+            .replace(/\./g, '') // 小数点を削除
+            .trim();
+          return cleanedNumber;
+        })
+        .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
+    }
+
+
     try {
 
       // loading表示
       showLoading();
-
-      // HSV処理で読みやすくする
-      // const redOnlyBlob = await extractRedTextImage(file);
 
       // OCRでエナジー値（数字のみ）を抽出
       const { data: { text } } = await Tesseract.recognize(
@@ -127,13 +144,30 @@ function setupEventListeners() {
         { logger: m => console.log(m) }
       );
 
-      const lines = text.split('\n');
-      // 数字とカンマだけの行を抽出し、100未満の数字の行を除外
-      const filteredLines = lines.filter(line => /^[0-9,]+$/.test(line))
-        .filter(line => {
-          const num = parseInt(line.replace(/,/g, ''), 10);
-          return num >= 100;
-        });
+      // 数字行の取得
+      let filteredLines = processOcrText(text);
+
+      // 数字チェック
+      if (filteredLines.length === 0) {
+        console.error('try1. no energy lines');
+
+        // HSV処理で読みやすくする
+        const redOnlyBlob = await extractRedTextImage(file);
+
+        // OCRでエナジー値（数字のみ）を抽出
+        const { data: { text } } = await Tesseract.recognize(
+          URL.createObjectURL(redOnlyBlob),  // fileではなくredOnlyBlobを使用
+          "eng", // 必要に応じて 'jpn' に変更
+          { logger: m => console.log(m) }
+        );
+
+        // 数字行の取得
+        filteredLines = processOcrText(text);
+        if (filteredLines.length === 0) {
+          console.error('try2. no energy lines');
+          throw new Error('エネルギー値を検出できませんでした');
+        }
+      }
 
       // 抽出した行の数字を常にカンマ付きにフォーマット
       const energy = filteredLines.map(line => {

@@ -56,7 +56,7 @@ async function extractRedTextImage(file) {
         const b = data[i + 2];
         const [h, s, v] = rgbToHsv(r, g, b);
 
-        const isRed = ((h >= 0 && h <= 10) || (h >= 350 && h <= 360)) && s >= 50 && v >= 50;
+        const isRed = (h < 40 || h >= 300 && h <= 360) && s >= 20 && v >= 30;
 
         if (isRed) {
           data[i] = data[i + 1] = data[i + 2] = 255; // 白
