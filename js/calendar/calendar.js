@@ -117,24 +117,6 @@ function setupEventListeners() {
     // const actionButtonEl = currentCell.querySelector(".action-button");
     // actionButtonEl.innerHTML = "";
 
-    function processOcrText(text) {
-      return text
-        .split('\n')
-        .map(line => line.trim()) // 空白を削除
-        .filter(line => line.length > 0) // 空行を除外
-        .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
-        .map(line => {
-          // カンマと小数点を含む数字を処理
-          const cleanedNumber = line
-            .replace(/,/g, '') // カンマを削除
-            .replace(/\./g, '') // 小数点を削除
-            .trim();
-          return cleanedNumber;
-        })
-        .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
-    }
-
-
     try {
 
       // loading表示
@@ -196,6 +178,24 @@ function setupEventListeners() {
     // 次回のアップロードのためにファイル入力をリセット
     hiddenFileInput.value = "";
   });
+}
+
+// OCR結果の文字列から数字のみを取得
+function processOcrText(text) {
+  return text
+    .split('\n')
+    .map(line => line.trim()) // 空白を削除
+    .filter(line => line.length > 0) // 空行を除外
+    .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
+    .map(line => {
+      // カンマと小数点を含む数字を処理
+      const cleanedNumber = line
+        .replace(/,/g, '') // カンマを削除
+        .replace(/\./g, '') // 小数点を削除
+        .trim();
+      return cleanedNumber;
+    })
+    .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
 }
 
 /**
@@ -464,3 +464,29 @@ async function copyCSVContent() {
     document.execCommand('copy');
   }
 }
+
+
+// 画像クリック時の拡大表示処理
+document.addEventListener("click", event => {
+  const menuImage = event.target.closest(".menu-image img");
+  if (menuImage && !event.target.classList.contains("delete-image-btn")) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+
+    modal.style.display = "block";
+    modalImg.src = menuImage.src;
+
+    // モーダルの閉じるボタンのイベント
+    const closeBtn = modal.querySelector(".close");
+    closeBtn.onclick = () => {
+      modal.style.display = "none";
+    };
+
+    // モーダル外クリックで閉じる
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  }
+});
