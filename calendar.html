@@ -120,7 +120,10 @@
         <tfoot>
         <tr class="daily-total-row">
           <td>計</td>
-          <td id="weekly-total" class="daily-total" colspan="3"></td>
+          <td id="weekly-total" class="daily-total" colspan="3">
+            <span id="weekly-total-energy"></span>
+            <img id="exportWeeklyCSV" src="img/icons/export.svg" alt="CSV出力" class="export-icon">
+          </td>
         </tr>
         </tfoot>
       </table>
@@ -131,6 +134,20 @@
   <!-- 画面全体を覆うローディングオーバーレイ -->
   <div id="loadingOverlay" class="loading-overlay" style="display:none;">
     <div class="spinner"></div>
+  </div>
+
+  <!-- CSV出力用モーダル -->
+  <div id="csvModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>週間エナジーまとめ</h2>
+      <div class="csv-container">
+        <textarea id="csvContent" readonly></textarea>
+        <div class="csv-buttons">
+          <button id="copyCSV" class="copy-button">コピー</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 <!-- 共通で使用するhiddenなファイル入力 -->

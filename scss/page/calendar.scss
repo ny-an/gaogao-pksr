@@ -59,7 +59,7 @@ $extra-tasty-color:#FD6772;
     .table-wrapper {
       width: 100%;
       overflow-x: auto;
-      margin-bottom: 60px;
+      margin-bottom: 120px;
     }
   }
 
@@ -222,6 +222,74 @@ $extra-tasty-color:#FD6772;
         transform: rotate(360deg);
       }
     }
+  }
+
+
+  // 週間まとめ表示
+  #exportWeeklyCSV {
+    &.export-icon {
+      width: 24px;
+      height: 24px;
+      vertical-align: middle;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: none;
+
+      &.active {
+        display: inline-block;
+      }
+    }
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &:active {
+      opacity: 0.6;
+    }
+  }
+
+  /* CSVエクスポートモーダル用スタイル */
+  #csvModal {
+    .csv-container {
+      margin: 15px 0;
+    }
+
+    textarea#csvContent {
+      width: 275px;
+      height: 200px;
+      padding: 10px;
+      font-family: monospace;
+      white-space: pre;
+      resize: vertical;
+      margin: 10px auto;
+      font-size: 14px;
+    }
+
+    .csv-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .copy-button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+
+    .copy-button:hover {
+      background-color: #45a049;
+    }
+
+    .copy-button:active {
+      background-color: #3d8b40;
+    }
+
   }
 
 }
