@@ -189,7 +189,7 @@ document.getElementById('title').addEventListener('click', () => {
   console.log(currentPage);
 
   if (currentPage === 'index') {
-    location.href = 'calender.html?ver=' + CACHE_VER;
+    location.href = 'calendar.html?ver=' + CACHE_VER;
   } else if (currentPage === 'calendar') {
     location.href = 'index.html?ver=' + CACHE_VER;
   }

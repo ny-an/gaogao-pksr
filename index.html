@@ -37,7 +37,8 @@
 </head>
 <body id="page-index">
 
-<div class="container">
+<div class="main_container">
+    <div class="container">
 
     <h1 id="title">ポケスリ献立表</h1>
 
@@ -129,6 +130,7 @@
     </div>
 
 </div>
+</div>
 
 <!-- クレジットモーダル -->
 <div id="creditModal" class="modal">
@@ -149,13 +151,34 @@
             <div>
                 <a href="index.html">献立表</a>
                 　
-                <a href="calender.html">日記帳</a>
+                <a href="calendar.html">日記帳</a>
                 　
                 <a href="stock.html">積立表</a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- footer -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <div class="footer-item" data-page="index">
+            <img src="img/footer/spoon1.svg" alt="献立表">
+            <span>献立表</span>
+        </div>
+        <div class="footer-item" data-page="calendar">
+            <img src="img/footer/book1.svg" alt="日記帳">
+            <span>日記帳</span>
+        </div>
+        <div class="footer-item" data-page="stock">
+            <img src="img/footer/piggy1.svg" alt="積立表">
+            <span>積立表</span>
+        </div>
+        <div class="footer-item" data-page="settings">
+            <img src="img/cute_cook.svg" alt="help">
+        </div>
+    </div>
+</footer>
 
 <!-- 設定アイコン -->
 <div class="settings-icon">
@@ -172,6 +195,7 @@
 <script src="js/data/foods.js"></script>
 <script src="js/lib/confetti.mini.js"></script>
 <script src="js/extra_tasty.js"></script>
+<script src="js/footer.js"></script>
 
 <!-- logic -->
 <script src="js/common.js"></script>

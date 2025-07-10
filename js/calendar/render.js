@@ -62,7 +62,7 @@ function setDefaultCell(cell) {
 }
 
 
-// calender画面のエナジー大成功classトグル処理
+// calendar画面のエナジー大成功classトグル処理
 document.addEventListener("click", event => {
   // event.target が存在し、HTMLElement か確認
   if (!(event.target instanceof Element)) return;

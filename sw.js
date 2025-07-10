@@ -7,7 +7,7 @@ importScripts('/gaogao-pksr/js/cache-config.js');
 const urlsToCache = [
   '/gaogao-pksr/',
   '/gaogao-pksr/index.html',
-  '/gaogao-pksr/calender.html',
+  '/gaogao-pksr/calendar.html',
   '/gaogao-pksr/stock.html',
   '/gaogao-pksr/js/common.js',
   '/gaogao-pksr/js/app.js',

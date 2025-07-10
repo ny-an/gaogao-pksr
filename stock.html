@@ -37,104 +37,106 @@
 </head>
 <body id="page-stock">
 
-<div class="container">
+<div class="main_container">
+    <div class="container">
 
-    <h1 id="title">ポケスリ積立表</h1>
+        <h1 id="title">ポケスリ積立表</h1>
 
-    <!-- カテゴリ選択をボタン式に変更 -->
-    <div class="category-select">
-        <div class="category-buttons">
-            <button type="button" data-category="サラダ" class="category-btn">サラダ</button>
-            <button type="button" data-category="カレー" class="category-btn">カレー</button>
-            <button type="button" data-category="デザート" class="category-btn">デザート</button>
+        <!-- カテゴリ選択をボタン式に変更 -->
+        <div class="category-select">
+            <div class="category-buttons">
+                <button type="button" data-category="サラダ" class="category-btn">サラダ</button>
+                <button type="button" data-category="カレー" class="category-btn">カレー</button>
+                <button type="button" data-category="デザート" class="category-btn">デザート</button>
+            </div>
         </div>
-    </div>
 
-    <div class="food-select">
-        <select id="foodSelect">
-            <option value="">-- 料理を選択 --</option>
-        </select>
+        <div class="food-select">
+            <select id="foodSelect">
+                <option value="">-- 料理を選択 --</option>
+            </select>
 
-        <!-- 追加ボタン配置 -->
-    </div>
-
-    <!-- 選択済み料理エリア -->
-    <div id="selectedFoodsContainer" class="selected-foods-container">
-        <!-- 料理名を縦に羅列、 -->
-        <div>
+            <!-- 追加ボタン配置 -->
         </div>
-    </div>
 
-    <!-- 食材数表示 -->
-    <table id="foodSumTable">
-        <thead>
+        <!-- 選択済み料理エリア -->
+        <div id="selectedFoodsContainer" class="selected-foods-container">
+            <!-- 料理名を縦に羅列、 -->
+            <div>
+            </div>
+        </div>
+
+        <!-- 食材数表示 -->
+        <table id="foodSumTable">
+            <thead>
             <tr>
                 <th>食材</th>
                 <th>1食</th>
                 <th>2食</th>
                 <th>3食</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             <!-- 食材データがここに挿入されます -->
-        </tbody>
-        <tfoot>
+            </tbody>
+            <tfoot>
             <tr class="total-row">
                 <td>合計</td>
                 <td id="total1">0</td>
                 <td id="total2">0</td>
                 <td id="total3">0</td>
             </tr>
-        </tfoot>
-    </table>
+            </tfoot>
+        </table>
 
-    <!-- 未使用食材表示エリア -->
-    <div id="unusedFoodsContainer" class="unused-foods-container">
-        <h3>使用しない食材</h3>
-        <div class="unused-foods-grid"></div>
-    </div>
-
-
-    <!-- 使い方 -->
-    <div class="usage-guide">
-        <h2>積立表について</h2>
-        <div class="guide-content">
-            <p class="guide-description">
-                積立表は、翌週の狙いの料理を作るために食材を何個用意すればいいか計算するツールです。
-                料理カテゴリーに関わらず、食材を何個用意すればよいか計算ができます。
-                <br /><br />
-                必要な食材が最も多いレシピの数が反映されるため、どの料理が来ても対応できる必要最低限の食材数が確認できます。
-            </p>
-
-            <h3>使い方</h3>
-            <ol class="guide-steps">
-                <li>
-                    翌週作りたい料理を選択してください。
-                    サラダとカレーの両方から選んだり、複数選択もできます。
-                </li>
-                <li>
-                    同じ食材が複数の料理で使用される場合、食材アイコンの右下に重複した数が表示されます。
-                    重複した場合の素材の数は、一番多く使う料理の数で表示・計算しています。
-
-                    <div class="example-box">
-                        <p>例：キノコが必要な料理を2つ選択した場合</p>
-                        <ul>
-                            <li>料理A：キノコ2個使用</li>
-                            <li>料理B：キノコ5個使用</li>
-                            <li>→ キノコのアイコンに「2」と表示され、必要数は5個として計算されます</li>
-                        </ul>
-                    </div>
-
-                </li>
-                <li>
-                    食材の行をクリックすると、行の色が変わります。
-                    確認済みの食材を見分けるのに使えます。
-                </li>
-            </ol>
-
+        <!-- 未使用食材表示エリア -->
+        <div id="unusedFoodsContainer" class="unused-foods-container">
+            <h3>使用しない食材</h3>
+            <div class="unused-foods-grid"></div>
         </div>
-    </div>
 
+
+        <!-- 使い方 -->
+        <div class="usage-guide">
+            <h2>積立表について</h2>
+            <div class="guide-content">
+                <p class="guide-description">
+                    積立表は、翌週の狙いの料理を作るために食材を何個用意すればいいか計算するツールです。
+                    料理カテゴリーに関わらず、食材を何個用意すればよいか計算ができます。
+                    <br /><br />
+                    必要な食材が最も多いレシピの数が反映されるため、どの料理が来ても対応できる必要最低限の食材数が確認できます。
+                </p>
+
+                <h3>使い方</h3>
+                <ol class="guide-steps">
+                    <li>
+                        翌週作りたい料理を選択してください。
+                        サラダとカレーの両方から選んだり、複数選択もできます。
+                    </li>
+                    <li>
+                        同じ食材が複数の料理で使用される場合、食材アイコンの右下に重複した数が表示されます。
+                        重複した場合の素材の数は、一番多く使う料理の数で表示・計算しています。
+
+                        <div class="example-box">
+                            <p>例：キノコが必要な料理を2つ選択した場合</p>
+                            <ul>
+                                <li>料理A：キノコ2個使用</li>
+                                <li>料理B：キノコ5個使用</li>
+                                <li>→ キノコのアイコンに「2」と表示され、必要数は5個として計算されます</li>
+                            </ul>
+                        </div>
+
+                    </li>
+                    <li>
+                        食材の行をクリックすると、行の色が変わります。
+                        確認済みの食材を見分けるのに使えます。
+                    </li>
+                </ol>
+
+            </div>
+        </div>
+
+    </div>
 </div>
 
 <!-- クレジットモーダル -->
@@ -156,7 +158,7 @@
             <div>
                 <a href="index.html">献立表</a>
                 　
-                <a href="calender.html">日記帳</a>
+                <a href="calendar.html">日記帳</a>
                 　
                 <a href="stock.html">積立表</a>
             </div>
@@ -171,6 +173,28 @@
         </div>
     </div>
 </div>
+
+<!-- footer -->
+<footer class="app-footer">
+    <div class="footer-container">
+        <div class="footer-item" data-page="index">
+            <img src="img/footer/spoon1.svg" alt="献立表">
+            <span>献立表</span>
+        </div>
+        <div class="footer-item" data-page="calendar">
+            <img src="img/footer/book1.svg" alt="日記帳">
+            <span>日記帳</span>
+        </div>
+        <div class="footer-item" data-page="stock">
+            <img src="img/footer/piggy1.svg" alt="積立表">
+            <span>積立表</span>
+        </div>
+        <div class="footer-item" data-page="settings">
+            <img src="img/cute_cook.svg" alt="help">
+        </div>
+    </div>
+</footer>
+
 
 <!-- 設定アイコン -->
 <div class="settings-icon">
@@ -187,6 +211,7 @@
 <script src="js/data/foods.js"></script>
 <script src="js/lib/confetti.mini.js"></script>
 <!--<script src="js/extra_tasty.js"></script>-->
+<script src="js/footer.js"></script>
 
 <!-- logic -->
 <script src="js/common.js"></script>
