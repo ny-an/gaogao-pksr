@@ -161,8 +161,10 @@ function setupEventListeners() {
       });
       console.log('energy:',energy);
 
-      // 画像を圧縮してBase64へ変換（例: 最大150×150）
-      const compressedImage = await compressImage(file, 300, 300);
+      // 画像圧縮時に現在の設定を反映
+      const quality = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
+      const { width, height } = IMAGE_QUALITY_SIZES[quality];
+      const compressedImage = await compressImage(file, width, height);
 
       // セルの更新およびIndexedDBの更新
       await updateCellDisplay(currentCell, energy, compressedImage);

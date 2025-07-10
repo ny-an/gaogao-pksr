@@ -34,3 +34,50 @@ function getMondayDateFromWeek(weekString) {
   // 日付をフォーマット (例: "2024/1/1")
   return `${targetMonday.getFullYear()}/${targetMonday.getMonth() + 1}/${targetMonday.getDate()}`;
 }
+
+
+// 保存設定
+// 設定のキー定義
+const SETTINGS_KEYS = {
+  IMAGE_QUALITY: 'imageQuality'
+};
+
+// デフォルト設定
+const DEFAULT_SETTINGS = {
+  [SETTINGS_KEYS.IMAGE_QUALITY]: 'high'
+};
+
+// 設定値に対応する画像サイズ
+const IMAGE_QUALITY_SIZES = {
+  high: { width: 600, height: 600 },
+  low: { width: 300, height: 300 }
+};
+
+// 設定の取得
+function getSetting(key) {
+  const value = localStorage.getItem(key);
+  return value !== null ? value : DEFAULT_SETTINGS[key];
+}
+
+// 設定の保存
+function saveSetting(key, value) {
+  localStorage.setItem(key, value);
+}
+
+// 設定の初期化
+function initSettings() {
+  const qualitySelect = document.getElementById('imageQualitySetting');
+  if (!qualitySelect) return;
+
+  // 現在の設定を反映
+  qualitySelect.value = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
+
+  // 設定変更時の処理
+  qualitySelect.addEventListener('change', (e) => {
+    saveSetting(SETTINGS_KEYS.IMAGE_QUALITY, e.target.value);
+  });
+
+}
+
+// 初期化
+document.addEventListener('DOMContentLoaded', initSettings);

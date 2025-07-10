@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const settingsIcon = document.querySelector('.settings-icon');
   const creditModal = document.getElementById('creditModal');
-  const closeModal = document.querySelector('.close');
+  const closeModal = creditModal.querySelector('.close');
 
   // 設定アイコンをクリックしたときにモーダルを表示
   settingsIcon.addEventListener('click', () => {
