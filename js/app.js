@@ -63,11 +63,4 @@ document.addEventListener('DOMContentLoaded', () => {
     lastCategoryButton.click();
   }
 
-  // app-versionを記載
-  document.getElementById('app-version').innerText = CACHE_VER;
-
-  // versionをclickでスーパーリロード
-  document.getElementById('app-version').addEventListener('click', () => {
-    superReload();
-  });
 });
