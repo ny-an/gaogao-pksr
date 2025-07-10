@@ -19,10 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // クリックイベントの設定
   footerItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const page = item.dataset.page;
-      window.location.href = page === 'index' ? 'index.html' : `${page}.html`;
-    });
+    // settingsはskip
+    if (item.dataset.page !== 'settings') {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        window.location.href = page === 'index' ? 'index.html' : `${page}.html`;
+      });
+    }
   });
 
   // 初期状態の設定
