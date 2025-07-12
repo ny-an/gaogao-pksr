@@ -78,3 +78,59 @@ async function extractRedTextImage(file) {
     };
   });
 }
+
+
+// OCR処理を行う関数
+async function performOCR(file) {
+  try {
+    // 通常のOCR処理
+    const { data: { text } } = await Tesseract.recognize(
+      file,
+      "eng",
+      { logger: m => console.log(m) }
+    );
+
+    let filteredLines = processOcrText(text);
+
+    // OCR失敗時は赤文字抽出処理を試みる
+    if (filteredLines.length === 0) {
+      console.error('try1. no energy lines');
+
+      const redOnlyBlob = await extractRedTextImage(file);
+      const { data: { text: redText } } = await Tesseract.recognize(
+        URL.createObjectURL(redOnlyBlob),
+        "eng",
+        { logger: m => console.log(m) }
+      );
+      filteredLines = processOcrText(redText);
+    }
+
+    if (filteredLines.length > 0) {
+      const num = parseInt(filteredLines[0].replace(/,/g, ''), 10);
+      return num.toLocaleString('en-US');
+    }
+
+    throw new Error('エネルギー値を検出できませんでした');
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+// OCR結果の文字列から数字のみを取得
+function processOcrText(text) {
+  return text
+    .split('\n')
+    .map(line => line.trim()) // 空白を削除
+    .filter(line => line.length > 0) // 空行を除外
+    .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
+    .map(line => {
+      // カンマと小数点を含む数字を処理
+      const cleanedNumber = line
+        .replace(/,/g, '') // カンマを削除
+        .replace(/\./g, '') // 小数点を削除
+        .trim();
+      return cleanedNumber;
+    })
+    .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
+}

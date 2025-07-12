@@ -195,8 +195,47 @@
 
 
   <!-- 共通で使用するhiddenなファイル入力 -->
-<input type="file" id="hiddenFileInput" accept="image/*" style="display:none">
+  <input type="file" id="hiddenFileInput" accept="image/*" style="display:none">
 
+  <!-- 追加Modal -->
+  <div id="addEntryModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>データ追加</h2>
+      <div class="entry-form">
+        <div class="date-display">
+          <span id="modalDate"></span>
+          <span id="modalDay"></span>
+        </div>
+
+        <div class="energy-section">
+          <div class="energy-display">
+            <label>エナジー:</label>
+            <span id="ocrEnergyValue">-</span>
+          </div>
+
+          <div class="energy-input">
+            <label for="manualEnergyInput">手動入力:</label>
+            <div class="input-group">
+              <input type="number" id="manualEnergyInput" placeholder="エナジーを入力" min="0">
+              <button id="confirmEnergyButton" class="confirm-button">確定</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="image-section">
+          <button id="imageSelectButton" class="image-button">
+            <img src="img/icons/camera.svg" alt="画像選択">
+            画像選択
+          </button>
+          <div id="selectedImagePreview" class="image-preview"></div>
+        </div>
+
+        <button id="saveEntryButton" class="save-button">保存</button>
+      </div>
+    </div>
+  </div>
 
   <!-- クレジットモーダル -->
   <div id="creditModal" class="modal">
@@ -269,6 +308,7 @@
 <script src="js/cache-config.js"></script>
 <script src="js/common.js?v=2"></script>
 <script src="js/version_manager.js"></script>
+<script src="js/calendar/entry-modal.js"></script>
 <script src="js/calendar/loading.js"></script>
 <script src="js/calendar/settings.js"></script>
 <script src="js/calendar/db.js"></script>

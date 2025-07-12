@@ -1,5 +1,5 @@
 // --- カレンダーのセル表示更新 ---
-function populateCalendar(weekData) {
+async function populateCalendar(weekData) {
   days.forEach(day => {
     meals.forEach(meal => {
       const cell = document.querySelector(`.day-cell[data-day="${day}"][data-meal="${meal}"]`);
@@ -16,14 +16,14 @@ function populateCalendar(weekData) {
 }
 
 // --- カレンダーのセル表示更新 ---
-function updateCellContent(cell, record) {
+async function updateCellContent(cell, record) {
   let content = `<div class="menu-item">${record.dish || ""}</div>`
     +`<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
   if (record.energy) {
-    content += `<div class="menu-image">
-            <img src="${record.image}" >
-            <button class="delete-image-btn action-reset">×</button>
-        </div>`;
+    content += `<div class="menu-image">`;
+    if(record.image)content += `<img src="${record.image}" >`;
+    content += `<button class="delete-image-btn action-reset">×</button>`
+    content += `</div>`;
   }
   content += `<div class="action-buttons">
               </div>`;
@@ -38,9 +38,8 @@ function updateCellContent(cell, record) {
     }
   }
 
-
   // セルの内容を書き換えないエナジー合計専用関数を呼び出す
-  recalcEnergyTotals();
+  await recalcEnergyTotals();
 
 }
 
@@ -53,12 +52,10 @@ function setDefaultCells() {
 
 // セルの表示を初期状態に戻す
 function setDefaultCell(cell) {
-  cell.innerHTML = `<div class="energy-value"></div>
-    <div class="action-buttons">
-      <button class="btn-ocr">画像</button>
-      <button class="btn-manual">入力</button>
-    </div>
-`;
+  cell.innerHTML = `
+    <div class="energy-value"></div>
+    <button class="add-entry-button">追加</button>
+  `;
 }
 
 
@@ -223,12 +220,12 @@ document.getElementById("weekSelector").addEventListener("change", event => {
   calendarTable.setAttribute("data-week", selectedWeek);
 
   // IndexedDB やその他のデータソースから該当週のデータを取得して、カレンダーを更新する
-  dbAPI.getWeeklyMenu(selectedWeek).then(weekRecord => {
+  dbAPI.getWeeklyMenu(selectedWeek).then(async(weekRecord) => {
     // weekRecord.data が存在しなければ空オブジェクトを渡す
-    populateCalendar(weekRecord && weekRecord.data ? weekRecord.data : {});
+    await populateCalendar(weekRecord && weekRecord.data ? weekRecord.data : {});
 
     // エナジー合計の更新
-    recalcEnergyTotals();
+    await recalcEnergyTotals();
 
   }).catch(error => {
     console.error("週情報の取得エラー:", error);

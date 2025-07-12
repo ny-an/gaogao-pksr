@@ -50,8 +50,6 @@ async function updateWeeklyRecord(cell, recordData) {
     console.error("DB保存エラー:", error);
   }
 
-  // updateEnergyTotals();
-
 }
 
 /**

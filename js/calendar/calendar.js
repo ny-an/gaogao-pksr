@@ -54,41 +54,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // --- イベントリスナー設定 ---
 function setupEventListeners() {
-  let currentCell = null;
-  const hiddenFileInput = document.getElementById("hiddenFileInput");
 
-  // DOMへのリスナー設置
+  // 追加ボタンのクリックイベント
   document.addEventListener("click", event => {
-    // 「画像」ボタンの処理
-    if (event.target.classList.contains("btn-ocr")) {
+    if (event.target.classList.contains("add-entry-button")) {
       const cell = event.target.closest(".day-cell");
-      currentCell = cell;
-      document.getElementById("hiddenFileInput").click();
-    }
-
-    // 「入力」ボタンの処理
-    if (event.target.classList.contains("btn-manual")) {
-      const cell = event.target.closest(".day-cell");
-      const value = prompt("エナジー値を入力してください:");
-      if (value !== null) {
-        const num = parseInt(value, 10);
-        if (!isNaN(num)) {
-
-          // セルの更新およびIndexedDBの更新
-          updateCellDisplay(cell, num, "").then();
-
-        } else {
-          alert("有効な数字を入力してください。");
-        }
-      }
-    }
-
-    // 「リセット」ボタンの処理
-    if (event.target.classList.contains("action-reset")) {
-      const cell = event.target.closest(".day-cell");
-      resetCell(cell).then(() => {
-        console.log("リセット完了");
-      });
+      const date = cell.getAttribute("data-date");
+      const meal = cell.getAttribute("data-meal");
+      window.entryModal.open(date, meal);
     }
   });
 
@@ -101,127 +74,49 @@ function setupEventListeners() {
       });
     }
   });
-
-  // hiddenFileInput: 画像アップロード後にOCRと画像圧縮を実施しDB更新
-  hiddenFileInput.addEventListener("change", async event => {
-    console.log("hiddenFileInput change");
-
-    const file = event.target.files[0];
-    if (!file || !currentCell) return;
-
-    const displayEl = currentCell.querySelector(".energy-value");
-    displayEl.innerText = "OCR処理中...";
-
-
-    // ボタン非表示化
-    // const actionButtonEl = currentCell.querySelector(".action-button");
-    // actionButtonEl.innerHTML = "";
-
-    try {
-
-      // loading表示
-      showLoading();
-
-      // OCRでエナジー値（数字のみ）を抽出
-      const { data: { text } } = await Tesseract.recognize(
-        file,
-        "eng", // 必要に応じて 'jpn' に変更
-        { logger: m => console.log(m) }
-      );
-
-      // 数字行の取得
-      let filteredLines = processOcrText(text);
-
-      // 数字チェック
-      if (filteredLines.length === 0) {
-        console.error('try1. no energy lines');
-
-        // HSV処理で読みやすくする
-        const redOnlyBlob = await extractRedTextImage(file);
-
-        // OCRでエナジー値（数字のみ）を抽出
-        const { data: { text } } = await Tesseract.recognize(
-          URL.createObjectURL(redOnlyBlob),  // fileではなくredOnlyBlobを使用
-          "eng", // 必要に応じて 'jpn' に変更
-          { logger: m => console.log(m) }
-        );
-
-        // 数字行の取得
-        filteredLines = processOcrText(text);
-        if (filteredLines.length === 0) {
-          console.error('try2. no energy lines');
-          throw new Error('エネルギー値を検出できませんでした');
-        }
-      }
-
-      // 抽出した行の数字を常にカンマ付きにフォーマット
-      const energy = filteredLines.map(line => {
-        const num = parseInt(line.replace(/,/g, ''), 10);
-        return num.toLocaleString('en-US');
-      });
-      console.log('energy:',energy);
-
-      // 画像圧縮時に現在の設定を反映
-      const quality = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
-      const { width, height } = IMAGE_QUALITY_SIZES[quality];
-      const compressedImage = await compressImage(file, width, height);
-
-      // セルの更新およびIndexedDBの更新
-      await updateCellDisplay(currentCell, energy, compressedImage);
-
-    } catch (error) {
-      // displayEl.innerText = "OCR/圧縮失敗";
-      alert("画像解析失敗！手入力してください！！");
-      console.error(error);
-    }finally {
-      hideLoading(); // OCR処理完了後にローディング非表示
-    }
-
-    // 次回のアップロードのためにファイル入力をリセット
-    hiddenFileInput.value = "";
-  });
-}
-
-// OCR結果の文字列から数字のみを取得
-function processOcrText(text) {
-  return text
-    .split('\n')
-    .map(line => line.trim()) // 空白を削除
-    .filter(line => line.length > 0) // 空行を除外
-    .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
-    .map(line => {
-      // カンマと小数点を含む数字を処理
-      const cleanedNumber = line
-        .replace(/,/g, '') // カンマを削除
-        .replace(/\./g, '') // 小数点を削除
-        .trim();
-      return cleanedNumber;
-    })
-    .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
 }
 
 /**
- * セル表示および IndexedDB の更新を行う関数
+ * セル表示の更新を行う関数
  * @param {HTMLElement} cell - 更新対象のセル
- * @param {number|string} energy - エナジー値
- * @param {string} compressedImage - 画像のURL（圧縮済み）
+ * @param {Object} record - セルに表示するデータ
+ * @param {number} record.energy - エネルギー値
+ * @param {string|null} record.image - 画像データ（DataURL形式、またはnull）
+ * @param {string} [record.dish] - 料理名（任意）
+ * @param {boolean} [record.extra] - エクストラ料理フラグ（任意）
+ * @returns {Promise<void>}
  */
-async function updateCellDisplay(cell, energy, compressedImage) {
-  // セル表示更新：料理名は今回は空文字とする
-  cell.innerHTML = `
-    <div class="menu-item"></div>
-    <div class="energy-value">${energy.toLocaleString()}</div>
-    <div class="menu-image action-reset">
-        <img src="${compressedImage}" width="50">
-        <button class="delete-image-btn action-reset">×</button>
-    </div>
-  `;
+async function updateCellDisplay(cell, record) {
 
-  // IndexedDB 更新: 現在のセルに対応するデータを更新
-  await updateWeeklyRecord(cell, { dish: "", energy: energy, image: compressedImage });
+  let content = `<div class="menu-item">${record.dish || ""}</div>
+                 <div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
 
-  // エナジー合計の更新
-  recalcEnergyTotals();
+  // エネルギー値が0より大きい場合はリセットボタンを表示
+  if (record.energy > 0) {
+    if (record.image) {
+      // 画像がある場合は画像とリセットボタン
+      content += `<div class="menu-image">
+            <img src="${record.image}" >
+            <button class="delete-image-btn action-reset">×</button>
+        </div>`;
+    } else {
+      // 画像がない場合はリセットボタンのみ
+      content += `<div class="menu-image"><button class="delete-image-btn action-reset">×</button></div>`;
+    }
+  } else {
+    // エネルギー値がない場合は追加ボタンを表示
+    content += `<button class="add-entry-button">追加</button>`;
+  }
+
+  cell.innerHTML = content;
+
+  // DBに保存されたデータの extra プロパティが true なら、エナジー要素に extra-tasty クラスを追加
+  if (record.extra) {
+    const energyElement = cell.querySelector(".energy-value");
+    if (energyElement) {
+      energyElement.classList.add("extra-tasty");
+    }
+  }
 
 }
 
@@ -336,6 +231,9 @@ function updateWeekDates(weekString) {
     const currentDate = new Date(mondayDate);
     currentDate.setDate(mondayDate.getDate() + index);
 
+    // 日付をYYYY-MM-DD形式に変換
+    const dateStr = currentDate.toISOString().split('T')[0];
+
     // 各曜日に対応する日付要素を取得
     const dateElements = document.querySelectorAll('.date-container');
     const dateEl = dateElements[index].querySelector('.date');
@@ -343,7 +241,14 @@ function updateWeekDates(weekString) {
     if (dateEl) {
       dateEl.textContent = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
     }
+
+    // その日の全セル（朝・昼・夜）にdata-date属性を設定
+    const dayCells = document.querySelectorAll(`.day-cell[data-day="${day}"]`);
+    dayCells.forEach(cell => {
+      cell.setAttribute('data-date', dateStr);
+    });
   });
+
 }
 
 // 週間まとめモーダル表示
