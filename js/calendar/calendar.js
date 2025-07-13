@@ -419,7 +419,9 @@ function initWeeklyMenuModal() {
   // CSVエクスポートボタンのイベントリスナー
   const exportButton = document.getElementById('exportWeeklyCSV');
   if (exportButton) {
-    exportButton.addEventListener('click', exporter.showWeeklyDataCSV);
+    exportButton.addEventListener('click',  async()=>{
+      await exporter.showWeeklyDataCSV();
+    });
   }
 
   // コピーボタンのイベントリスナー

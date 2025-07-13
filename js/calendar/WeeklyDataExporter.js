@@ -7,6 +7,7 @@ class WeeklyDataExporter {
 
   // CSV表示専用
   async showWeeklyDataCSV() {
+    console.log('showWeeklyDataCSV start');
     const calendarTable = document.querySelector(".calendar-table");
     const selectedWeek = calendarTable.getAttribute("data-week");
 
@@ -25,7 +26,7 @@ class WeeklyDataExporter {
   }
 
   // CSV文字列作成専用
-  async createWeeklyDataCSV(selectedWeek) {
+  async createWeeklyDataCSV (selectedWeek) {
     const weekRecord = await this.dbAPI.getWeeklyMenu(selectedWeek);
 
     if (!weekRecord || !weekRecord.data) {
@@ -39,6 +40,7 @@ class WeeklyDataExporter {
     let noonTotal = 0;
     let nightTotal = 0;
 
+    // 日ごとに1列のデータ作成処理
     this.days.forEach((day, index) => {
       const currentDate = new Date(mondayDate);
       currentDate.setDate(mondayDate.getDate() + index);
@@ -49,16 +51,28 @@ class WeeklyDataExporter {
         String(currentDate.getDate()).padStart(2, '0');
 
       const dayData = weekRecord.data[day] || {};
-      const morning = (dayData['朝'] && dayData['朝'].energy) ? dayData['朝'].energy.toString().replace(/,/g, '') : 0;
-      const noon = (dayData['昼'] && dayData['昼'].energy) ? dayData['昼'].energy.toString().replace(/,/g, '') : 0;
-      const night = (dayData['夜'] && dayData['夜'].energy) ? dayData['夜'].energy.toString().replace(/,/g, '') : 0;
+      let morning = (dayData['朝'] && dayData['朝'].energy) ? dayData['朝'].energy.toString().replace(/,/g, '') : 0;
+      let noon = (dayData['昼'] && dayData['昼'].energy) ? dayData['昼'].energy.toString().replace(/,/g, '') : 0;
+      let night = (dayData['夜'] && dayData['夜'].energy) ? dayData['夜'].energy.toString().replace(/,/g, '') : 0;
       const dayTotal = parseInt(morning) + parseInt(noon) + parseInt(night);
 
       morningTotal += parseInt(morning);
       noonTotal += parseInt(noon);
       nightTotal += parseInt(night);
 
-      csvContent += `${dateStr},${day},${morning},${noon},${night},${dayTotal}\n`;
+      // 大成功考慮
+      const morningObj = weekRecord.data[day]?.['朝'];
+      const noonObj = weekRecord.data[day]?.['昼'];
+      const nightObj = weekRecord.data[day]?.['夜'];
+
+      if (morningObj?.extra) morning += '!';
+      if (noonObj?.extra) noon += '!';
+      if (nightObj?.extra) night += '!';
+
+      const row = `${dateStr},${day},${morning},${noon},${night},${dayTotal}\n`;
+      console.log('row:',row);
+
+      csvContent += row;
     });
 
     // 週間合計を追加
