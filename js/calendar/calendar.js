@@ -1,5 +1,6 @@
 // exporter
 const exporter = new WeeklyDataExporter(window.dbAPI, days);
+const calendarRender = new CalendarRenderer();
 
 // --- DOM初期化とDBからのデータ反映 ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -8,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await dbAPI.openDatabase();
 
     // ページロード時に週セレクターを初期化し、現在の週データを表示する
-    await populateWeekSelector();
+    await initialWeekSelector();
 
     // 選択中の週
     const selectedWeek = document.getElementById("currentWeek").innerText;
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // DBから該当週のデータを取得
     const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
     if (weekRecord && weekRecord.data) {
-      await populateCalendar(weekRecord.data);
+      await calendarRender.populateCalendar(weekRecord.data);
     } else {
 
       const currentDate = new Date();
@@ -36,22 +37,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("新しい週データを自動作成しました:", selectedWeek);
 
       // 空の表を追加
-      setDefaultCells();
-
+      calendarRender.setAllDefaultCells();
     }
 
     // 全エネルギー表示
     await recalcCumulativeEnergy();
 
+    // 週間まとめエナジー表示
+    await recalcEnergyTotals();
+
     // 週間まとめエナジーModal関連
     initWeeklyMenuModal();
+
+    // 各種イベントリスナーを設定
+    setupEventListeners();
 
   } catch (error) {
     console.error("IndexedDBエラー:", error);
   }
-
-  // イベントリスナーを設定
-  setupEventListeners();
 });
 
 
@@ -68,65 +71,183 @@ function setupEventListeners() {
     }
   });
 
-  // リセット（動的生成された要素）のイベントをデリゲーションで設定
+  // リセット処理
   document.addEventListener("click", event => {
     if (event.target.classList.contains("action-reset")) {
       const cell = event.target.closest(".day-cell");
-      resetCell(cell).then(() => {
+      calendarRender.resetCell(cell).then(() => {
         console.log("リセット完了");
+      }).then(async()=>{
+        // エナジー合計の更新
+        await recalcEnergyTotals();
       });
     }
   });
+
+  // 週セレクターの選択変更イベント：選択された週のカレンダーをロードする
+  document.getElementById("weekSelector").addEventListener("change", event => {
+
+    const selectedWeek = event.target.value;
+    document.getElementById("currentWeek").innerText = selectedWeek;
+
+    // 月曜日の日付を計算して表示
+    const mondayDate = getMondayDateFromWeek(selectedWeek);
+    document.getElementById("mondayDate").innerText = mondayDate;
+
+    // table自体のdata-week属性を更新
+    const calendarTable = document.querySelector(".calendar-table");
+    calendarTable.setAttribute("data-week", selectedWeek);
+
+    // IndexedDB やその他のデータソースから該当週のデータを取得して、カレンダーを更新する
+    dbAPI.getWeeklyMenu(selectedWeek).then(async(weekRecord) => {
+      // weekRecord.data が存在しなければ空オブジェクトを渡す
+      await calendarRender.populateCalendar(weekRecord && weekRecord.data ? weekRecord.data : {});
+
+      // エナジー合計の更新
+      await recalcEnergyTotals();
+
+    }).catch(async(error) => {
+      console.error("週情報の取得エラー:", error);
+      // エラーが発生した場合は空の状態にする
+      await calendarRender.populateCalendar({});
+    });
+
+  });
+
+  // calendar画面のエナジー大成功classトグル処理
+  document.addEventListener("click", event => {
+    // event.target が存在し、HTMLElement か確認
+    if (!(event.target instanceof Element)) return;
+
+    // energy-value または menu-image の場合のみ処理
+    if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
+
+      // クリックされた要素の祖先からセル要素を取得
+      const cell = event.target.closest(".day-cell");
+      let targetEl = event.target;
+
+      // クリックされたが menu-image の場合、対象は energy-value 要素に変更
+      if (event.target.classList.contains("menu-image") && cell) {
+        const energyEl = cell.querySelector(".energy-value");
+        if (energyEl) {
+          targetEl = energyEl;
+        }
+      }
+
+      // 対象要素に対してクラスの付与状況を反転
+      targetEl.classList.toggle("extra-tasty");
+
+      if (cell) {
+        // DB 更新：クラスの有無に応じて extra フラグを更新
+        const extra = targetEl.classList.contains("extra-tasty");
+        updateExtraFlag(cell, extra);
+      }
+    }
+  });
+
 }
 
-/**
- * セル表示の更新を行う関数
- * @param {HTMLElement} cell - 更新対象のセル
- * @param {Object} record - セルに表示するデータ
- * @param {number} record.energy - エネルギー値
- * @param {string|null} record.image - 画像データ（DataURL形式、またはnull）
- * @param {string} [record.dish] - 料理名（任意）
- * @param {boolean} [record.extra] - エクストラ料理フラグ（任意）
- * @returns {Promise<void>}
- */
-async function updateCellDisplay(cell, record) {
+// IndexedDBにデータのある週だけ表示するための週セレクター初期化関数
+async function initialWeekSelector() {
+  const weekSelector = document.getElementById("weekSelector");
+  weekSelector.innerHTML = "";
+  const currentDate = new Date();
+  const currentWeekStr = getISOWeekString(currentDate);
+  const weeksToShow = 100; // 遡り表示する週数
+  const validWeeks = [];
 
-  let content = `<div class="menu-item">${record.dish || ""}</div>
-                 <div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
+  for (let i = 0; i < weeksToShow; i++) {
+    // 現在の日付から1週間ずつ過去にずらす
+    const pastDate = new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000 * i));
+    const weekStr = getISOWeekString(pastDate);
 
-  // エネルギー値が0より大きい場合はリセットボタンを表示
-  if (record.energy > 0) {
-    if (record.image) {
-      // 画像がある場合は画像とリセットボタン
-      content += `<div class="menu-image">
-            <img src="${record.image}" >
-            <button class="delete-image-btn action-reset">×</button>
-        </div>`;
-    } else {
-      // 画像がない場合はリセットボタンのみ
-      content += `<div class="menu-image"><button class="delete-image-btn action-reset">×</button></div>`;
+    try {
+      const weekRecord = await dbAPI.getWeeklyMenu(weekStr);
+      console.log("週データ:", weekStr, weekRecord);
+
+      // データが存在する場合のみ有効な週として追加
+      if (weekRecord && weekRecord.data && Object.keys(weekRecord.data).length > 0) {
+        validWeeks.push(weekStr);
+        const option = document.createElement("option");
+        option.value = weekStr;
+        option.text = weekStr;
+        weekSelector.appendChild(option);
+      }else{
+        // 何もないデータ状態の場合は、現在の週だけ表示する
+        if (weekStr === currentWeekStr) {
+          validWeeks.push(weekStr);
+          const option = document.createElement("option");
+          option.value = weekStr;
+          option.text = weekStr;
+          weekSelector.appendChild(option);
+        }
+      }
+    } catch (error) {
+      // データがなければエラーとなる可能性があるので、その場合は何もしない（スキップ）
+      console.warn("データが無い週:", weekStr, error);
     }
+  }
+
+  // 存在する週があれば初期表示にセット
+  if (validWeeks.length > 0) {
+    document.getElementById("currentWeek").innerText = validWeeks[0];
+
+    // 月曜日の日付を計算して表示
+    const mondayDate = getMondayDateFromWeek(validWeeks[0]);
+    const mondayDateObj = new Date(mondayDate);
+    const formattedMondayDate = mondayDateObj.toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    document.getElementById("mondayDate").innerText = formattedMondayDate;
+
+    // 日曜も追加
+    const sundayDate = new Date(mondayDate);
+    sundayDate.setDate(sundayDate.getDate() + 6);
+    const formattedSundayDate = sundayDate.toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    document.getElementById("sundayDate").innerText = formattedSundayDate;
+
   } else {
-    // エネルギー値がない場合は追加ボタンを表示
-    content += `<button class="add-entry-button">追加</button>`;
+    // 週データが存在しなければ、空のデータで作成
+    const newWeekRecord = {
+      week: currentWeekStr,
+      data: {} // 空の初期状態
+    };
+    await dbAPI.saveWeeklyMenu(newWeekRecord);
+    console.log("新しい週データを自動作成しました:", currentWeekStr);
+
+    document.getElementById("currentWeek").innerText = currentWeekStr;
   }
 
-  cell.innerHTML = content;
+  // 週の選択が変更されたときのイベントリスナー
+  weekSelector.addEventListener("change", (event) => {
+    const selectedWeek = event.target.value;
+    calendarRender.updateWeekDates(selectedWeek);  // 日付を更新
+  });
 
-  // DBに保存されたデータの extra プロパティが true なら、エナジー要素に extra-tasty クラスを追加
-  if (record.extra) {
-    const energyElement = cell.querySelector(".energy-value");
-    if (energyElement) {
-      energyElement.classList.add("extra-tasty");
-    }
-  }
+  // 初期表示時の日付設定
+  const currentWeek = weekSelector.value;
+  calendarRender.updateWeekDates(currentWeek);
 
 }
 
-
-// 週ごとのエナジー合計を再計算する関数
+// 週ごとのエナジー合計を計算して表示更新までする関数
 async function recalcEnergyTotals() {
   console.log('recalcEnergyTotals start');
+
+  // 週合計を計算
+  const weeklyTotal = await calcEnergyTotals();
+  console.log('weeklyTotal:',weeklyTotal);
+
+  // 表示更新
+  await updateWeeklyEnergyView(weeklyTotal);
+}
+
+// 週まとめエナジー合計を計算して返す
+async function calcEnergyTotals() {
 
   const selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
   const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
@@ -169,6 +290,12 @@ async function recalcEnergyTotals() {
 
   // 週間合計の計算と表示
   const weeklyTotal = Object.values(dailyTotals).reduce((sum, value) => sum + value, 0);
+
+  return weeklyTotal;
+}
+
+// 週まとめエナジーの表示更新
+async function updateWeeklyEnergyView(weeklyTotal) {
   const weeklyNumElement = document.getElementById("weeklyEnergyNum");
   const weeklyTotalElement = document.getElementById("weekly-total-energy");
   if (weeklyNumElement) {
@@ -176,15 +303,31 @@ async function recalcEnergyTotals() {
     weeklyTotalElement.innerText = weeklyTotal.toLocaleString();
   }
 
-  // export画像の表示切り替え
+  // export画像の表示切り替くえ
   exporter.updateExportIconVisibility();
 
   // ついでに全エナジー表示更新
   await recalcCumulativeEnergy();
 }
 
-// 全データの累計エナジーを再計算する関数
+// 累計エナジーを再計算して表示関数
 async function recalcCumulativeEnergy() {
+  try {
+
+    const totalEnergy = await calcCumulativeEnergy();
+
+    // 全データの累計エナジーの表示更新
+    const allEnergyNumEl = document.getElementById("allEnergyNum");
+    if (allEnergyNumEl) {
+      allEnergyNumEl.innerText = totalEnergy.toLocaleString();
+    }
+  } catch (error) {
+    console.error("累計エナジー計算エラー:", error);
+  }
+}
+
+// 累計エナジーを計算して返す
+async function calcCumulativeEnergy() {
   try {
     const allWeekRecords = await dbAPI.getAllWeeklyMenus();
     let totalEnergy = 0;
@@ -212,43 +355,38 @@ async function recalcCumulativeEnergy() {
       }
     });
 
-    // 全データの累計エナジーの表示更新
-    const allEnergyNumEl = document.getElementById("allEnergyNum");
+    return totalEnergy;
 
-    if (allEnergyNumEl) {
-      allEnergyNumEl.innerText = totalEnergy.toLocaleString();
-    }
   } catch (error) {
     console.error("累計エナジー計算エラー:", error);
   }
 }
 
-// カレンダーTableに日付を設定する関数を追加
-function updateWeekDates(weekString) {
-  const mondayDate = new Date(getMondayDateFromWeek(weekString));
-
-  days.forEach((day, index) => {
-    const currentDate = new Date(mondayDate);
-    currentDate.setDate(mondayDate.getDate() + index);
-
-    // 日付をYYYY-MM-DD形式に変換
-    const dateStr = currentDate.toISOString().split('T')[0];
-
-    // 各曜日に対応する日付要素を取得
-    const dateElements = document.querySelectorAll('.date-container');
-    const dateEl = dateElements[index].querySelector('.date');
-
-    if (dateEl) {
-      dateEl.textContent = `${currentDate.getMonth() + 1}/${currentDate.getDate()}`;
-    }
-
-    // その日の全セル（朝・昼・夜）にdata-date属性を設定
-    const dayCells = document.querySelectorAll(`.day-cell[data-day="${day}"]`);
-    dayCells.forEach(cell => {
-      cell.setAttribute('data-date', dateStr);
-    });
-  });
-
+/**
+ * 指定のセルのDBレコードに extra プロパティを更新する関数
+ * @param {HTMLElement} cell - 更新対象のセル (.day-cell)
+ * @param {boolean} extra - 付与する extra のフラグ
+ */
+function updateExtraFlag(cell, extra) {
+  const calendarTable = document.querySelector(".calendar-table");
+  const selectedWeek = calendarTable.getAttribute("data-week");
+  dbAPI.getWeeklyMenu(selectedWeek)
+    .then(weekRecord => {
+      if (!weekRecord) {
+        weekRecord = { week: selectedWeek, data: {} };
+      }
+      const day = cell.getAttribute("data-day");
+      const meal = cell.getAttribute("data-meal");
+      if (!weekRecord.data[day]) {
+        weekRecord.data[day] = {};
+      }
+      if (!weekRecord.data[day][meal]) {
+        weekRecord.data[day][meal] = {};
+      }
+      weekRecord.data[day][meal].extra = extra;
+      return dbAPI.saveWeeklyMenu(weekRecord);
+    })
+    .catch(error => console.error("DB更新(Extra)エラー:", error));
 }
 
 // 週間まとめモーダル表示

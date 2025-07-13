@@ -1,4 +1,4 @@
-// js/calendar/entry-modal.js として新規作成
+// 入力総合窓口
 class EntryModal {
   constructor() {
     this.modal = document.getElementById('addEntryModal');
@@ -41,10 +41,11 @@ class EntryModal {
         // 画像の圧縮処理
         const quality = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
         const { width, height } = IMAGE_QUALITY_SIZES[quality];
-        compressedImage = await compressImage(file, width, height);
+        compressedImage = await this.compressImage(file, width, height);
 
         // OCR処理
-        const energy = await performOCR(file);
+        const ocrReader = new OcrReader();
+        const energy = await ocrReader.performOCR(file);
 
         // プレビューと結果の更新
         this.updateWithOCRResult(energy, compressedImage);
@@ -102,7 +103,6 @@ class EntryModal {
 
   updateDateDisplay(date, meal) {
     const dateObj = new Date(date);
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
     this.dateDisplay.textContent = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
     this.dayDisplay.textContent = `(${days[dateObj.getDay()]}) ${meal}`;
   }
@@ -119,6 +119,7 @@ class EntryModal {
     this.imagePreview.appendChild(img);
   }
 
+  // OCRエラー処理
   handleOCRError(imageData) {
     this.ocrEnergyValue.innerHTML = '<span style="color:red">OCR失敗</span>';
     this.imageData = imageData;
@@ -130,6 +131,7 @@ class EntryModal {
     this.imagePreview.appendChild(img);
   }
 
+  // 保存ボタン
   async save() {
     // #ocrEnergyValue に確定値が表示されている場合のみ取得
     const ocrText = this.ocrEnergyValue.textContent.replace(/,/g, '').replace(/[^\d]/g, '');
@@ -149,7 +151,7 @@ class EntryModal {
 
     try {
       // セルの更新
-      await updateCellDisplay(this.currentCell, record);
+      await calendarRender.updateCellContent(this.currentCell, record);
 
       // データベースの更新
       await updateWeeklyRecord(this.currentCell, record);
@@ -162,6 +164,51 @@ class EntryModal {
       console.error('保存エラー:', error);
       alert('保存中にエラーが発生しました。');
     }
+  }
+
+  /**
+   * 画像を指定サイズに圧縮してBase64データに変換する関数
+   * @param {File} file - アップロードされた画像ファイル
+   * @param {number} maxWidth - 最大幅 (デフォルト300)
+   * @param {number} maxHeight - 最大高さ (デフォルト300)
+   * @returns {Promise<string>} 圧縮後のBase64データ
+   */
+  async compressImage(file, maxWidth = 300, maxHeight = 300) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          let width = img.width;
+          let height = img.height;
+          // アスペクト比を維持して縮小
+          if (width > maxWidth) {
+            height = height * (maxWidth / width);
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = width * (maxHeight / height);
+            height = maxHeight;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          // 画質は必要に応じて調整。第二引数の0.7はJPEGのクオリティ
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = function(error) {
+          reject(error);
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = function(error) {
+        reject(error);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 }
 
