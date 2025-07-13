@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // DBから該当週のデータを取得
     const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
     if (weekRecord && weekRecord.data) {
-      populateCalendar(weekRecord.data);
+      await populateCalendar(weekRecord.data);
     } else {
 
       const currentDate = new Date();
