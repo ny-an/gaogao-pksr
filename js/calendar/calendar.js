@@ -127,7 +127,6 @@ async function recalcEnergyTotals() {
 
   const selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
   const weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
-  const days = ["月", "火", "水", "木", "金", "土", "日"];
   const dailyTotals = {};
 
   // 各曜日の合計を初期化
@@ -185,8 +184,6 @@ async function recalcEnergyTotals() {
 async function recalcCumulativeEnergy() {
   try {
     const allWeekRecords = await dbAPI.getAllWeeklyMenus();
-    const days = ["月", "火", "水", "木", "金", "土", "日"];
-    const meals = ["朝", "昼", "夜"];
     let totalEnergy = 0;
 
     allWeekRecords.forEach(weekRecord => {
