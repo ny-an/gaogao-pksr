@@ -145,6 +145,31 @@ function setupEventListeners() {
     }
   });
 
+  // 料理画像クリック時の拡大表示処理
+  document.addEventListener("click", event => {
+    const menuImage = event.target.closest(".menu-image img");
+    if (menuImage && !event.target.classList.contains("delete-image-btn")) {
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("modalImage");
+
+      modal.style.display = "block";
+      modalImg.src = menuImage.src;
+
+      // モーダルの閉じるボタンのイベント
+      const closeBtn = modal.querySelector(".close");
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // モーダル外クリックで閉じる
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+    }
+  });
+
 }
 
 // IndexedDBにデータのある週だけ表示するための週セレクター初期化関数
@@ -420,29 +445,3 @@ function initWeeklyMenuModal() {
     }
   }
 }
-
-
-// 画像クリック時の拡大表示処理
-document.addEventListener("click", event => {
-  const menuImage = event.target.closest(".menu-image img");
-  if (menuImage && !event.target.classList.contains("delete-image-btn")) {
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
-
-    modal.style.display = "block";
-    modalImg.src = menuImage.src;
-
-    // モーダルの閉じるボタンのイベント
-    const closeBtn = modal.querySelector(".close");
-    closeBtn.onclick = () => {
-      modal.style.display = "none";
-    };
-
-    // モーダル外クリックで閉じる
-    modal.onclick = (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
-    };
-  }
-});
