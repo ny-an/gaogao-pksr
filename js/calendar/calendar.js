@@ -72,6 +72,11 @@ function setupEventListeners() {
       const cell = event.target.closest(".day-cell");
       const date = cell.getAttribute("data-date");
       const meal = cell.getAttribute("data-meal");
+
+      // 初期表示にする
+      this.manualEnergyInputViewButton.classList.add("active");
+      this.energyInputDiv.classList.remove("active");
+
       window.entryModal.open(date, meal);
     }
 
