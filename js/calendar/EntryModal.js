@@ -64,6 +64,12 @@ class EntryModal {
       if (event.target.closest('#manualEnergyInputViewButton')) {
         this.manualEnergyInputViewButton.classList.toggle("active");
         this.energyInputDiv.classList.toggle("active");
+
+        // 値を現在表示の値にする
+        const ocrText = this.ocrEnergyValue.textContent.replace(/,/g, '').replace(/[^\d]/g, '');
+        const energy = ocrText && !isNaN(parseInt(ocrText)) ? parseInt(ocrText) : 0;
+        this.manualEnergyInput.value = energy;
+
         return;
       }
 
