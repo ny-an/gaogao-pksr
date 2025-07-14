@@ -375,9 +375,11 @@ $extra-tasty-color:#FD6772;
       margin: 20px 0;
 
       .energy-display{
-        display: block;
+        display: flex;
         text-align: center;
         margin-bottom: 2rem;
+        justify-content: center;
+        align-items: center;
       }
       .energy-input{
         label{}
