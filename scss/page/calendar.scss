@@ -421,8 +421,13 @@ $extra-tasty-color:#FD6772;
         .input-group {
           display: flex;
           gap: 8px;
-          align-items: center;
           justify-content: center;
+
+          input{
+            width: 111px;
+            text-align: right;
+            font-size: 16px;
+          }
 
           .confirm-button {
             padding: 4px 8px;
