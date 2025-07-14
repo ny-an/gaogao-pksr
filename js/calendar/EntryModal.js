@@ -23,14 +23,6 @@ class EntryModal {
   }
 
   initializeEventListeners() {
-    // 保存ボタンセット
-    this.saveButton.addEventListener('click', () => this.save());
-
-    // 画像選択ボタンのイベントハンドラ
-    this.imageButton.addEventListener('click', () => {
-      const fileInput = document.getElementById('hiddenFileInput');
-      fileInput.click();
-    });
 
     // ファイル選択時の処理
     document.getElementById('hiddenFileInput').addEventListener('change', async (event) => {
@@ -65,37 +57,54 @@ class EntryModal {
       }
     });
 
-    // 訂正ボタンのイベントリスナー
-    if (this.manualEnergyInputViewButton) {
-      this.manualEnergyInputViewButton.addEventListener("click", () => {
+    // modal自身へイベントリスナー付与
+    this.modal.addEventListener('click', async (event) => {
+
+      // 訂正ボタン
+      if (event.target.closest('#manualEnergyInputViewButton')) {
         this.manualEnergyInputViewButton.classList.toggle("active");
         this.energyInputDiv.classList.toggle("active");
-      });
-    }
-
-    // 確定ボタンのイベントリスナー
-    this.confirmEnergyButton.addEventListener('click', () => {
-      const value = this.manualEnergyInput.value;
-      if (value) {
-        this.ocrEnergyValue.textContent = parseInt(value).toLocaleString();
-
-        // 訂正ボタンと手動入力エリアの切替
-        this.manualEnergyInputViewButton.classList.toggle("active");
-        this.energyInputDiv.classList.toggle("active");
+        return;
       }
+
+      // 確定ボタン
+      if (event.target.closest('#confirmEnergyButton')) {
+        const value = this.manualEnergyInput.value;
+        if (value) {
+          this.ocrEnergyValue.textContent = parseInt(value).toLocaleString();
+          this.manualEnergyInputViewButton.classList.toggle("active");
+          this.energyInputDiv.classList.toggle("active");
+        }
+        return;
+      }
+
+      // 保存ボタン
+      if (event.target.closest('#saveEntryButton')) {
+        await this.save();
+        return;
+      }
+
+      // 画像ボタン
+      if (event.target.closest('#imageSelectButton')) {
+        const fileInput = document.getElementById('hiddenFileInput');
+        fileInput.click();
+        return;
+      }
+
+      // 閉じるボタン
+      if (event.target.closest('.close')) {
+        this.close();
+        return;
+      }
+
+      // モーダル背景クリックで閉じる
+      if (event.target === this.modal) {
+        this.close();
+        return;
+      }
+
     });
 
-    // 保存ボタンのイベントハンドラ
-    this.saveButton.addEventListener('click', () => this.save());
-
-    // モーダルを閉じるボタンの処理
-    const closeBtn = this.modal.querySelector('.close');
-    closeBtn.onclick = () => this.close();
-
-    // モーダル外クリックで閉じる
-    this.modal.onclick = (e) => {
-      if (e.target === this.modal) this.close();
-    };
   }
 
   open(date, meal) {

@@ -67,7 +67,8 @@ function setupEventListeners() {
     if (!(event.target instanceof Element)) return;
 
     // 追加ボタンのクリックイベント
-    if (event.target.classList.contains("add-entry-button")) {
+    const addButton = event.target.closest(".add-entry-button");
+    if (addButton) {
       const cell = event.target.closest(".day-cell");
       const date = cell.getAttribute("data-date");
       const meal = cell.getAttribute("data-meal");
