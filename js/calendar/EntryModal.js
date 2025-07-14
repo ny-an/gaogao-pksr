@@ -208,7 +208,7 @@ class EntryModal {
    * @param {number} maxHeight - 最大高さ (デフォルト300)
    * @returns {Promise<string>} 圧縮後のBase64データ
    */
-  async compressImage(file, maxWidth = 300, maxHeight = 300) {
+  async compressImage(file, maxWidth = 300, maxHeight = 300, quality = 0.8) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = function(e) {
@@ -231,7 +231,7 @@ class EntryModal {
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
           // 画質は必要に応じて調整。第二引数の0.7はJPEGのクオリティ
-          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
           resolve(dataUrl);
         };
         img.onerror = function(error) {
@@ -248,16 +248,22 @@ class EntryModal {
 
   // リサイズしないでBase64化
   async fileToBase64(file) {
-    return new Promise((resolve, reject) => {
+    // 画像の元サイズを取得
+    const originalSize = await new Promise((resolve, reject) => {
+      const img = new Image();
       const reader = new FileReader();
-      reader.onload = function(e) {
-        resolve(e.target.result);
-      };
-      reader.onerror = function(error) {
-        reject(error);
-      };
-      reader.readAsDataURL(file); // ファイルをそのままBase64化
+      reader.onload = function (e) {
+        img.onload = function () {
+          resolve({ width: img.width, height: img.height });
+        }
+        img.onerror = reject;
+        img.src = e.target.result;
+      }
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
     });
+
+    return await this.compressImage(file, originalSize.width, originalSize.height, 1);
   }
 
 }
