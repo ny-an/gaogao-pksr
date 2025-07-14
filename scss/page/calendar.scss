@@ -129,6 +129,11 @@ $extra-tasty-color:#FD6772;
             width: 80px;
             object-fit: cover;
             object-position: 0 -60px;
+
+            &.image-error, &.image-manual{
+              object-fit: contain;
+              object-position: bottom;
+            }
           }
           .delete-image-btn {
             position: absolute;

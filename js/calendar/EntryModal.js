@@ -1,6 +1,9 @@
 // 入力総合窓口
 class EntryModal {
   constructor() {
+    // 手入力フラグ
+    this.isManualInput = false;
+
     this.modal = document.getElementById('addEntryModal');
     this.dateDisplay = document.getElementById('modalDate');
     this.dayDisplay = document.getElementById('modalDay');
@@ -51,6 +54,9 @@ class EntryModal {
         // プレビューと結果の更新
         this.updateWithOCRResult(energy, compressedImage);
 
+        // 状態管理
+        this.isManualInput = false;
+
       } catch (error) {
         console.error('OCR処理エラー:', error);
         // OCRが失敗しても画像は保存できるようにする
@@ -84,6 +90,9 @@ class EntryModal {
           this.ocrEnergyValue.textContent = parseInt(value).toLocaleString();
           this.manualEnergyInputViewButton.classList.toggle("active");
           this.energyInputDiv.classList.toggle("active");
+
+          // 状態管理
+          this.isManualInput = true;
         }
         return;
       }
@@ -182,6 +191,8 @@ class EntryModal {
       dish: "",
       energy: energy,
       image: this.imageData,
+      added: new Date().getTime(),
+      isManual: this.isManualInput,
     };
 
     try {

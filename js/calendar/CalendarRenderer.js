@@ -20,14 +20,17 @@ class CalendarRenderer {
 
   // 単一セルの内容を表示切替
   updateCellContent(cell, record) {
-    let content = `<div class="menu-item">${record.dish || ""}</div>`
-      + `<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
-    if (record.energy) {
-      content += `<div class="menu-image">`;
-      if (record.image) content += `<img src="${record.image}" >`;
-      content += `<button class="delete-image-btn action-reset">×</button>`;
-      content += `</div>`;
-    }
+
+    // 状態管理でclass変更
+    let imgClass = record.isManual ? "image-manual" : "";
+    if(record.energy == 0) imgClass = "image-manual";
+
+    let content = `<div class="menu-item">${record.dish || ""}</div>`;
+    content += `<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
+    content += `<div class="menu-image">`;
+    content += `<img src="${record.image}" class="${imgClass}" onerror="this.src='img/foods/svg/SlowpokeTail.svg';this.classList.add('image-error');" >`;
+    content += `<button class="delete-image-btn action-reset">×</button>`;
+    content += `</div>`;
     content += `<div class="action-buttons"></div>`;
     cell.innerHTML = content;
 
