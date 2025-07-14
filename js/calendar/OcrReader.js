@@ -87,15 +87,45 @@ class OcrReader {
     });
   }
 
+  // workerとタイムアウトでOCRする
+  async recognizeWithTimeout(file, timeoutMs = 10000) {
+    const worker = Tesseract.createWorker({
+      logger: m => console.log(m)
+    });
+
+    // タイムアウト用
+    let timer;
+    let result;
+    try {
+      await worker.load();
+      await worker.loadLanguage('eng');
+      await worker.initialize('eng');
+
+      const ocrPromise = worker.recognize(file);
+
+      // タイムアウト設定
+      const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(async () => {
+          await worker.terminate();
+          reject(new Error('OCR処理がタイムアウトしました'));
+        }, timeoutMs);
+      });
+
+      result = await Promise.race([ocrPromise, timeoutPromise]);
+      clearTimeout(timer);
+
+    } finally {
+      try { await worker.terminate(); } catch {}
+    }
+
+    return result;
+  }
+
   // OCR処理を行う
   async performOCR(file) {
     try {
       // 通常のOCR処理
-      const {data: {text}} = await Tesseract.recognize(
-        file,
-        "eng",
-        {logger: m => console.log(m)}
-      );
+      const {data: {text}} = await this.recognizeWithTimeout(file);
 
       let filteredLines = this.processOcrText(text);
 
@@ -104,10 +134,8 @@ class OcrReader {
         console.error('try1. no energy lines');
 
         const redOnlyBlob = await this.extractRedTextImage(file);
-        const {data: {text: redText}} = await Tesseract.recognize(
-          URL.createObjectURL(redOnlyBlob),
-          "eng",
-          {logger: m => console.log(m)}
+        const {data: {text: redText}} = await this.recognizeWithTimeout(
+          URL.createObjectURL(redOnlyBlob)
         );
         filteredLines = this.processOcrText(redText);
       }
