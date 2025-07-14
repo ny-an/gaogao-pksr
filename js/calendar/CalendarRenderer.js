@@ -48,7 +48,9 @@ class CalendarRenderer {
   setDefaultCell(cell) {
     cell.innerHTML = `
       <div class="energy-value"></div>
-      <button class="add-entry-button">追加</button>
+      <button class="add-entry-button">
+          <img src="img/icons/pen_white.svg" alt="Pen Icon" class="icon pen-icon">
+      </button>
     `;
   }
 
