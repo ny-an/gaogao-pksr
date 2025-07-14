@@ -37,8 +37,12 @@ class EntryModal {
 
         // 画像の圧縮処理
         const quality = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
-        const { width, height } = IMAGE_QUALITY_SIZES[quality];
-        compressedImage = await this.compressImage(file, width, height);
+        if(quality !== 'raw') {
+          const {width, height} = IMAGE_QUALITY_SIZES[quality];
+          compressedImage = await this.compressImage(file, width, height);
+        }else{
+          compressedImage = await this.fileToBase64(file);
+        }
 
         // OCR処理
         const ocrReader = new OcrReader();
@@ -241,6 +245,21 @@ class EntryModal {
       reader.readAsDataURL(file);
     });
   }
+
+  // リサイズしないでBase64化
+  async fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        resolve(e.target.result);
+      };
+      reader.onerror = function(error) {
+        reject(error);
+      };
+      reader.readAsDataURL(file); // ファイルをそのままBase64化
+    });
+  }
+
 }
 
 // グローバルなインスタンスを作成
