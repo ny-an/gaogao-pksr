@@ -63,16 +63,43 @@ function setupEventListeners() {
 
   // 追加ボタンのクリックイベント
   document.addEventListener("click", event => {
+    // event.target が存在し、HTMLElement か確認
+    if (!(event.target instanceof Element)) return;
+
+    // 追加ボタンのクリックイベント
     if (event.target.classList.contains("add-entry-button")) {
       const cell = event.target.closest(".day-cell");
       const date = cell.getAttribute("data-date");
       const meal = cell.getAttribute("data-meal");
       window.entryModal.open(date, meal);
     }
-  });
 
-  // リセット処理
-  document.addEventListener("click", event => {
+    // Tableのエナジー大成功classトグル処理
+    if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
+
+      // クリックされた要素の祖先からセル要素を取得
+      const cell = event.target.closest(".day-cell");
+      let targetEl = event.target;
+
+      // クリックされたが menu-image の場合、対象は energy-value 要素に変更
+      if (event.target.classList.contains("menu-image") && cell) {
+        const energyEl = cell.querySelector(".energy-value");
+        if (energyEl) {
+          targetEl = energyEl;
+        }
+      }
+
+      // 対象要素に対してクラスの付与状況を反転
+      targetEl.classList.toggle("extra-tasty");
+
+      if (cell) {
+        // DB 更新：クラスの有無に応じて extra フラグを更新
+        const extra = targetEl.classList.contains("extra-tasty");
+        updateExtraFlag(cell, extra);
+      }
+    }
+
+    // Tableのリセットボタン
     if (event.target.classList.contains("action-reset")) {
       const cell = event.target.closest(".day-cell");
       calendarRender.resetCell(cell).then(() => {
@@ -82,6 +109,30 @@ function setupEventListeners() {
         await recalcEnergyTotals();
       });
     }
+
+    // 料理画像クリック時の拡大表示処理
+    const menuImage = event.target.closest(".menu-image img");
+    if (menuImage && !event.target.classList.contains("delete-image-btn")) {
+      const modal = document.getElementById("imageModal");
+      const modalImg = document.getElementById("modalImage");
+
+      modal.style.display = "block";
+      modalImg.src = menuImage.src;
+
+      // モーダルの閉じるボタンのイベント
+      const closeBtn = modal.querySelector(".close");
+      closeBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      // モーダル外クリックで閉じる
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          modal.style.display = "none";
+        }
+      };
+    }
+
   });
 
   // 週セレクターの選択変更イベント：選択された週のカレンダーをロードする
@@ -112,62 +163,6 @@ function setupEventListeners() {
       await calendarRender.populateCalendar({});
     });
 
-  });
-
-  // calendar画面のエナジー大成功classトグル処理
-  document.addEventListener("click", event => {
-    // event.target が存在し、HTMLElement か確認
-    if (!(event.target instanceof Element)) return;
-
-    // energy-value または menu-image の場合のみ処理
-    if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
-
-      // クリックされた要素の祖先からセル要素を取得
-      const cell = event.target.closest(".day-cell");
-      let targetEl = event.target;
-
-      // クリックされたが menu-image の場合、対象は energy-value 要素に変更
-      if (event.target.classList.contains("menu-image") && cell) {
-        const energyEl = cell.querySelector(".energy-value");
-        if (energyEl) {
-          targetEl = energyEl;
-        }
-      }
-
-      // 対象要素に対してクラスの付与状況を反転
-      targetEl.classList.toggle("extra-tasty");
-
-      if (cell) {
-        // DB 更新：クラスの有無に応じて extra フラグを更新
-        const extra = targetEl.classList.contains("extra-tasty");
-        updateExtraFlag(cell, extra);
-      }
-    }
-  });
-
-  // 料理画像クリック時の拡大表示処理
-  document.addEventListener("click", event => {
-    const menuImage = event.target.closest(".menu-image img");
-    if (menuImage && !event.target.classList.contains("delete-image-btn")) {
-      const modal = document.getElementById("imageModal");
-      const modalImg = document.getElementById("modalImage");
-
-      modal.style.display = "block";
-      modalImg.src = menuImage.src;
-
-      // モーダルの閉じるボタンのイベント
-      const closeBtn = modal.querySelector(".close");
-      closeBtn.onclick = () => {
-        modal.style.display = "none";
-      };
-
-      // モーダル外クリックで閉じる
-      modal.onclick = (e) => {
-        if (e.target === modal) {
-          modal.style.display = "none";
-        }
-      };
-    }
   });
 
 }

@@ -212,9 +212,11 @@
           <div class="energy-display">
             <img src="img/fire_energy_white.svg" alt="Energy Icon" id="energyIcon" class="energy-icon">
             <span id="ocrEnergyValue">-</span>
+            <button id="manualEnergyInputViewButton" class="manual-modify-button active">訂正</button>
           </div>
 
-          <div class="energy-input">
+
+          <div id="energyInputDiv" class="energy-input">
             <label for="manualEnergyInput">手動入力:</label>
             <div class="input-group">
               <input type="number" id="manualEnergyInput" placeholder="エナジーを入力" min="0">

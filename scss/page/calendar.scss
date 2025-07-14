@@ -374,6 +374,7 @@ $extra-tasty-color:#FD6772;
     .energy-section {
       margin: 20px 0;
 
+      // 表示
       .energy-display{
         display: flex;
         text-align: center;
@@ -381,31 +382,51 @@ $extra-tasty-color:#FD6772;
         justify-content: center;
         align-items: center;
       }
-      .energy-input{
-        label{}
-        input{
 
+      // 訂正ボタン
+      .manual-modify-button{
+        display: none;
+        &.active{
+          display: block;
         }
+
+        padding: 4px 8px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
       }
 
-      .input-group {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        justify-content: center;
+      // 入力
+      .energy-input{
+        display: none;
 
-        .confirm-button {
-          padding: 4px 8px;
-          background-color: #4CAF50;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
+        &.active{
+          display: block;
         }
 
-        .confirm-button:hover {
-          background-color: #45a049;
+        // 手動入力部分
+        .input-group {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          justify-content: center;
+
+          .confirm-button {
+            padding: 4px 8px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+
+          .confirm-button:hover {
+            background-color: #45a049;
+          }
         }
+
       }
     }
 

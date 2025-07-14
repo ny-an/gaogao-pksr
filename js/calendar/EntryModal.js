@@ -6,7 +6,12 @@ class EntryModal {
     this.dayDisplay = document.getElementById('modalDay');
     this.ocrEnergyValue = document.getElementById('ocrEnergyValue');
     this.manualEnergyInput = document.getElementById('manualEnergyInput');
-    this.confirmEnergyButton = document.getElementById('confirmEnergyButton'); // 追加
+    // 訂正ボタン
+    this.manualEnergyInputViewButton = document.getElementById("manualEnergyInputViewButton");
+    // 訂正エリア
+    this.energyInputDiv = document.getElementById("energyInputDiv");
+    // 確定ボタン
+    this.confirmEnergyButton = document.getElementById('confirmEnergyButton');
     this.saveButton = document.getElementById('saveEntryButton');
     this.imageButton = document.getElementById('imageSelectButton');
     this.imagePreview = document.getElementById('selectedImagePreview');
@@ -60,14 +65,25 @@ class EntryModal {
       }
     });
 
-    // 確定ボタンのイベントリスナーを追加
+    // 訂正ボタンのイベントリスナー
+    if (this.manualEnergyInputViewButton) {
+      this.manualEnergyInputViewButton.addEventListener("click", () => {
+        this.manualEnergyInputViewButton.classList.toggle("active");
+        this.energyInputDiv.classList.toggle("active");
+      });
+    }
+
+    // 確定ボタンのイベントリスナー
     this.confirmEnergyButton.addEventListener('click', () => {
       const value = this.manualEnergyInput.value;
       if (value) {
         this.ocrEnergyValue.textContent = parseInt(value).toLocaleString();
+
+        // 訂正ボタンと手動入力エリアの切替
+        this.manualEnergyInputViewButton.classList.toggle("active");
+        this.energyInputDiv.classList.toggle("active");
       }
     });
-
 
     // 保存ボタンのイベントハンドラ
     this.saveButton.addEventListener('click', () => this.save());
