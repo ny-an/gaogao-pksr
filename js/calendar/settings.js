@@ -49,7 +49,8 @@ const DEFAULT_SETTINGS = {
 
 // 設定値に対応する画像サイズ
 const IMAGE_QUALITY_SIZES = {
-  high: { width: 600, height: 600 },
+  high: { width: 1200, height: 1200 },
+  middle: { width: 600, height: 600 },
   low: { width: 300, height: 300 }
 };
 
