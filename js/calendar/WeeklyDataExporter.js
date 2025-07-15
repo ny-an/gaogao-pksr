@@ -23,6 +23,10 @@ class WeeklyDataExporter {
 
     const modal = document.getElementById('csvModal');
     modal.style.display = 'block';
+
+    // まとめ画像表示
+    await this.writeOutAllImages(selectedWeek);
+
   }
 
   // CSV文字列作成専用
@@ -113,6 +117,92 @@ class WeeklyDataExporter {
     } else {
       exportIcon.classList.remove('active');
     }
+  }
+
+
+  /**
+   * まとめ画像作成処理
+   * すべての食事画像を1枚のまとめ画像として合成し、「コピー」ボタンの下に表示
+   * @param {string} week 週情報 ("2024-W23" など)
+   */
+  async writeOutAllImages(week) {
+    console.log('writeOutAllImages start');
+
+    const emptyImage = "img/foods/svg/SlowpokeTail.svg";
+    const images = [];
+    const daysArr = this.days;
+    const mealsArr = ['朝', '昼', '夜'];
+
+    // 各セル画像を集める
+    const weekRecord = await this.dbAPI.getWeeklyMenu(week);
+    for (let day of daysArr) {
+      let row = [];
+      let flagRow = [];
+      for (let meal of mealsArr) {
+        const rec = weekRecord?.data?.[day]?.[meal];
+        const imgSrc = rec && rec.image ? rec.image : emptyImage;
+        row.push(imgSrc);
+      }
+      images.push(row);
+    }
+
+    // まとめキャンバス生成
+    const cellWidth = 210;
+    const cellHeight = 400;
+    const canvas = document.createElement('canvas');
+    canvas.width = cellWidth * mealsArr.length;
+    canvas.height = cellHeight * daysArr.length;
+    const ctx = canvas.getContext('2d');
+
+    // 各画像をまとめる
+    for (let row = 0; row < daysArr.length; row++) {
+      for (let col = 0; col < mealsArr.length; col++) {
+        const img = new window.Image();
+        img.src = images[row][col];
+
+        // 画像表示前にemptyなら背景グレー塗り
+        const isEmpty = !weekRecord?.data?.[daysArr[row]]?.[mealsArr[col]];
+        if (isEmpty) {
+          ctx.fillStyle = '#efefef'; // ここを$gray-color等に
+          ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+        }
+
+        // 画像貼り付け
+        await new Promise(resolve => {
+          img.onload = () => {
+            // contain方式（縦横比維持で最大表示、余白は透明）
+            const ratio = Math.min(cellWidth / img.width, cellHeight / img.height);
+            const w = img.width * ratio;
+            const h = img.height * ratio;
+            const dx = col * cellWidth + (cellWidth - w) / 2;
+            const dy = row * cellHeight + (cellHeight - h) / 2;
+            ctx.drawImage(img, dx, dy, w, h);
+            resolve();
+          };
+          img.onerror = () => {
+            resolve();
+          };
+        });
+      }
+    }
+
+    // まとめ画像をdataURLで取得
+    // 「コピー」ボタン下のエリアに表示
+    const dataUrl = canvas.toDataURL('image/png');
+    let belowCopy = document.getElementById('belowCopyBtnArea');
+    if (!belowCopy) {
+      // idが無ければ作成し、コピーボタンの直下に挿入
+      const copyBtn = document.getElementById('copyCSV');
+      belowCopy = document.createElement('div');
+      belowCopy.id = 'belowCopyBtnArea';
+      belowCopy.style.textAlign = 'center';
+      belowCopy.style.marginTop = '20px';
+      copyBtn.insertAdjacentElement('afterend', belowCopy);
+    }
+    belowCopy.innerHTML = `
+      <div style="font-weight:bold;margin-bottom:8px;">まとめ画像</div>
+      <img src="${dataUrl}" style="max-height:300px;border:1px solid #ccc;">
+    `;
   }
 
 }
