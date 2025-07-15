@@ -11,6 +11,16 @@ $energy-font-family: 'Montserrat', sans-serif;
 $energy-color:#FEA824;
 $extra-tasty-color:#FD6772;
 
+/* スクロールバーを常に見せる */
+.simplebar-scrollbar.simplebar-visible {
+  opacity: 1 !important;
+}
+/* 非アクティブ時もレールごと出す場合 */
+.simplebar-track {
+  opacity: 1 !important;
+}
+
+
 #page-calendar {
 
   &{

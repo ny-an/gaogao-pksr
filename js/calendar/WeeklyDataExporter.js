@@ -128,7 +128,7 @@ class WeeklyDataExporter {
   async writeOutAllImages(week) {
     console.log('writeOutAllImages start');
 
-    const emptyImage = "img/foods/svg/SlowpokeTail.svg";
+    const emptyImage = "";
     const images = [];
     const daysArr = this.days;
     const mealsArr = ['朝', '昼', '夜'];
@@ -137,7 +137,6 @@ class WeeklyDataExporter {
     const weekRecord = await this.dbAPI.getWeeklyMenu(week);
     for (let day of daysArr) {
       let row = [];
-      let flagRow = [];
       for (let meal of mealsArr) {
         const rec = weekRecord?.data?.[day]?.[meal];
         const imgSrc = rec && rec.image ? rec.image : emptyImage;
@@ -146,7 +145,9 @@ class WeeklyDataExporter {
       images.push(row);
     }
 
-    // まとめキャンバス生成
+    // images配列を作った後、不要な日(行)を除外してcanvasを作る
+    const filteredImages = [];
+    const filteredDays = [];
     const cellWidth = 210;
     const cellHeight = 400;
     const canvas = document.createElement('canvas');
@@ -156,18 +157,31 @@ class WeeklyDataExporter {
 
     // 各画像をまとめる
     for (let row = 0; row < daysArr.length; row++) {
-      for (let col = 0; col < mealsArr.length; col++) {
-        const img = new window.Image();
-        img.src = images[row][col];
+      const rowImages = images[row];
+      // [朝, 昼, 夜] のいずれかが空でなければ有効
+      const hasAnyImage = rowImages.some(src => src && src.trim());
+      if (hasAnyImage) {
+        filteredImages.push(rowImages);
+        filteredDays.push(daysArr[row]);
+      }
+    }
 
-        // 画像表示前にemptyなら背景グレー塗り
-        const isEmpty = !weekRecord?.data?.[daysArr[row]]?.[mealsArr[col]];
-        if (isEmpty) {
-          ctx.fillStyle = '#efefef'; // ここを$gray-color等に
+    // canvasサイズを有効なdaysだけに可変
+    canvas.height = cellHeight * filteredImages.length;
+
+    // ↓以降のfor文も有効な行だけ描画
+    for (let row = 0; row < filteredImages.length; row++) {
+      for (let col = 0; col < mealsArr.length; col++) {
+        const imgSrc = filteredImages[row][col];
+        if (!imgSrc || imgSrc.trim() === '' || imgSrc === emptyImage) {
+          // 空欄は背景グレーにして描画スキップ
+          ctx.fillStyle = '#efefef';
           ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+          continue;
         }
 
-        // 画像貼り付け
+        const img = new window.Image();
+        img.src = imgSrc;
         await new Promise(resolve => {
           img.onload = () => {
             // contain方式（縦横比維持で最大表示、余白は透明）
@@ -180,6 +194,7 @@ class WeeklyDataExporter {
             resolve();
           };
           img.onerror = () => {
+            // スキップ
             resolve();
           };
         });
@@ -201,7 +216,9 @@ class WeeklyDataExporter {
     }
     belowCopy.innerHTML = `
       <div style="font-weight:bold;margin-bottom:8px;">まとめ画像</div>
-      <img src="${dataUrl}" style="max-height:300px;border:1px solid #ccc;">
+      <div style="overflow: scroll;max-height: 300px; border:1px solid #ccc;" data-simplebar>
+        <img src="${dataUrl}" style="max-width:100%;">
+      </div>
     `;
   }
 
