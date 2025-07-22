@@ -298,17 +298,13 @@ class EntryModal {
     }
 
     // 保存データから上書き
-    const old_record = await dbAPI.getRecordFromCell(this.currentCell);
-
-    const record = {
-      dish: old_record?.dish ?? "",
-      image: this.imageData,
-      added: new Date().getTime(),
-      isManual: this.isManualInput,
-      memo: this.memoTextArea.value.trim(),
-      energy: energy,
-      extra: old_record?.extra ?? false,
-    }
+    let record = await dbAPI.getRecordFromCell(this.currentCell);
+    record.image = this.imageData;
+    record.added = new Date().getTime();
+    record.memo = this.memoTextArea.value.trim();
+    record.energy = energy;
+    record.extra = this.extraFlg;
+    record.isManual = this.isManualInputFlg;
     console.log('save before record:', record);
 
     try {
