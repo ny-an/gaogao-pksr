@@ -121,7 +121,7 @@ class EntryModal {
         return;
       }
 
-      // エナジー確定ボタン
+      // エナジー訂正確定ボタン
       if (event.target.closest('#confirmEnergyButton')) {
         const value = this.manualEnergyInput.value;
         if (value) {
@@ -135,16 +135,42 @@ class EntryModal {
         return;
       }
 
+      // 画像ボタン
+      if (event.target.closest('#imageSelectButton')) {
+        const fileInput = document.getElementById('hiddenFileInput');
+        fileInput.click();
+        return;
+      }
+
+      // 画像
+      if(event.target.closest('#selectedImagePreview')){
+
+        // 料理画像クリック時の拡大表示処理
+        document.getElementById('selectedImagePreview').classList.toggle('max-view');
+
+
+      }
+
       // 保存ボタン
       if (event.target.closest('#saveEntryButton')) {
         await this.save();
         return;
       }
 
-      // 画像ボタン
-      if (event.target.closest('#imageSelectButton')) {
-        const fileInput = document.getElementById('hiddenFileInput');
-        fileInput.click();
+      // リセットボタン
+      if (event.target.closest('#resetEntryButton')) {
+        console.log('reset-button clicked');
+        const confirm_text = "この日のデータを削除します。\n本当によろしいですか？";
+        if(!confirm(confirm_text)){
+          return;
+        }
+
+        // リセット
+        await calendarRender.resetCell(this.currentCell);
+        // エナジー合計の更新
+        await recalcEnergyTotals();
+
+        this.close();
         return;
       }
 
@@ -164,8 +190,9 @@ class EntryModal {
 
   }
 
-  open(date, meal) {
+  async open(date, meal) {
     console.log('EntryModal: open',date,meal);
+
     this.reset();
     this.selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
     this.currentCell = document.querySelector(`.day-cell[data-date="${date}"][data-meal="${meal}"]`);
@@ -173,9 +200,15 @@ class EntryModal {
     this.currentMeal = meal;
     this.updateDateDisplay(date, meal);
 
-    // ここでメモ読込
-    const calendarTable = document.querySelector(".calendar-table");
-    this.setMemoTextForDay(this.selectedWeek, date, meal);
+    // 当日データ表示
+    const record = await dbAPI.getRecordFromCell(this.currentCell);
+    console.log('record:', record);
+    if(record){
+      if(record.image) this.updateWithOCRResult(record.energy, record.image);
+      this.isManualInput = record.isManual;
+      this.ocrEnergyValue.textContent = record.energy?.toLocaleString() ?? '-';
+      this.memoTextArea.value = record.memo;
+    }
 
     this.modal.style.display = 'block';
   }
@@ -208,11 +241,24 @@ class EntryModal {
     this.manualEnergyInput.value = energy;
     this.imageData = imageData;
 
-    // プレビュー表示
+    // プレビュー表示 + 拡大アイコンを右上固定で追加
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-wrapper';
+
     const img = document.createElement('img');
+    img.className = 'preview-image';
     img.src = imageData;
+
+    const expandIcon = document.createElement('img');
+    expandIcon.src = 'img/icons/expand.svg';
+    expandIcon.className = 'expand-icon';
+    expandIcon.alt = '拡大';
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(expandIcon);
+
     this.imagePreview.innerHTML = '';
-    this.imagePreview.appendChild(img);
+    this.imagePreview.appendChild(wrapper);
   }
 
   // OCRエラー処理
@@ -239,13 +285,18 @@ class EntryModal {
     }
 
     // 保存データから上書き
-    const record = dbAPI.getRecordFromCell(this.currentCell);
-    record.dish = "";
-    record.energy = energy;
-    record.image = this.imageData;
-    record.added = new Date().getTime();
-    record.isManual = this.isManualInput;
-    record.memo = this.memoTextArea.value.trim();
+    const old_record = await dbAPI.getRecordFromCell(this.currentCell);
+
+    const record = {
+      dish: old_record?.dish ?? "",
+      image: this.imageData,
+      added: new Date().getTime(),
+      isManual: this.isManualInput,
+      memo: this.memoTextArea.value.trim(),
+      energy: energy,
+      extra: old_record?.extra ?? false,
+    }
+    console.log('save before record:', record);
 
     try {
       // セルの更新

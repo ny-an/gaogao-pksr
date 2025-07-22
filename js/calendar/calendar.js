@@ -61,25 +61,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 // --- イベントリスナー設定 ---
 function setupEventListeners() {
 
-  // 追加ボタンのクリックイベント
-  document.addEventListener("click", event => {
+  // セル内のクリックイベント
+  document.addEventListener("click", async (event) => {
     // event.target が存在し、HTMLElement か確認
     if (!(event.target instanceof Element)) return;
-
-    // 追加ボタンのクリックイベント
-    const addButton = event.target.closest(".add-entry-button");
-    if (addButton) {
-      const cell = event.target.closest(".day-cell");
-      const date = cell.getAttribute("data-date");
-      const meal = cell.getAttribute("data-meal");
-
-      // 初期表示にする
-      this.manualEnergyInputViewButton.classList.add("active");
-      this.energyInputDiv.classList.remove("active");
-
-      // モーダルを開く
-      window.entryModal.open(date, meal);
-    }
 
     // Tableのエナジー大成功classトグル処理
     if (event.target.classList.contains("energy-value") || event.target.classList.contains("menu-image")) {
@@ -104,40 +89,23 @@ function setupEventListeners() {
         const extra = targetEl.classList.contains("extra-tasty");
         updateExtraFlag(cell, extra);
       }
+      return;
     }
 
-    // Tableのリセットボタン
-    if (event.target.classList.contains("action-reset")) {
+    // セルクリックイベント
+    const Cell = event.target.closest(".day-cell");
+    if (Cell) {
       const cell = event.target.closest(".day-cell");
-      calendarRender.resetCell(cell).then(() => {
-        console.log("リセット完了");
-      }).then(async()=>{
-        // エナジー合計の更新
-        await recalcEnergyTotals();
-      });
-    }
+      const date = cell.getAttribute("data-date");
+      const meal = cell.getAttribute("data-meal");
 
-    // 料理画像クリック時の拡大表示処理
-    const menuImage = event.target.closest(".menu-image img");
-    if (menuImage && !event.target.classList.contains("delete-image-btn")) {
-      const modal = document.getElementById("imageModal");
-      const modalImg = document.getElementById("modalImage");
+      // 初期表示にする
+      this.manualEnergyInputViewButton.classList.add("active");
+      this.energyInputDiv.classList.remove("active");
 
-      modal.style.display = "block";
-      modalImg.src = menuImage.src;
+      // モーダルを開く
+      await window.entryModal.open(date, meal);
 
-      // モーダルの閉じるボタンのイベント
-      const closeBtn = modal.querySelector(".close");
-      closeBtn.onclick = () => {
-        modal.style.display = "none";
-      };
-
-      // モーダル外クリックで閉じる
-      modal.onclick = (e) => {
-        if (e.target === modal) {
-          modal.style.display = "none";
-        }
-      };
     }
 
   });

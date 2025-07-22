@@ -12,6 +12,7 @@ $energy-color:#FEA824;
 $extra-tasty-color:#FD6772;
 
 $button-green-color: #4CAF50;
+$button-orange-color: #f0ab42;
 
 /* スクロールバーを常に見せる */
 .simplebar-scrollbar.simplebar-visible {
@@ -189,14 +190,17 @@ $button-green-color: #4CAF50;
 
         }
 
-        .action-buttons {
-          display: flex;
-          flex-direction: column;
+        // メモを少しだけ効果
+        .memo-preview-area {
+          height: 10px;
+          position: absolute;
+          bottom: 2px;
+          right: 2px;
 
-          button {
+          .memo-preview{
             font-size: 10px;
-            padding: 3px;
-            margin-bottom: 3px;
+            color: #a9a9a9;
+            display: block;
           }
         }
       }
@@ -448,7 +452,7 @@ $button-green-color: #4CAF50;
           }
 
           .confirm-button {
-            padding: 4px 8px;
+            padding: 6px 8px 2px 8px;
             background-color: $button-green-color;
             color: white;
             border: none;
@@ -496,9 +500,49 @@ $button-green-color: #4CAF50;
       }
 
       #selectedImagePreview{
-        img{
-          max-height: 30vh;
-          max-width: 100%;
+        .image-wrapper {
+          position: relative;
+          display: inline-block;
+          border: 1px solid gainsboro;
+
+          // 画像プレビュー
+          img.preview-image{
+            max-width: 100%;
+            max-height: 30vh;
+
+            transition:
+                    max-height 1s cubic-bezier(0.42,0,0.58,1),
+                    transform 1s cubic-bezier(0.42,0,0.58,1);
+            cursor: pointer;
+            transform: scale(1);
+          }
+
+          // 拡大ボタン
+          img.expand-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            z-index: 1;
+            pointer-events: none; /* クリック妨害しない */
+            opacity: 0.75;
+            transition:
+                    top 1s ease,
+                    right 1s ease;
+          }
+        }
+
+        // 拡大表示時
+        &.max-view{
+          .image-wrapper img.preview-image{
+            max-height: 90vh;
+            transform: scale(1.2);
+          }
+          .image-wrapper img.expand-icon {
+            top: 30px;
+            right: 20px;
+          }
         }
       }
     }
@@ -514,6 +558,16 @@ $button-green-color: #4CAF50;
       margin-top: 20px;
     }
 
+    .reset-button {
+      width: 100%;
+      padding: 10px;
+      background-color: $button-orange-color;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
 
     // メモボタン
     .memo-button {
@@ -549,12 +603,12 @@ $button-green-color: #4CAF50;
         background: $button-green-color;
         border: none;
         border-radius: 4px;
-        padding: 6px 10px;
+        padding: 6px 8px 2px 8px;
         cursor: pointer;
       }
       .icon.check-icon {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
       }
     }
 

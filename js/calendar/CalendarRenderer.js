@@ -25,13 +25,19 @@ class CalendarRenderer {
     let imgClass = record.isManual ? "image-manual" : "";
     if(record.energy == 0) imgClass = "image-manual";
 
+    // memoプレビュー
+    const maxLen = 20;
+    const memoText = record?.memo || "";
+    const shortMemo = memoText.length > maxLen
+      ? memoText.slice(0, maxLen) + "…"
+      : memoText;
+
     let content = `<div class="menu-item">${record.dish || ""}</div>`;
     content += `<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;
     content += `<div class="menu-image">`;
     content += `<img src="${record.image}" class="${imgClass}" onerror="this.src='img/foods/svg/SlowpokeTail.svg';this.classList.add('image-error');" >`;
-    content += `<button class="delete-image-btn action-reset">×</button>`;
     content += `</div>`;
-    content += `<div class="action-buttons"></div>`;
+    content += `<div class="memo-preview-area"><span class="memo-preview">${shortMemo}</span></div>`;
     cell.innerHTML = content;
 
     if (record.extra) {

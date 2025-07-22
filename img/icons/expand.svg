@@ -1,0 +1,23 @@
+<svg viewBox="100 100 100 100" xmlns="http://www.w3.org/2000/svg">
+	<style>
+		.st0{fill:none;stroke:#333;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	</style>
+	<g>
+		<g>
+			<line class="st0" x1="102.97" y1="103.67" x2="134.63" y2="135.34"/>
+			<polyline class="st0" points="134.31,103.66 102.77,103.48 102.95,135.01"/>
+		</g>
+		<g>
+			<line class="st0" x1="196.33" y1="103.18" x2="164.66" y2="134.85"/>
+			<polyline class="st0" points="164.99,103.16 196.52,102.98 196.34,134.52"/>
+		</g>
+		<g>
+			<line class="st0" x1="103.67" y1="196.33" x2="135.34" y2="164.66"/>
+			<polyline class="st0" points="135.01,196.34 103.48,196.52 103.66,164.99"/>
+		</g>
+		<g>
+			<line class="st0" x1="197.03" y1="196.82" x2="165.37" y2="165.15"/>
+			<polyline class="st0" points="165.69,196.84 197.23,197.02 197.05,165.48"/>
+		</g>
+	</g>
+</svg>
