@@ -153,19 +153,14 @@ class EntryModal {
 
         try {
 
-          // データ更新から
-          const updateFlag = !this.extraFlg;
-          await updateExtraFlag(this.currentCell, updateFlag);
-          console.log('await updateExtraFlag done');
-
-          // セル表示の大成功切り替え
+          // エナジー表示の大成功切り替え
           this.ocrEnergyValue.classList.toggle("extra-tasty");
 
           // モーダル要素に対してクラスの付与状況を反転
           this.currentCell.classList.toggle("extra-tasty");
 
           // DB 更新：クラスの有無に応じて extra フラグを更新
-          this.extraFlg = this.currentCell.classList.contains("extra-tasty");
+          this.extraFlg = !this.extraFlg;
           console.log('set extraFlg:', this.extraFlg);
 
         }catch(error) {
