@@ -25,6 +25,9 @@ class EntryModal {
     this.memoEditArea = document.getElementById('memoEditArea');
     this.memoTextArea = document.getElementById('memoTextArea');
 
+    // modal内memoプレビュー
+    this.modalMemoPreviewText = document.getElementById('modalMemoPreviewText');
+
     // 表示対象の日付
     this.currentWeekDay = null;
     this.currentMeal = null;
@@ -106,6 +109,12 @@ class EntryModal {
 
         await dbAPI.updateWeeklyRecord(this.currentCell, record);
         this.memoEditArea.classList.toggle('active');
+
+        // memo プレビュー
+        this.memoPreviewText(memoText);
+
+        // const memoPreviewText = (record?.memo ?? '').slice(0, 50).replace(/\n/g, '<br>');
+        // this.modalMemoPreviewText.innerHTML = memoPreviewText;
       }
 
       // エナジー訂正ボタン
@@ -203,12 +212,16 @@ class EntryModal {
     // 当日データ表示
     const record = await dbAPI.getRecordFromCell(this.currentCell);
     console.log('record:', record);
+    const memoStr = record?.memo ?? '';
     if(record){
       if(record.image) this.updateWithOCRResult(record.energy, record.image);
       this.isManualInput = record.isManual;
       this.ocrEnergyValue.textContent = record.energy?.toLocaleString() ?? '-';
-      this.memoTextArea.value = record?.memo ?? '';
+      this.memoTextArea.value = memoStr;
     }
+
+    // memo プレビュー
+    this.memoPreviewText(memoStr);
 
     this.modal.style.display = 'block';
   }
@@ -313,6 +326,12 @@ class EntryModal {
       console.error('保存エラー:', error);
       alert('保存中にエラーが発生しました。');
     }
+  }
+
+  // memo プレビュー更新
+  memoPreviewText(memoStr){
+    const memoPreviewText = memoStr.slice(0, 50).replace(/\n/g, '<br>');
+    this.modalMemoPreviewText.innerHTML = memoPreviewText;
   }
 
   /**

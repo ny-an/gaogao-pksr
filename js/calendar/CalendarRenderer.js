@@ -25,12 +25,15 @@ class CalendarRenderer {
     let imgClass = record.isManual ? "image-manual" : "";
     if(record.energy == 0) imgClass = "image-manual";
 
-    // memoプレビュー
+    // メモプレビュー：1行目の15文字まで取得
     const maxLen = 15;
     const memoText = record?.memo || "";
-    const shortMemo = memoText.length > maxLen
-      ? memoText.slice(0, maxLen) + "…"
+    const firstLine = memoText.includes('\n')
+      ? memoText.split('\n')[0]
       : memoText;
+    const shortMemo = firstLine.length > maxLen
+      ? firstLine.slice(0, maxLen) + "…"
+      : firstLine;
 
     let content = `<div class="menu-item">${record.dish || ""}</div>`;
     content += `<div class="energy-value">${(record.energy || 0).toLocaleString()}</div>`;

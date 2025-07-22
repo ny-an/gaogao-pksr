@@ -612,5 +612,12 @@ $button-orange-color: #f0ab42;
       }
     }
 
+    // 追加モーダル内のメモプレビュー
+    #modalMemoPreviewArea{
+      font-size: 14px;
+      color: #a9a9a9;
+      display: block;
+    }
+
   }
 }
