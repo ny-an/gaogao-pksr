@@ -26,7 +26,7 @@ class CalendarRenderer {
     if(record.energy == 0) imgClass = "image-manual";
 
     // memoプレビュー
-    const maxLen = 20;
+    const maxLen = 15;
     const memoText = record?.memo || "";
     const shortMemo = memoText.length > maxLen
       ? memoText.slice(0, maxLen) + "…"
