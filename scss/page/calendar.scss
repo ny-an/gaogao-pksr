@@ -402,13 +402,31 @@ $button-orange-color: #f0ab42;
     .energy-section {
       margin: 20px 0;
 
-      // 表示
+      // エナジー表示
       .energy-display{
         display: flex;
         text-align: center;
         margin-bottom: 1rem;
         justify-content: center;
         align-items: center;
+
+        .energy-icon{
+          cursor: pointer;
+
+          &.scale12{
+            scale: 1.2;
+          }
+          &.scale15{
+            scale: 1.5;
+          }
+        }
+
+        .energy-value{
+          &.extra-tasty{
+            color: $extra-tasty-color;
+            font-weight: bold;
+          }
+        }
       }
 
       // 訂正ボタン
