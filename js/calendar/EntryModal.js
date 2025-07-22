@@ -212,7 +212,7 @@ class EntryModal {
     // 当日データ表示
     const record = await dbAPI.getRecordFromCell(this.currentCell);
     console.log('record:', record);
-    const memoStr = record?.memo ?? '';
+    const memoStr = record?.memo ?? 'memo';
     if(record){
       if(record.image) this.updateWithOCRResult(record.energy, record.image);
       this.isManualInput = record.isManual;
