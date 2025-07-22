@@ -207,7 +207,7 @@ class EntryModal {
       if(record.image) this.updateWithOCRResult(record.energy, record.image);
       this.isManualInput = record.isManual;
       this.ocrEnergyValue.textContent = record.energy?.toLocaleString() ?? '-';
-      this.memoTextArea.value = record.memo;
+      this.memoTextArea.value = record?.memo ?? '';
     }
 
     this.modal.style.display = 'block';
