@@ -153,12 +153,8 @@ class EntryModal {
 
         try {
 
-          console.log('this.currentCell', this.currentCell);
-          console.log('this.extraFlg', this.extraFlg);
-
           // データ更新から
           const updateFlag = !this.extraFlg;
-          console.log('updateFlag:', updateFlag);
           await updateExtraFlag(this.currentCell, updateFlag);
           console.log('await updateExtraFlag done');
 
