@@ -81,13 +81,23 @@ function setupEventListeners() {
         }
       }
 
-      // 対象要素に対してクラスの付与状況を反転
-      targetEl.classList.toggle("extra-tasty");
+      // old and new
+      const oldExtra = targetEl.classList.contains("extra-tasty");
+      const newExtra = !oldExtra;
 
       if (cell) {
-        // DB 更新：クラスの有無に応じて extra フラグを更新
-        const extra = targetEl.classList.contains("extra-tasty");
-        updateExtraFlag(cell, extra);
+        try{
+          // DB 更新：クラスの有無に応じて extra フラグを更新
+          await updateExtraFlag(cell, newExtra)
+
+          // 対象要素に対してクラスの付与状況を反転
+          targetEl.classList.toggle("extra-tasty");
+
+        }catch (error) {
+          console.error('ERROR:', error);
+          alert('保存に失敗しました')
+
+        }
       }
       return;
     }

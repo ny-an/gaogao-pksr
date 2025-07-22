@@ -3,12 +3,14 @@ class EntryModal {
   constructor() {
     this.selectedWeek = null;
 
-    // 手入力フラグ
-    this.isManualInput = false;
+    // 各種フラグ
+    this.isManualInputFlg = false;
+    this.extraFlg = false;
 
     this.modal = document.getElementById('addEntryModal');
     this.dateDisplay = document.getElementById('modalDate');
     this.dayDisplay = document.getElementById('modalDay');
+    this.energyIcon = document.getElementById('energyIcon');
     this.ocrEnergyValue = document.getElementById('ocrEnergyValue');
     this.manualEnergyInput = document.getElementById('manualEnergyInput');
     // 訂正ボタン
@@ -27,6 +29,7 @@ class EntryModal {
 
     // modal内memoプレビュー
     this.modalMemoPreviewText = document.getElementById('modalMemoPreviewText');
+
 
     // 表示対象の日付
     this.currentWeekDay = null;
@@ -68,7 +71,7 @@ class EntryModal {
         this.updateWithOCRResult(energy, compressedImage);
 
         // 状態管理
-        this.isManualInput = false;
+        this.isManualInputFlg = false;
 
       } catch (error) {
         console.error('OCR処理エラー:', error);
@@ -90,7 +93,7 @@ class EntryModal {
       }
       // メモ確定ボタン
       if (event.target.closest('#saveMemoButton')) {
-        const memoText = this.memoTextArea.value.trim();
+        const memoText = this.memoTextArea.value.trim() ?? '';
 
         if (!this.selectedWeek || !this.currentWeekDay || !this.currentMeal){
           console.error('selectedWeek, currentDate, currentMeal is null');
@@ -103,8 +106,8 @@ class EntryModal {
         if(!record){
           console.warn('record is null');
 
-          // 当日データとしてmemoだけ保存
-          record = {memo:memoText};
+          record = {};
+          record.memo = memoText;
         }
 
         await dbAPI.updateWeeklyRecord(this.currentCell, record);
@@ -139,9 +142,40 @@ class EntryModal {
           this.energyInputDiv.classList.toggle("active");
 
           // 状態管理
-          this.isManualInput = true;
+          this.isManualInputFlg = true;
         }
         return;
+      }
+
+      // エナジーボタン：大成功トグル
+      if (event.target.closest('#energyIcon')) {
+        console.log('energyIcon clicked');
+
+        try {
+
+          console.log('this.currentCell', this.currentCell);
+          console.log('this.extraFlg', this.extraFlg);
+
+          // データ更新から
+          const updateFlag = !this.extraFlg;
+          console.log('updateFlag:', updateFlag);
+          await updateExtraFlag(this.currentCell, updateFlag);
+          console.log('await updateExtraFlag done');
+
+          // セル表示の大成功切り替え
+          this.ocrEnergyValue.classList.toggle("extra-tasty");
+
+          // モーダル要素に対してクラスの付与状況を反転
+          this.currentCell.classList.toggle("extra-tasty");
+
+          // DB 更新：クラスの有無に応じて extra フラグを更新
+          this.extraFlg = this.currentCell.classList.contains("extra-tasty");
+          console.log('set extraFlg:', this.extraFlg);
+
+        }catch(error) {
+          console.error('updateExtraFlag error:', error)
+          return;
+        }
       }
 
       // 画像ボタン
@@ -215,9 +249,15 @@ class EntryModal {
     const memoStr = record?.memo ?? 'memo';
     if(record){
       if(record.image) this.updateWithOCRResult(record.energy, record.image);
-      this.isManualInput = record.isManual;
+      this.isManualInputFlg = record.isManual;
       this.ocrEnergyValue.textContent = record.energy?.toLocaleString() ?? '-';
       this.memoTextArea.value = memoStr;
+    }
+
+    // 大成功表示切り替え
+    if(record?.extra){
+      this.ocrEnergyValue.classList.add("extra-tasty");
+      this.extraFlg = true;
     }
 
     // memo プレビュー
@@ -241,6 +281,8 @@ class EntryModal {
     this.currentCell = null;
     this.currentWeekDay = null;
     this.currentMeal = null;
+    this.ocrEnergyValue.classList.remove("extra-tasty");
+    this.extraFlg = false;
   }
 
   updateDateDisplay(date, meal) {
@@ -249,6 +291,7 @@ class EntryModal {
     this.dayDisplay.textContent = `(${days[dateObj.getDay()]}) ${meal}`;
   }
 
+  // OCR後の処理
   updateWithOCRResult(energy, imageData) {
     this.ocrEnergyValue.innerHTML = energy;
     this.manualEnergyInput.value = energy;
