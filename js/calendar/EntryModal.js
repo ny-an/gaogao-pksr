@@ -169,7 +169,7 @@ class EntryModal {
       // リセットボタン
       if (event.target.closest('#resetEntryButton')) {
         console.log('reset-button clicked');
-        const confirm_text = "この日のデータを削除します。\n本当によろしいですか？";
+        const confirm_text = `【${this.currentWeekDay}曜の${this.currentMeal}】のデータを削除します。\n本当によろしいですか？`;
         if(!confirm(confirm_text)){
           return;
         }
