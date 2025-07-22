@@ -1,6 +1,8 @@
 // 入力総合窓口
 class EntryModal {
   constructor() {
+    this.selectedWeek = null;
+
     // 手入力フラグ
     this.isManualInput = false;
 
@@ -18,6 +20,14 @@ class EntryModal {
     this.saveButton = document.getElementById('saveEntryButton');
     this.imageButton = document.getElementById('imageSelectButton');
     this.imagePreview = document.getElementById('selectedImagePreview');
+
+    // memo
+    this.memoEditArea = document.getElementById('memoEditArea');
+    this.memoTextArea = document.getElementById('memoTextArea');
+
+    // 表示対象の日付
+    this.currentWeekDay = null;
+    this.currentMeal = null;
 
     this.currentCell = null;
     this.imageData = null;
@@ -70,7 +80,35 @@ class EntryModal {
     // modal自身へイベントリスナー付与
     this.modal.addEventListener('click', async (event) => {
 
-      // 訂正ボタン
+      // メモ追加ボタン
+      if (event.target.closest('#addMemoButton')) {
+        this.memoEditArea.classList.toggle('active');
+        this.memoTextArea.focus();
+      }
+      // メモ確定ボタン
+      if (event.target.closest('#saveMemoButton')) {
+        const memoText = this.memoTextArea.value.trim();
+
+        if (!this.selectedWeek || !this.currentWeekDay || !this.currentMeal){
+          console.error('selectedWeek, currentDate, currentMeal is null');
+          console.error(this.selectedWeek, this.currentWeekDay, this.currentMeal);
+          return;
+        }
+
+        // 当日のデータのmemoだけ更新
+        let record = await dbAPI.getRecordFromCell(this.currentCell);
+        if(!record){
+          console.warn('record is null');
+
+          // 当日データとしてmemoだけ保存
+          record = {memo:memoText};
+        }
+
+        await dbAPI.updateWeeklyRecord(this.currentCell, record);
+        this.memoEditArea.classList.toggle('active');
+      }
+
+      // エナジー訂正ボタン
       if (event.target.closest('#manualEnergyInputViewButton')) {
         this.manualEnergyInputViewButton.classList.toggle("active");
         this.energyInputDiv.classList.toggle("active");
@@ -83,7 +121,7 @@ class EntryModal {
         return;
       }
 
-      // 確定ボタン
+      // エナジー確定ボタン
       if (event.target.closest('#confirmEnergyButton')) {
         const value = this.manualEnergyInput.value;
         if (value) {
@@ -127,9 +165,18 @@ class EntryModal {
   }
 
   open(date, meal) {
-    this.currentCell = document.querySelector(`.day-cell[data-date="${date}"][data-meal="${meal}"]`);
-    this.updateDateDisplay(date, meal);
+    console.log('EntryModal: open',date,meal);
     this.reset();
+    this.selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
+    this.currentCell = document.querySelector(`.day-cell[data-date="${date}"][data-meal="${meal}"]`);
+    this.currentWeekDay = weekDays[new Date(date).getDay()];
+    this.currentMeal = meal;
+    this.updateDateDisplay(date, meal);
+
+    // ここでメモ読込
+    const calendarTable = document.querySelector(".calendar-table");
+    this.setMemoTextForDay(this.selectedWeek, date, meal);
+
     this.modal.style.display = 'block';
   }
 
@@ -143,6 +190,11 @@ class EntryModal {
     this.ocrEnergyValue.textContent = '-';
     this.manualEnergyInput.value = '';
     this.imageData = null;
+    this.memoEditArea.classList.remove('active');
+    this.memoTextArea.value = '';
+    this.currentCell = null;
+    this.currentWeekDay = null;
+    this.currentMeal = null;
   }
 
   updateDateDisplay(date, meal) {
@@ -186,21 +238,21 @@ class EntryModal {
       return;
     }
 
-    // 保存データ
-    const record = {
-      dish: "",
-      energy: energy,
-      image: this.imageData,
-      added: new Date().getTime(),
-      isManual: this.isManualInput,
-    };
+    // 保存データから上書き
+    const record = dbAPI.getRecordFromCell(this.currentCell);
+    record.dish = "";
+    record.energy = energy;
+    record.image = this.imageData;
+    record.added = new Date().getTime();
+    record.isManual = this.isManualInput;
+    record.memo = this.memoTextArea.value.trim();
 
     try {
       // セルの更新
       await calendarRender.updateCellContent(this.currentCell, record);
 
       // データベースの更新
-      await updateWeeklyRecord(this.currentCell, record);
+      await dbAPI.updateWeeklyRecord(this.currentCell, record);
 
       // エネルギー合計の再計算
       await recalcEnergyTotals();
@@ -275,6 +327,14 @@ class EntryModal {
     });
 
     return await this.compressImage(file, originalSize.width, originalSize.height, 1);
+  }
+
+  // 当日のメモを表示
+  async setMemoTextForDay(selectedWeek, date, meal) {
+    await dbAPI.getRecordFromCell(this.currentCell).then(record => {
+      this.memoTextArea.value = record?.memo ?? '';
+      console.log('record.memo:', record?.memo);
+    })
   }
 
 }

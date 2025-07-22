@@ -25,6 +25,53 @@ function openDatabase() {
   });
 }
 
+/**
+ * HTMLのcell要素から week, day, meal を取得する共通ユーティリティ関数
+ * @param {HTMLElement} cell
+ * @returns {{ week: string, day: string, meal: string }}
+ */
+function extractWeekDayMealFromCell(cell) {
+  const day = cell.getAttribute("data-day");
+  const meal = cell.getAttribute("data-meal");
+  const calendarTable = document.querySelector(".calendar-table");
+  const week = calendarTable.getAttribute("data-week");
+  return { week, day, meal };
+}
+
+
+/**
+ * セル要素から当日のrecordデータを取得
+ * @param {HTMLElement} cell
+ * @return {Promise<Object|null>} recordデータ、なければnull
+ */
+async function getRecordFromCell(cell) {
+  const { week, day, meal } = extractWeekDayMealFromCell(cell);
+  const weekRecord = await dbAPI.getWeeklyMenu(week);
+  if (weekRecord && weekRecord.data
+    && weekRecord.data[day]
+    && weekRecord.data[day][meal]) {
+    return weekRecord.data[day][meal];
+  }
+  return null;
+}
+
+/**
+ * 指定された日付・食事時間のrecordデータを返す関数
+ * @param {string} week - 週番号 (例: "2024-W21")
+ * @param {string} day - 曜日名 (例: "月", "火" ...)
+ * @param {string} meal - 食事時間帯 (例: "朝", "昼", "夜")
+ * @return {Promise<Object|null>} recordがあればそのオブジェクト、なければnull
+ */
+async function getRecordForDate(week, day, meal) {
+  const weekRecord = await dbAPI.getWeeklyMenu(week);
+  if (weekRecord && weekRecord.data
+    && weekRecord.data[day]
+    && weekRecord.data[day][meal]) {
+    return weekRecord.data[day][meal];
+  }
+  return null;
+}
+
 
 // --- IndexedDB 更新用処理 ---
 async function updateWeeklyRecord(cell, recordData) {
@@ -102,6 +149,9 @@ function getAllWeeklyMenus() {
 // 他のスクリプトから利用できるようにグローバルにセット
 window.dbAPI = {
   openDatabase,
+  getRecordForDate,
+  getRecordFromCell,
+  updateWeeklyRecord,
   saveWeeklyMenu,
   getWeeklyMenu,
   getAllWeeklyMenus,

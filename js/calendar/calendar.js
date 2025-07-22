@@ -77,6 +77,7 @@ function setupEventListeners() {
       this.manualEnergyInputViewButton.classList.add("active");
       this.energyInputDiv.classList.remove("active");
 
+      // モーダルを開く
       window.entryModal.open(date, meal);
     }
 
