@@ -330,6 +330,7 @@ class EntryModal {
 
   // memo プレビュー更新
   memoPreviewText(memoStr){
+    if(!memoStr) return;
     const memoPreviewText = memoStr.slice(0, 50).replace(/\n/g, '<br>');
     this.modalMemoPreviewText.innerHTML = memoPreviewText;
   }
