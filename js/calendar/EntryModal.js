@@ -299,7 +299,10 @@ class EntryModal {
 
     // 保存データから上書き
     let record = await dbAPI.getRecordFromCell(this.currentCell);
-    record.image = this.imageData;
+    if(!record){
+      record = {};
+    }
+    record.image = this.imageData ?? null;
     record.added = new Date().getTime();
     record.memo = this.memoTextArea.value.trim();
     record.energy = energy;
