@@ -204,34 +204,35 @@
   <!-- 追加Modal -->
   <div id="addEntryModal" class="modal">
     <div class="modal-content">
+
+      <!-- header:日付表示 -->
+      <h2 class="date-display">
+        <span id="modalDate"></span>
+        <span id="modalDay"></span>
+      </h2>
       <span class="close">&times;</span>
-      <h2>データ追加</h2>
+
+      <!-- body -->
       <div class="entry-form">
-
-        <!-- 日付表示エリア -->
-        <div class="date-display">
-          <span id="modalDate"></span>
-          <span id="modalDay"></span>
-
-          <!-- メモボタン -->
-          <button id="addMemoButton" class="memo-button" title="メモ追加">
-            <img src="img/icons/memo_white.svg" alt="メモ" class="icon memo-icon">
-          </button>
-        </div>
-
         <!-- メモプレビュー領域 -->
         <div id="modalMemoPreviewArea" class="modal-memo-preview-area">
           <div id="modalMemoPreview" class="modal-memo-preview">
             <span id="modalMemoPreviewText"></span>
           </div>
-        </div>
 
-        <!-- メモ編集領域 -->
-        <div id="memoEditArea" class="memo-edit-area">
-          <textarea id="memoTextArea" placeholder="メモを入力"></textarea>
-          <button id="saveMemoButton" class="save-memo-button">
-            <img src="img/icons/check_white.svg" alt="メモ保存" class="icon check-icon">
+          <!-- メモボタン -->
+          <button id="addMemoButton" class="memo-button" title="メモ追加">
+            <img src="img/icons/memo_white.svg" alt="メモ" class="icon memo-icon">
           </button>
+
+          <!-- メモ編集領域 -->
+          <div id="memoEditArea" class="memo-edit-area">
+            <textarea id="memoTextArea" placeholder="メモを入力"></textarea>
+            <button id="saveMemoButton" class="save-memo-button">
+              <img src="img/icons/check_white.svg" alt="メモ保存" class="icon check-icon">
+            </button>
+          </div>
+
         </div>
 
         <!-- エナジー表記エリア -->

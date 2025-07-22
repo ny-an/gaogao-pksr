@@ -584,6 +584,7 @@ $button-orange-color: #f0ab42;
       height: 20px;
     }
     .memo-edit-area {
+      width: 100%;
       margin-top: 8px;
       display: none;
       align-items: flex-start;
@@ -616,7 +617,13 @@ $button-orange-color: #f0ab42;
     #modalMemoPreviewArea{
       font-size: 14px;
       color: #a9a9a9;
-      display: block;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: 1rem;
+      align-items: center;
+
     }
 
   }
