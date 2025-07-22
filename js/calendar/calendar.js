@@ -362,26 +362,24 @@ async function calcCumulativeEnergy() {
  * @param {HTMLElement} cell - 更新対象のセル (.day-cell)
  * @param {boolean} extra - 付与する extra のフラグ
  */
-function updateExtraFlag(cell, extra) {
-  const calendarTable = document.querySelector(".calendar-table");
-  const selectedWeek = calendarTable.getAttribute("data-week");
-  dbAPI.getWeeklyMenu(selectedWeek)
-    .then(weekRecord => {
-      if (!weekRecord) {
-        weekRecord = { week: selectedWeek, data: {} };
-      }
-      const day = cell.getAttribute("data-day");
-      const meal = cell.getAttribute("data-meal");
-      if (!weekRecord.data[day]) {
-        weekRecord.data[day] = {};
-      }
-      if (!weekRecord.data[day][meal]) {
-        weekRecord.data[day][meal] = {};
-      }
-      weekRecord.data[day][meal].extra = extra;
-      return dbAPI.saveWeeklyMenu(weekRecord);
-    })
-    .catch(error => console.error("DB更新(Extra)エラー:", error));
+async function updateExtraFlag(cell, extra) {
+  console.log('updateExtraFlag start',cell,extra);
+
+  try {
+
+    let record = await dbAPI.getRecordFromCell(cell);
+    if(!record){
+      record = {};
+    }
+    record.extra = extra ?? false;
+
+    console.log('set record:', record);
+    await dbAPI.updateWeeklyRecord(cell, record);
+
+  }catch(error){
+    console.error('updateExtraFlag error:',error);
+    throw error;
+  }
 }
 
 // 週間まとめモーダル表示
