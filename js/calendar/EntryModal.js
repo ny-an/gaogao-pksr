@@ -49,38 +49,44 @@ class EntryModal {
       if (!file) return;
 
       let compressedImage;
+      let energy = 0;
+      let error_message = null;
 
+      // ローディング表示
+      showLoading();
+
+      // 画像の圧縮処理
       try {
-        // ローディング表示
-        showLoading();
-
-        // 画像の圧縮処理
         const quality = getSetting(SETTINGS_KEYS.IMAGE_QUALITY);
-        if(quality !== 'raw') {
+        if (quality !== 'raw') {
           const {width, height} = IMAGE_QUALITY_SIZES[quality];
           compressedImage = await this.compressImage(file, width, height);
-        }else{
+        } else {
           compressedImage = await this.fileToBase64(file);
         }
+      }catch(error){
+        console.error('画像圧縮エラー:', error);
+        error_message = '画像圧縮エラー';
+      }
 
+      try {
         // OCR処理
         const ocrReader = new OcrReader();
-        const energy = await ocrReader.performOCR(file);
-
-        // プレビューと結果の更新
-        this.updateWithOCRResult(energy, compressedImage);
-
-        // 状態管理
-        this.isManualInputFlg = false;
+        energy = await ocrReader.performOCR(file);
 
       } catch (error) {
         console.error('OCR処理エラー:', error);
-        // OCRが失敗しても画像は保存できるようにする
-        this.handleOCRError(compressedImage);
-      } finally {
-        hideLoading();
-        event.target.value = ''; // ファイル入力をリセット
+        error_message = 'OCR処理エラー';
       }
+
+      // プレビューと結果の更新
+      this.updateWithOCRResult(energy, compressedImage,error_message);
+
+      // 状態管理
+      this.isManualInputFlg = false;
+
+      hideLoading();
+      event.target.value = ''; // ファイル入力をリセット
     });
 
     // modal自身へイベントリスナー付与
@@ -276,16 +282,25 @@ class EntryModal {
     this.extraFlg = false;
   }
 
+  // 日付の表示更新
   updateDateDisplay(date, meal) {
     const dateObj = new Date(date);
     this.dateDisplay.textContent = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
     this.dayDisplay.textContent = `(${days[dateObj.getDay()]}) ${meal}`;
   }
 
-  // OCR後の処理
-  updateWithOCRResult(energy, imageData) {
-    this.ocrEnergyValue.innerHTML = energy;
-    this.manualEnergyInput.value = energy;
+  // OCR後の表示処理
+  updateWithOCRResult(energy, imageData, error_message) {
+
+    // エナジー結果
+    if(error_message){
+      this.ocrEnergyValue.innerHTML = energy;
+      this.manualEnergyInput.value = energy;
+    }else{
+      this.ocrEnergyValue.innerHTML = '<span style="color:red">'+error_message+'</span>';
+      this.manualEnergyInput.value = energy;
+    }
+
     this.imageData = imageData;
 
     // プレビュー表示 + 拡大アイコンを右上固定で追加
@@ -306,18 +321,6 @@ class EntryModal {
 
     this.imagePreview.innerHTML = '';
     this.imagePreview.appendChild(wrapper);
-  }
-
-  // OCRエラー処理
-  handleOCRError(imageData) {
-    this.ocrEnergyValue.innerHTML = '<span style="color:red">OCR失敗</span>';
-    this.imageData = imageData;
-
-    // プレビュー表示
-    const img = document.createElement('img');
-    img.src = imageData;
-    this.imagePreview.innerHTML = '';
-    this.imagePreview.appendChild(img);
   }
 
   // 保存ボタン
