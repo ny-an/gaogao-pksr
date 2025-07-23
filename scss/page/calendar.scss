@@ -528,9 +528,7 @@ $button-orange-color: #f0ab42;
             max-width: 100%;
             max-height: 30vh;
 
-            transition:
-                    max-height 1s cubic-bezier(0.42,0,0.58,1),
-                    transform 1s cubic-bezier(0.42,0,0.58,1);
+            transition: max-height 0.8s ease-in-out;
             cursor: pointer;
             transform: scale(1);
           }
@@ -546,8 +544,8 @@ $button-orange-color: #f0ab42;
             pointer-events: none; /* クリック妨害しない */
             opacity: 0.75;
             transition:
-                    top 1s ease,
-                    right 1s ease;
+                    top 0.8s ease-in-out,
+                    right 0.8s ease-in-out;
           }
         }
 
@@ -555,7 +553,6 @@ $button-orange-color: #f0ab42;
         &.max-view{
           .image-wrapper img.preview-image{
             max-height: 90vh;
-            transform: scale(1.2);
           }
           .image-wrapper img.expand-icon {
             top: 30px;
