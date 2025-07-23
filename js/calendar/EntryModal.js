@@ -295,7 +295,7 @@ class EntryModal {
   updateWithOCRResult(energy, imageData, error_message) {
 
     // エナジー結果
-    if(error_message){
+    if(!error_message){
       this.ocrEnergyValue.innerHTML = energy;
       this.manualEnergyInput.value = energy;
     }else{
