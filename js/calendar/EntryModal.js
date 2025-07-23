@@ -133,8 +133,10 @@ class EntryModal {
 
         // 値を現在表示の値にする
         const ocrText = this.ocrEnergyValue.textContent.replace(/,/g, '').replace(/[^\d]/g, '');
-        const energy = ocrText && !isNaN(parseInt(ocrText)) ? parseInt(ocrText) : 0;
-        this.manualEnergyInput.value = energy;
+        const energy = ocrText && !isNaN(parseInt(ocrText)) ? parseInt(ocrText) : '';
+        this.manualEnergyInput.value = energy == 0 ? '' : energy;
+        this.manualEnergyInput.focus();
+        console.log('manualEnergy input value:', energy);
 
         return;
       }
