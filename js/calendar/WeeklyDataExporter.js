@@ -69,9 +69,10 @@ class WeeklyDataExporter {
       const noonObj = weekRecord.data[day]?.['昼'];
       const nightObj = weekRecord.data[day]?.['夜'];
 
-      if (morningObj?.extra) morning += '!';
-      if (noonObj?.extra) noon += '!';
-      if (nightObj?.extra) night += '!';
+      // 大成功時は頭に!マークがつく
+      if (morningObj?.extra) morning = '!' + morning;
+      if (noonObj?.extra) noon = '!' + noon;
+      if (nightObj?.extra) night = '!' + night;
 
       const row = `${dateStr},${day},${morning},${noon},${night},${dayTotal}\n`;
       console.log('row:',row);
