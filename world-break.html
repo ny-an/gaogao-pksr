@@ -25,6 +25,9 @@
         .heads{}
         button.clear {padding: 6px 10px; border: 1px solid #ddd; background: #dedede; border-radius: 8px; cursor: pointer; }
         button.clear:hover { background: #f5f5f5; }
+
+        #freq { margin-top: 6px; }
+        #freq .chip { display:inline-block; margin: 2px 4px 0 0; }
     </style>
 </head>
 <body>
@@ -47,6 +50,7 @@
 <div class="row" style="display:none">
     <label class="small"><input type="checkbox" id="only5" checked> 5文字だけに限定</label>
     <label class="small"><input type="checkbox" id="caseFold" checked> ひらカナ同一視（か=カ）</label>
+    <button class="clear" id="clearBtn" type="button">入力をクリア</button>
 </div>
 
 <div class="note small muted">例：真ん中を「リ」にしたい場合は 3 文字目に「リ」。</div>
@@ -65,6 +69,10 @@
 </div>
 
 <div class="summary small" id="summary"></div>
+
+<!-- ▼ 追加：頻出文字の表示枠（summaryの直後あたりに置く） -->
+<div class="small muted" id="freq"></div>
+
 <div class="list" id="resultList"></div>
 
 <script>
@@ -80,6 +88,31 @@
   const resultList = document.getElementById('resultList');
   const summary = document.getElementById('summary');
   const clearBtn = document.getElementById('clearBtn');
+
+  // ▼ 追加：DOM参照
+  const freqDiv = document.getElementById('freq');
+
+  // ▼ 追加：頻出文字を集計して表示
+  function renderFreq(words) {
+    if (!words.length) {
+      freqDiv.textContent = '頻出文字: なし';
+      return;
+    }
+    // ひらカナ同一視ONならカタカナに正規化してカウント
+    const map = new Map(); // char -> count
+    for (const w0 of words) {
+      const w = caseFold.checked ? toKatakana(w0) : w0;
+      for (const ch of Array.from(w)) {
+        map.set(ch, (map.get(ch) || 0) + 1);
+      }
+    }
+    // 出現数で降順ソート
+    const sorted = [...map.entries()].sort((a, b) => b[1] - a[1]);
+    const top = sorted[0];
+    // 上位をチップ表示（上位5件）
+    freqDiv.innerHTML = `頻出文字: <strong>${top[0]}</strong>（${top[1]}回）　|　上位: ` +
+      sorted.slice(0, 5).map(([ch, n]) => `<span class="chip">${ch} × ${n}</span>`).join(' ');
+  }
 
   // ひらがな⇔カタカナの単純同一視
   const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, (m) =>
@@ -164,6 +197,9 @@
     if (bans.length) cond.push(`禁止=${bans.join(' ')}`);
 
     summary.textContent = `条件: ${cond.length ? cond.join(' / ') : '指定なし'}　|　ヒット: ${filtered.length} / ${data.length}`;
+
+    // 頻出文字
+    renderFreq(filtered);
   }
 
   // 入力イベント
