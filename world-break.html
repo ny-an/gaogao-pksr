@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ワールド破壊兵器</title>
+    <style>
+        body { font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Meiryo", sans-serif; line-height: 1.6; padding: 24px; }
+        h1 { font-size: 1.2rem; margin: 0 0 12px; }
+        .controls { display: grid; grid-template-columns: repeat(5, minmax(50px, 1fr)); gap: 10px; max-width: 520px; margin-top: 10px; }
+        .controls input { font-size: 16px; text-align: center; padding: 8px 6px; border: 1px solid #ddd; border-radius: 8px; }
+        .row { display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+        .row label { display: flex; align-items: center; gap: 6px; }
+        .summary { margin-top: 12px; color: #555; }
+        .flex { display: flex; flex-direction:column; flex-wrap: wrap; align-items: stretch; margin-top:14px; }
+        .box { min-width: 280px; }
+        textarea { width: 100%; min-height: 96px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .min-textarea{ min-height:1rem }
+        .list { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+        .chip { border: 1px solid #eee; border-radius: 999px; padding: 6px 10px; text-align: center; background: #fafafa; }
+        .muted { color: #888; }
+        .small { font-size: 0.9rem; }
+        .note { font-size:12px; margin-top: 4px; color: #777; }
+
+        .heads{}
+        button.clear {padding: 6px 10px; border: 1px solid #ddd; background: #dedede; border-radius: 8px; cursor: pointer; }
+        button.clear:hover { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+<h1>ワールド破壊兵器</h1>
+
+<div class="heads">
+    <button class="clear" id="clearBtn" type="button">クリア</button>
+</div>
+
+<!-- 5つの枠：位置指定 -->
+<div class="controls" id="posInputs">
+    <input type="text" maxlength="1" placeholder="1文字目" aria-label="1文字目">
+    <input type="text" maxlength="1" placeholder="2文字目" aria-label="2文字目">
+    <input type="text" maxlength="1" placeholder="3文字目" aria-label="3文字目">
+    <input type="text" maxlength="1" placeholder="4文字目" aria-label="4文字目">
+    <input type="text" maxlength="1" placeholder="5文字目" aria-label="5文字目">
+</div>
+
+<!-- デフォルトON（非表示設定） -->
+<div class="row" style="display:none">
+    <label class="small"><input type="checkbox" id="only5" checked> 5文字だけに限定</label>
+    <label class="small"><input type="checkbox" id="caseFold" checked> ひらカナ同一視（か=カ）</label>
+</div>
+
+<div class="note small muted">例：真ん中を「リ」にしたい場合は 3 文字目に「リ」。</div>
+
+<div class="flex">
+    <div class="box">
+        <label for="banArea"><strong>使わない文字列</strong></label>
+        <textarea id="banArea" placeholder="ここに入力した各文字を含む語は除外されます。例）ラフレシア → ラ／フ／レ／シ／アを禁止"></textarea>
+    </div>
+
+    <div class="box">
+        <label for="includeArea"><strong>使う文字</strong></label>
+        <textarea id="includeArea" class="min-textarea" placeholder="ここに入力した各文字をすべて含む語のみ表示。例）リカ → リとカを両方含む語"></textarea>
+        <div class="note small muted">空白は無視・重複は自動でまとめます。</div>
+    </div>
+</div>
+
+<div class="summary small" id="summary"></div>
+<div class="list" id="resultList"></div>
+
+<script>
+  const data = [
+    "フシギダネ","フシギソウ","フシギバナ","リザードン","カメックス","キャタピー","トランセル","バタフリー","ピジョット","オニスズメ","オニドリル","アーボック","ピカチュウ","ライチュウ","サンドパン","ニドラン♀","ニドリーナ","ニドクイン","ニドラン♂","ニドリーノ","ニドキング","キュウコン","ゴルバット","ナゾノクサ","クサイハナ","ラフレシア","パラセクト","モルフォン","ダグトリオ","ペルシアン","ゴルダック","オコリザル","ウインディ","ニョロボン","ユンゲラー","フーディン","ワンリキー","ゴーリキー","カイリキー","マダツボミ","ウツボット","メノクラゲ","ドククラゲ","イシツブテ","ゴローニャ","ギャロップ","レアコイル","ドードリオ","ベトベター","ベトベトン","シェルダー","パルシェン","スリーパー","キングラー","ビリリダマ","マルマイン","サワムラー","エビワラー","ベロリンガ","マタドガス","サイホーン","モンジャラ","トサキント","アズマオウ","ヒトデマン","スターミー","バリヤード","ストライク","ルージュラ","ケンタロス","コイキング","ギャラドス","シャワーズ","サンダース","ブースター","オムナイト","オムスター","カブトプス","メガプテラ","フリーザー","ファイヤー","ミニリュウ","ハクリュー","カイリュー","ミュウツー","チコリータ","ベイリーフ","メガニウム","ヒノアラシ","マグマラシ","バクフーン","アリゲイツ","オーダイル","ヨルノズク","レディアン","アリアドス","クロバット","チョンチー","ランターン","トゲチック","ネイティオ","デンリュウ","キレイハナ","ウソッキー","ニョロトノ","ヒマナッツ","ヤンヤンマ","ブラッキー","ヤミカラス","ヤドキング","アンノーン","ソーナンス","キリンリキ","クヌギダマ","フォレトス","グライガー","ハガネール","グランブル","ハリーセン","ヘラクロス","マグマッグ","マグカルゴ","テッポウオ","デリバード","マンタイン","エアームド","キングドラ","ドンファン","ポリゴン2","カポエラー","ムチュール","エレキッド","ミルタンク","ヨーギラス","サナギラス","バンギラス","ジュプトル","ジュカイン","ワカシャモ","バシャーモ","ミズゴロウ","ヌマクロー","ラグラージ","ジグザグマ","マッスグマ","カラサリス","アゲハント","ドクケイル","ハスブレロ","ルンパッパ","ダーテング","オオスバメ","ペリッパー","サーナイト","アメモース","キノガッサ","ヤルキモノ","ケッキング","テッカニン","ゴニョニョ","バクオング","マクノシタ","ハリテヤマ","エネコロロ","ボスゴドラ","チャーレム","ライボルト","バルビート","イルミーゼ","マルノーム","サメハダー","ホエルオー","ブーピッグ","パッチール","ナックラー","ビブラーバ","フライゴン","チルタリス","ザングース","ハブネーク","ルナトーン","ソルロック","ドジョッチ","シザリガー","ネンドール","ユレイドル","アーマルド","ミロカロス","カクレオン","カゲボウズ","ジュペッタ","サマヨール","トロピウス","ユキワラシ","オニゴーリ","タマザラシ","トドグラー","トドゼルガ","ハンテール","サクラビス","ジーランス","ボーマンダ","メタグロス","レジロック","レジアイス","レジスチル","ラティアス","カイオーガ","グラードン","レックウザ","デオキシス","ハヤシガメ","ドダイトス","モウカザル","ゴウカザル","ポッチャマ","ポッタイシ","エンペルト","ムクバード","ムクホーク","コロボーシ","コロトック","レントラー","ロズレイド","ズガイドス","ラムパルド","タテトプス","トリデプス","ミノムッチ","ミノマダム","ゴミのミノ","ガーメイル","ミツハニー","ビークイン","フローゼル","チェリンボ","カラナクシ","トリトドン","エテボース","フワライド","ミミロップ","ムウマージ","ドンカラス","ニャルマー","ブニャット","リーシャン","スカンプー","スカタンク","ドーミラー","ドータクン","ガブリアス","ヒポポタス","カバルドン","ドラピオン","グレッグル","ドクロッグ","マスキッパ","ケイコウオ","ネオラント","ユキカブリ","ユキノオー","マニューラ","ジバコイル","ベロベルト","ドサイドン","モジャンボ","エレキブル","ブーバーン","トゲキッス","メガヤンマ","リーフィア","グレイシア","グライオン","ポリゴンZ","エルレイド","ダイノーズ","ヨノワール","ユキメノコ","エムリット","ディアルガ","ヒードラン","レジギガス","ギラティナ","クレセリア","ダークライ","アルセウス","ビクティニ","ツタージャ","ジャノビー","ジャローダ","チャオブー","エンブオー","ミジュマル","フタチマル","ダイケンキ","ミルホッグ","ヨーテリー","ハーデリア","ムーランド","チョロネコ","レパルダス","ヤナッキー","バオッキー","ヒヤッキー","ムシャーナ","ハトーボー","ケンホロウ","ゼブライカ","ギガイアス","ココロモリ","モグリュー","ドリュウズ","ドッコラー","ドテッコツ","ローブシン","ガマゲロゲ","ハハコモリ","ペンドラー","エルフーン","ドレディア","ワルビアル","ダルマッカ","ヒヒダルマ","マラカッチ","イシズマイ","イワパレス","ズルズキン","シンボラー","デスカーン","プロトーガ","アバゴーラ","アーケオス","ヤブクロン","ダストダス","ゾロアーク","チラーミィ","チラチーノ","ゴチルゼル","ランクルス","コアルヒー","バニプッチ","バニリッチ","バイバニラ","メブキジカ","シュバルゴ","タマゲタケ","モロバレル","ブルンゲル","ママンボウ","デンチュラ","テッシード","ナットレイ","ギギギアル","シビシラス","シビビール","シビルドン","ランプラー","シャンデラ","オノノクス","クマシュン","ツンベアー","フリージオ","チョボマキ","アギルダー","コジョフー","コジョンド","クリムガン","キリキザン","バッフロン","ウォーグル","バルチャイ","バルジーナ","クイタラン","アイアント","サザンドラ","ウルガモス","コバルオン","テラキオン","ビリジオン","トルネロス","ボルトロス","ランドロス","ケルディオ","メロエッタ","ゲノセクト","ハリマロン","ハリボーグ","ブリガロン","テールナー","ゲコガシラ","ゲッコウガ","ヒノヤコマ","コフキムシ","コフーライ","カエンジシ","フラエッテ","メェークル","ゴーゴート","ヤンチャム","トリミアン","ニャスパー","ニダンギル","ギルガルド","シュシュプ","フレフワン","ペロッパフ","ペロリーム","マーイーカ","カラマネロ","ガメノデス","ドラミドロ","ウデッポウ","ブロスター","エリキテル","エレザード","ガチゴラス","アマルルガ","ニンフィア","ルチャブル","ヌメルゴン","クレッフィ","オーロット","バケッチャ","パンプジン","カチコール","クレベース","オンバット","オンバーン","ゼルネアス","イベルタル","フクスロー","ニャヒート","ガオガエン","オシャマリ","アシレーヌ","ケララッパ","ドデカバシ","ヤングース","デカグース","アゴジムシ","デンヂムシ","クワガノン","マケンカニ","ケケンカニ","オドリドリ","アブリボン","ルガルガン","ドヒドイデ","ドロバンコ","バンバドロ","ラランテス","マシェード","ヤトウモリ","ヌイコグマ","キテルグマ","アママイコ","アマージョ","キュワワー","コソクムシ","シロデスナ","ナマコブシ","ネッコアラ","バクガメス","トゲデマル","ミミッキュ","ハギギシリ","ジジーロン","ジャランゴ","コスモッグ","コスモウム","ソルガレオ","ルナアーラ","ウツロイド","テッカグヤ","カミツルギ","ネクロズマ","アーゴヨン","ズガドーン","メルメタル","バチンキー","ラビフット","ジメレオン","ホシガリス","ヨクバリス","アオガラス","サッチムシ","レドームシ","ワタシラガ","カジリガメ","パルスワン","トロッゴン","カジッチュ","タルップル","サダイジャ","サシカマス","マルヤクデ","オトスパス","ポットデス","ブリムオン","オーロンゲ","サニゴーン","バリコオル","デスバーン","マホイップ","タイレーツ","バチンウニ","コオリッポ","イエッサン","ドラメシヤ","ドラパルト","けんのおう","ザマゼンタ","たてのおう","ウーラオス","レジエレキ","レジドラゴ","ブリザポス","レイスポス","イダイトウ","ハリーマン","ラブトロス","ニャローテ","アチゲータ","ウェルカモ","ワナイダー","マメバッタ","パーモット","パピモッチ","オリーニョ","オリーヴァ","イキリンコ","ハラバリー","タギングル","ノノクラゲ","リククラゲ","カプサイジ","カヌチャン","ウミトリオ","オトシドリ","ナミイルカ","イルカマン","モトトカゲ","キラフロル","ハカドッグ","カラミンゴ","アルクジラ","ハルクジラ","ミガルーサ","シャリタツ","コノヨザル","リキキリン","ノココッチ","ドドゲザン","セグレイブ","コレクレー","サーフゴー","パオジアン","ディンルー","コライドン","ミライドン","カミッチュ","ヤバソチャ","イイネイヌ","マシマシラ","キチキギス","オーガポン","いどのめん","テラパゴス","モモワロウ"
+  ];
+
+  const posInputs = [...document.querySelectorAll('#posInputs input')];
+  const only5 = document.getElementById('only5');
+  const caseFold = document.getElementById('caseFold');
+  const banArea = document.getElementById('banArea');
+  const includeArea = document.getElementById('includeArea');
+  const resultList = document.getElementById('resultList');
+  const summary = document.getElementById('summary');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // ひらがな⇔カタカナの単純同一視
+  const toKatakana = (str) => str.replace(/[\u3041-\u3096]/g, (m) =>
+    String.fromCharCode(m.charCodeAt(0) + 0x60)
+  );
+  const norm = (s) => (s ?? "").trim();
+
+  // テキストエリアを「1文字ずつ」配列化（空白無視・重複排除・ひら/カナ同一視オプション）
+  function parseCharsFromTextarea(el) {
+    const raw = el.value ?? "";
+    const chars = Array.from(raw).filter(ch => !/\s/.test(ch));
+    const uniq = [...new Set(chars)];
+    return caseFold.checked ? uniq.map(toKatakana) : uniq;
+  }
+
+  // 禁止文字（各文字がNG）
+  function parseBans() {
+    return parseCharsFromTextarea(banArea);
+  }
+
+  // 含める（必須）文字（各文字をすべて含むこと）
+  function parseIncludes() {
+    return parseCharsFromTextarea(includeArea);
+  }
+
+  function matchesPosition(word, patternChars, bans, includes) {
+    const w = norm(word);
+    if (only5.checked && w.length !== 5) return false;
+
+    const ww = caseFold.checked ? toKatakana(w) : w;
+
+    // 位置一致チェック（未入力はワイルドカード）
+    for (let i = 0; i < 5; i++) {
+      const pc = patternChars[i];
+      if (!pc) continue;
+      const p = caseFold.checked ? toKatakana(pc) : pc;
+      if (ww[i] !== p) return false;
+    }
+
+    // 禁止：いずれか1文字でも含んだら除外
+    for (const b of bans) {
+      if (b && ww.includes(b)) return false;
+    }
+
+    // 必須：すべての文字を含むこと
+    for (const inc of includes) {
+      if (inc && !ww.includes(inc)) return false;
+    }
+
+    return true;
+  }
+
+  function currentPattern() {
+    return posInputs.map(inp => norm(inp.value).slice(0, 1));
+  }
+
+  function render() {
+    const pattern = currentPattern();
+    const bans = parseBans();
+    const includes = parseIncludes();
+
+    const filtered = data.filter(word => matchesPosition(word, pattern, bans, includes));
+
+    // 表示
+    resultList.innerHTML = '';
+    if (filtered.length === 0) {
+      resultList.innerHTML = `<div class="muted">該当なし</div>`;
+    } else {
+      for (const w of filtered) {
+        const div = document.createElement('div');
+        div.className = 'chip';
+        div.textContent = w;
+        resultList.appendChild(div);
+      }
+    }
+
+    const cond = [];
+    pattern.forEach((c, idx) => { if (c) cond.push(`${idx+1}文字目=${c}`); });
+    <!--      if (only5.checked) cond.push('5文字限定');-->
+    <!--      if (caseFold.checked) cond.push('ひらカナ同一視');-->
+    if (includes.length) cond.push(`必須=${includes.join(' ')}`);
+    if (bans.length) cond.push(`禁止=${bans.join(' ')}`);
+
+    summary.textContent = `条件: ${cond.length ? cond.join(' / ') : '指定なし'}　|　ヒット: ${filtered.length} / ${data.length}`;
+  }
+
+  // 入力イベント
+  let t;
+  function scheduleRender() { clearTimeout(t); t = setTimeout(render, 50); }
+
+  posInputs.forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      if (e.target.value.length > 1) e.target.value = e.target.value.slice(0, 1);
+      scheduleRender();
+    });
+  });
+  [only5, caseFold].forEach(el => el.addEventListener('change', render));
+  banArea.addEventListener('input', scheduleRender);
+  includeArea.addEventListener('input', scheduleRender);
+
+  // クリア（非表示だが機能は残す）
+  clearBtn?.addEventListener('click', () => {
+    posInputs.forEach(inp => inp.value = '');
+    banArea.value = '';
+    includeArea.value = '';
+    render();
+  });
+
+  // 初期設定
+  banArea.value = '';      // 禁止文字列
+  includeArea.value = '';  // 含む文字列
+  render();
+</script>
+</body>
+</html>
