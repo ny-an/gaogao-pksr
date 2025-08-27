@@ -302,7 +302,8 @@
     }
 
     // 未使用食材を特定
-    const unusedFoods = Array.from(allFoods).filter(food => !usedFoods.has(food));
+    const unusedFoods = Array.from(allFoods).filter(food => !usedFoods.has(food))
+      .sort((f1, f2) => foodEnergyMap[f1] - foodEnergyMap[f2]);
 
     // 未使用食材を表示
     const unusedFoodsGrid = document.querySelector('.unused-foods-grid');
