@@ -1,4 +1,6 @@
 // 追加食材リセットボタンの作成
+const EXTRA_FOOD_MAX = 800;
+
 function addResetButton(extraContainer) {
   // リセットボタン用のdivを作成
   const resetItemDiv = document.createElement('div');
@@ -111,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     input.type = 'number';
     input.value = "0";
     input.min = "0";
+    input.max = String(EXTRA_FOOD_MAX);
     input.className = 'extra-food';
     input.setAttribute('data-food', foodName);
     input.style.display = 'none';
@@ -195,8 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function incrementValue() {
       const newValue = parseInt(input.value) + 1;
 
-      // 600を超える場合は処理を中断
-      if (newValue > 600) {
+      // 上限を超える場合は処理を中断
+      if (newValue > EXTRA_FOOD_MAX) {
         stopIncrementing();
         return;
       }
