@@ -20,7 +20,9 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 8px;
+    padding-bottom: 32px; // 下部に操作ボタンのスペースを確保
     background-color: #fff;
+    position: relative; // 子要素（▲▼）の絶対配置用
 
     .img-container {
       position: relative;
@@ -68,6 +70,36 @@
       font-size: 12px;
     }
 
+    // 角配置の三角ボタン
+    .triangle-btn {
+      position: absolute;
+      bottom: 6px;
+      width: 25px;
+      height: 24px;
+      line-height: 24px;
+      padding: 0;
+      border: 1px solid #cfd8dc;
+      border-radius: 4px;
+      background: #eceff1; // md grey-100 相当
+      color: #263238; // md blue-grey-900 相当
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .triangle-btn:active {
+      background: #cfd8dc;
+    }
+
+    .triangle-up {
+      right: 6px; // 右下
+    }
+
+    .triangle-down {
+      left: 6px; // 左下
+    }
   }
 }
 

@@ -126,89 +126,99 @@ document.addEventListener('DOMContentLoaded', () => {
     label.className = 'food-label';
     label.textContent = `${energy}`;
 
+    // 左下(下三角)・右下(上三角)ボタンを作成
+    const decrementBtn = document.createElement('button');
+    decrementBtn.className = 'triangle-btn triangle-down';
+    decrementBtn.setAttribute('aria-label', 'decrement');
+    decrementBtn.type = 'button';
+    decrementBtn.innerHTML = '&#9660;'; // ▼
+
+    const incrementBtn = document.createElement('button');
+    incrementBtn.className = 'triangle-btn triangle-up';
+    incrementBtn.setAttribute('aria-label', 'increment');
+    incrementBtn.type = 'button';
+    incrementBtn.innerHTML = '&#9650;'; // ▲
+
     // アイコン、入力、ラベルをボックスに追加する
     imgContainer.appendChild(img);
     imgContainer.appendChild(badge);
     itemDiv.appendChild(imgContainer);
+    itemDiv.appendChild(decrementBtn);
+    itemDiv.appendChild(incrementBtn);
     itemDiv.appendChild(label);
     itemDiv.appendChild(input);
 
-    let incrementInterval;
-    let isIncrementing = false;
-    let pressStartTime;
-
-    // 初速
-    const defaultSpeed = 200; // 初期速度: 200ms 少ないほど速い
-    let currentSpeed = defaultSpeed; // 変化するスピード
-
-    // 中速
-    const middleSpeed = 150; // 中速モード速度: ms
-    const durationToMiddle = 3000; // 中速モード起動時間
-
-    // 高速
-    const highSpeed = 100; // 高速モード速度: ms
-    const durationToHigh = 7000; // 高速モード起動時間
-
-    // 長押し開始時の処理
-    itemDiv.addEventListener('mousedown', startIncrementing);
-    itemDiv.addEventListener('touchstart', startIncrementing);
-
-    // 長押し終了時の処理
-    itemDiv.addEventListener('mouseup', stopIncrementing);
-    itemDiv.addEventListener('mouseleave', stopIncrementing);
-    itemDiv.addEventListener('touchend', stopIncrementing);
-    itemDiv.addEventListener('touchcancel', stopIncrementing);
-
-    function startIncrementing(e) {
-      if (e.type === 'touchstart') {
-        e.preventDefault();
-      }
-      isIncrementing = true;
-      pressStartTime = Date.now();
-      incrementValue();
-
-      function updateInterval() {
-        clearInterval(incrementInterval);
-        incrementInterval = setInterval(() => {
-          if (isIncrementing) {
-            const pressDuration = Date.now() - pressStartTime;
-
-            // 速度変更の判定
-            if (pressDuration > durationToHigh) {
-              currentSpeed = highSpeed;
-            } else if (pressDuration > durationToMiddle) {
-              currentSpeed = middleSpeed;
-            }
-
-            incrementValue();
-            updateInterval(); // 新しい速度で再設定
-          }
-        }, currentSpeed);
-      }
-
-      updateInterval();
-    }
-
-    function stopIncrementing() {
-      isIncrementing = false;
-      currentSpeed = defaultSpeed; // 速度を初期値に戻す
-      clearInterval(incrementInterval);
-    }
-
-    function incrementValue() {
-      const newValue = parseInt(input.value) + 1;
-
-      // 上限を超える場合は処理を中断
-      if (newValue > EXTRA_FOOD_MAX) {
-        stopIncrementing();
-        return;
-      }
-
-      input.value = newValue;
-      badge.textContent = newValue;
-      badge.style.display = newValue > 0 ? 'flex' : 'none';
+    // 値更新のユーティリティ
+    function setValue(newValue) {
+      const bounded = Math.max(0, Math.min(EXTRA_FOOD_MAX, Number(newValue)));
+      input.value = String(bounded);
+      badge.textContent = String(bounded);
+      badge.style.display = bounded > 0 ? 'flex' : 'none';
       input.dispatchEvent(new Event('change'));
     }
+
+    function step(delta) {
+      const current = Number(input.value) || 0;
+      setValue(current + delta);
+    }
+
+    // ▲▼ボタン 長押しで連続加減
+    let holdInterval;
+    let holdStartAt = 0;
+    const defaultSpeed = 200; // ms
+    const middleSpeed = 120;  // ms
+    const highSpeed = 80;     // ms
+    const durationToMiddle = 1500; // ms
+    const durationToHigh = 4000;   // ms
+
+    function computeSpeed(now) {
+      const elapsed = now - holdStartAt;
+      if (elapsed > durationToHigh) return highSpeed;
+      if (elapsed > durationToMiddle) return middleSpeed;
+      return defaultSpeed;
+    }
+
+    function startHold(delta, e) {
+      e.preventDefault();
+      e.stopPropagation();
+      step(delta); // 初回即時反映
+      holdStartAt = Date.now();
+      clearInterval(holdInterval);
+      let currentSpeed = computeSpeed(Date.now());
+      holdInterval = setInterval(function tick() {
+        step(delta);
+        const nextSpeed = computeSpeed(Date.now());
+        if (nextSpeed !== currentSpeed) {
+          currentSpeed = nextSpeed;
+          clearInterval(holdInterval);
+          holdInterval = setInterval(tick, currentSpeed);
+        }
+      }, currentSpeed);
+    }
+
+    function stopHold(e) {
+      if (e) e.stopPropagation();
+      clearInterval(holdInterval);
+    }
+
+    // マウス/タッチの両方に対応
+    incrementBtn.addEventListener('mousedown', (e) => startHold(1, e));
+    decrementBtn.addEventListener('mousedown', (e) => startHold(-1, e));
+    incrementBtn.addEventListener('touchstart', (e) => startHold(1, e), { passive: false });
+    decrementBtn.addEventListener('touchstart', (e) => startHold(-1, e), { passive: false });
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(type => {
+      incrementBtn.addEventListener(type, stopHold);
+      decrementBtn.addEventListener(type, stopHold);
+    });
+
+    // クリック(タップ)でモーダル起動（ボタン除外）
+    itemDiv.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target === incrementBtn || target === decrementBtn) return;
+      openNumberInputModal(foodName, Number(input.value) || 0, (val) => {
+        setValue(val);
+      });
+    });
 
 
 
@@ -229,3 +239,88 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
+// 数値入力用モーダル（簡易実装）
+function openNumberInputModal(title, initialValue, onSubmit) {
+  // 既存があれば削除
+  const old = document.getElementById('extra-food-input-modal');
+  if (old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'extra-food-input-modal';
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.background = 'rgba(0,0,0,0.4)';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.zIndex = '1000';
+
+  const dialog = document.createElement('div');
+  dialog.style.background = '#fff';
+  dialog.style.borderRadius = '8px';
+  dialog.style.padding = '16px';
+  dialog.style.minWidth = '260px';
+  dialog.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+
+  const h = document.createElement('div');
+  h.textContent = `${title}`;
+  h.style.fontWeight = '600';
+  h.style.marginBottom = '8px';
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = '0';
+  input.max = String(EXTRA_FOOD_MAX);
+  input.value = String(initialValue);
+  input.style.width = '250px';
+  input.style.padding = '8px 12px';
+  input.style.border = '1px solid #ccc';
+  input.style.borderRadius = '6px';
+  input.style.fontSize = '16px';
+  input.style.textAlign = 'center';
+
+  const footer = document.createElement('div');
+  footer.style.display = 'flex';
+  footer.style.gap = '8px';
+  footer.style.justifyContent = 'flex-end';
+  footer.style.marginTop = '12px';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'キャンセル';
+  cancelBtn.className = 'btn btn-text';
+
+  const okBtn = document.createElement('button');
+  okBtn.type = 'button';
+  okBtn.textContent = 'OK';
+  okBtn.className = 'btn btn-primary';
+
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  okBtn.addEventListener('click', () => {
+    const v = Number(input.value);
+    if (!Number.isFinite(v)) return;
+    onSubmit(Math.max(0, Math.min(EXTRA_FOOD_MAX, v)));
+    overlay.remove();
+  });
+
+  footer.appendChild(cancelBtn);
+  footer.appendChild(okBtn);
+  dialog.appendChild(h);
+  dialog.appendChild(input);
+  dialog.appendChild(footer);
+  overlay.appendChild(dialog);
+  document.body.appendChild(overlay);
+
+  // Enterで確定
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      okBtn.click();
+    }
+  });
+  input.focus();
+  input.select();
+}
