@@ -35,26 +35,7 @@ function sortDishesByTotalFoods(dishes) {
 
 // 画像ファイルパスを生成するための関数
 function getFoodImagePath(food) {
-  const imageMap = {
-    "マメミート": "BeanSausage",
-    "とくせんリンゴ": "FancyApple",
-    "とくせんエッグ": "FancyEgg",
-    "げきからハーブ": "FieryHerb",
-    "ワカクサコーン": "GreengrassCorn",
-    "ワカクサ大豆": "GreengrassSoybeans",
-    "あまいミツ": "Honey",
-    "ふといながねぎ": "LargeLeek",
-    "モーモーミルク": "MoomooMilk",
-    "ピュアなオイル": "PureOil",
-    "おいしいシッポ": "SlowpokeTail",
-    "あんみんトマト": "SnoozyTomato",
-    "ほっこりポテト": "SoftPotato",
-    "リラックスカカオ": "SoothingCacao",
-    "あじわいキノコ": "TastyMushroom",
-    "あったかジンジャー": "WarmingGinger",
-    "めざましコーヒー": "RousingCoffee",
-  };
-  return `img/foods/svg/${imageMap[food] || 'default.svg'}.svg`;
+  return `img/foods/svg/${foodImageMap[food] || 'default.svg'}.svg`;
 }
 
 // カテゴリ選択時に料理リストを更新する関数

@@ -46,3 +46,27 @@ const foodColorMap = {
   "めざましコーヒー": '#A37D55',
   "ずっしりカボチャ": '#e5a323'
 };
+
+/**
+ * 食材画像名マッピング表
+ */
+const foodImageMap = {
+  "マメミート": "BeanSausage",
+  "とくせんリンゴ": "FancyApple",
+  "とくせんエッグ": "FancyEgg",
+  "げきからハーブ": "FieryHerb",
+  "ワカクサコーン": "GreengrassCorn",
+  "ワカクサ大豆": "GreengrassSoybeans",
+  "あまいミツ": "Honey",
+  "ふといながねぎ": "LargeLeek",
+  "モーモーミルク": "MoomooMilk",
+  "ピュアなオイル": "PureOil",
+  "おいしいシッポ": "SlowpokeTail",
+  "あんみんトマト": "SnoozyTomato",
+  "ほっこりポテト": "SoftPotato",
+  "リラックスカカオ": "SoothingCacao",
+  "あじわいキノコ": "TastyMushroom",
+  "あったかジンジャー": "WarmingGinger",
+  "めざましコーヒー": "RousingCoffee",
+  "ずっしりカボチャ": "ChunkyPumpkin"
+};
