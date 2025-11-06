@@ -1,6 +1,6 @@
 // 設定値の最小値と最大値
 const FB_BONUS_MIN = 0;
-const FB_BONUS_MAX = 75;
+const FB_BONUS_MAX = 85;
 const RECIPE_LEVEL_MIN = 0;
 const RECIPE_LEVEL_MAX = 65;
 
