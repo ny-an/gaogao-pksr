@@ -57,6 +57,10 @@
         <select id="foodSelect">
             <option value="">-- 料理を選択 --</option>
         </select>
+        <div id="foodFilterIndicator" class="food-filter-indicator" style="display: none;">
+            <span class="filter-icon">🔒</span>
+            <span class="filter-text">作成できる料理のみ表示中</span>
+        </div>
     </div>
 
 <!--    <h4 id="food-title"></h4>-->
@@ -94,10 +98,15 @@
 
     <!-- 各種ボタン -->
     <div class="settings-toggle">
-        <!-- 料理設定トグルボタン -->
-        <button id="toggleSettings">料理設定 ▼</button>
-        <!-- 追加食材トグルボタン -->
-        <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
+        <!-- 鍋容量設定トグルボタン（上） -->
+        <div class="settings-toggle-row">
+            <button id="togglePotCapacity" class="toggle-extra-btn">鍋容量設定 ▶</button>
+        </div>
+        <!-- 料理設定と追加食材（下に2つ横並び） -->
+        <div class="settings-toggle-row">
+            <button id="toggleSettings">料理設定 ▼</button>
+            <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
+        </div>
     </div>
 
     <div class="hidden-area">
@@ -121,6 +130,44 @@
                         <option value="1.25">1.25倍</option>
                         <option value="1.5">1.5倍</option>
                     </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 鍋容量設定エリア -->
+        <div id="potCapacityContainer" class="settings-container">
+            <div class="setting-item-list">
+                <div class="setting-item">
+                    <label for="potCapacity">なべ容量</label>
+                    <div class="cooking-power-up-control">
+                        <button type="button" class="triangle-btn triangle-down" id="potCapacityDecrement" aria-label="decrement">&#9660;</button>
+                        <input type="number" id="potCapacity" min="15" max="81" step="3" value="15">
+                        <button type="button" class="triangle-btn triangle-up" id="potCapacityIncrement" aria-label="increment">&#9650;</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="cookingPowerUp">料理パワーアップ増加分</label>
+                    <div class="cooking-power-up-control">
+                        <button type="button" class="triangle-btn triangle-down" id="cookingPowerUpDecrement" aria-label="decrement">&#9660;</button>
+                        <input type="number" id="cookingPowerUp" min="0" max="200" value="0">
+                        <button type="button" class="triangle-btn triangle-up" id="cookingPowerUpIncrement" aria-label="increment">&#9650;</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="goodCampTicket">いいキャンプチケット</label>
+                    <input type="checkbox" id="goodCampTicket">
+                </div>
+                <div class="setting-item">
+                    <label for="weekendBonus">ウィークエンドボーナス</label>
+                    <input type="checkbox" id="weekendBonus">
+                </div>
+                <div class="setting-item">
+                    <label>料理時の鍋容量</label>
+                    <span id="potCapacityDisplay" class="pot-capacity-display">0</span>
+                </div>
+                <div class="setting-item">
+                    <label for="hideUncookableDishes">作成できる料理だけ表示</label>
+                    <input type="checkbox" id="hideUncookableDishes">
                 </div>
             </div>
         </div>
@@ -202,6 +249,7 @@
 <script src="js/common.js"></script>
 <script src="js/version_manager.js"></script>
 <script src="js/dishes_setting.js"></script>
+<script src="js/pot_capacity.js"></script>
 
 <!-- DOM event -->
 <script src="js/setting_icon.js"></script>

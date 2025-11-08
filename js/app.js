@@ -62,5 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (lastCategoryButton) {
     lastCategoryButton.click();
   }
+  
+  // 初期化完了後に、チェックボックスの状態を反映させる
+  // pot_capacity.jsの初期化を待つため、少し遅延させる
+  setTimeout(() => {
+    if (typeof updateFoodOptionsIfNeeded === 'function') {
+      updateFoodOptionsIfNeeded();
+    }
+  }, 300);
 
 });

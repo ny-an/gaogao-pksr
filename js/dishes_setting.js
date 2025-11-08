@@ -93,6 +93,11 @@ function loadSettings() {
   document.getElementById('fbBonus').value = fbBonus;
   document.getElementById('eventBonus').value = eventBonus;
   document.getElementById('recipeLevel').value = recipeLevel;
+  
+  // 鍋容量設定も読み込む（pot_capacity.jsが読み込まれている場合）
+  if (typeof loadPotCapacitySettings === 'function') {
+    loadPotCapacitySettings();
+  }
 }
 
 // 設定をlocalStorageに保存する
@@ -111,12 +116,21 @@ function saveSettings() {
   localStorage.setItem('fbBonus', fbBonus);
   localStorage.setItem('recipeLevel', recipeLevel);
   localStorage.setItem('eventBonus', eventBonus);
+  
+  // 鍋容量設定も保存する（pot_capacity.jsが読み込まれている場合）
+  if (typeof savePotCapacitySettings === 'function') {
+    savePotCapacitySettings();
+  }
 }
 
 // 設定変更時に再計算する
 function handleSettingChange() {
   saveSettings();
   updateFoods(); // エナジーを再計算
+  // 鍋容量表示も更新する（pot_capacity.jsが読み込まれている場合）
+  if (typeof updatePotCapacityDisplay === 'function') {
+    updatePotCapacityDisplay();
+  }
 }
 
 // 設定関連のselect要素の初期化

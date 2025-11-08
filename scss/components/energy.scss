@@ -68,6 +68,15 @@
 
 .settings-toggle {
   margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .settings-toggle-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
 
   button {
     background-color: $gray-color;
@@ -78,6 +87,8 @@
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s ease;
+    flex: 1;
+    max-width: 200px;
 
     &:hover {
       background-color: $blue-color;
@@ -116,7 +127,8 @@
     margin-bottom: 5px;
 
     label {
-      width: 100%;
+      flex: 1;
+      min-width: 0;
       //margin-bottom: 5px;
       font-weight: bold;
       font-size: 14px;
@@ -125,7 +137,8 @@
 
     input,
     select {
-      width: 100%;
+      flex: 1;
+      min-width: 0;
       //padding: 8px;
       //border: 1px solid #ccc;
       //border-radius: 4px;
@@ -158,6 +171,46 @@
       background-size: 12px;
       margin-bottom: 0;
       font-weight: 100;
+    }
+
+    // 料理パワーアップコントロール
+    .cooking-power-up-control {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      input {
+        width: 80px;
+        flex: 0 0 auto;
+        margin: 0;
+      }
+
+      .triangle-btn {
+        position: static;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0;
+        border: 1px solid #cfd8dc;
+        border-radius: 4px;
+        background: #eceff1;
+        color: #263238;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 12px;
+      }
+
+      .triangle-btn:active {
+        background: #cfd8dc;
+      }
     }
   }
 }

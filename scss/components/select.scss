@@ -40,3 +40,36 @@ select:focus {
   border-color: #4CAF50; /* ボーダーの色を変更 */
   box-shadow: 0 0 3px rgba(0, 255, 0, 0.3); /* フォーカス時のボックスシャドウ */
 }
+
+/* 料理選択エリア */
+.food-select {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  
+  select {
+    margin-bottom: 0;
+  }
+  
+  .food-filter-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    margin-bottom: 0;
+    padding: 6px 12px;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #856404;
+    
+    .filter-icon {
+      font-size: 14px;
+    }
+    
+    .filter-text {
+      font-weight: 500;
+    }
+  }
+}

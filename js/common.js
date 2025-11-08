@@ -38,21 +38,110 @@ function getFoodImagePath(food) {
   return `img/foods/svg/${foodImageMap[food] || 'default.svg'}.svg`;
 }
 
+/**
+ * 料理が作成可能かどうかを判定する
+ * @param {Object} dishFoods - 料理に必要な食材とその数
+ * @returns {boolean} 作成可能な場合true
+ */
+function isDishCookable(dishFoods) {
+  if (!dishFoods || Object.keys(dishFoods).length === 0) {
+    return false; // 食材データがない場合は作成不可
+  }
+  
+  // 必要な食材の合計数を計算
+  const totalFoods = Object.values(dishFoods).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
+  
+  // 現在の鍋容量を取得
+  let potCapacity = 999;
+  if (typeof calculatePotCapacity === 'function') {
+    try {
+      potCapacity = calculatePotCapacity();
+    } catch (e) {
+      console.error('calculatePotCapacity error:', e);
+      potCapacity = 999;
+    }
+  }
+  
+  // 必要な食材数が鍋容量以下なら作成可能
+  const isCookable = totalFoods <= potCapacity;
+  
+  return isCookable;
+}
+
 // カテゴリ選択時に料理リストを更新する関数
 function updateFoodOptions(selectedCategory) {
+  // 現在選択されている料理を保存（作れない料理かどうかをチェックするため）
+  const currentSelectedDish = foodSelect.value;
+  
   foodSelect.innerHTML = '<option value="">-- 料理を選択 --</option>';
 
   if (selectedCategory && dishes[selectedCategory]) {
+    // 作成できない料理を非表示にする設定を取得
+    const hideUncookableCheckbox = document.getElementById('hideUncookableDishes');
+    const hideUncookable = hideUncookableCheckbox && hideUncookableCheckbox.checked;
+    
+    // org_dishesから食材データを取得（dishesはソート済みだが、データ構造は同じ）
+    const orgDishesData = typeof org_dishes !== 'undefined' ? org_dishes : {};
+    const categoryDishes = orgDishesData[selectedCategory] || dishes[selectedCategory];
+    
+    // 現在選択されている料理が作れない料理かどうかをチェック
+    let currentDishIsUncookable = false;
+    let currentDishWillBeVisible = false;
+    if (currentSelectedDish && categoryDishes[currentSelectedDish]) {
+      const currentDishFoods = categoryDishes[currentSelectedDish];
+      currentDishIsUncookable = !isDishCookable(currentDishFoods);
+      // 現在選択されている料理が表示されるかどうか
+      currentDishWillBeVisible = !hideUncookable || !currentDishIsUncookable;
+    }
+    
     // 選択されたカテゴリに属する料理をfoodSelectに追加
     for (const dish in dishes[selectedCategory]) {
+      // org_dishesから食材データを取得（より確実）
+      const dishFoods = categoryDishes[dish] || dishes[selectedCategory][dish];
+      
+      // 作成できない料理を非表示にする設定が有効な場合、フィルタリング
+      if (hideUncookable && !isDishCookable(dishFoods)) {
+        continue; // 作成できない料理はスキップ
+      }
+      
       const option = document.createElement('option');
       option.value = dish;
       option.textContent = dish;
       foodSelect.appendChild(option);
     }
+    
+    // 作れない料理を表示していた場合は、選択なしへ
+    // そうでない場合は、以前選択していた料理を再選択
+    if (currentDishIsUncookable) {
+      foodSelect.value = '';
+    } else if (currentSelectedDish && currentDishWillBeVisible) {
+      // 以前選択していた料理が存在し、表示される場合は再選択
+      const option = foodSelect.querySelector(`option[value="${currentSelectedDish}"]`);
+      if (option) {
+        foodSelect.value = currentSelectedDish;
+      }
+    }
+    
+    // 制限表示の更新
+    updateFoodFilterIndicator(hideUncookable);
   }
   // 食材リストを初期化
   updateFoods();
+}
+
+/**
+ * 料理リストの制限表示を更新する
+ * @param {boolean} isFiltered - フィルタリングが有効かどうか
+ */
+function updateFoodFilterIndicator(isFiltered) {
+  const indicator = document.getElementById('foodFilterIndicator');
+  if (indicator) {
+    if (isFiltered) {
+      indicator.style.display = 'flex';
+    } else {
+      indicator.style.display = 'none';
+    }
+  }
 }
 
 // 最初の料理を自動で選択する関数
