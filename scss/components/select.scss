@@ -52,7 +52,7 @@ select:focus {
   }
   
   .food-filter-indicator {
-    display: flex;
+    display: none; /* デフォルトは非表示 */
     align-items: center;
     gap: 6px;
     margin-top: 12px;
@@ -70,6 +70,11 @@ select:focus {
     
     .filter-text {
       font-weight: 500;
+    }
+    
+    /* 表示時はflex */
+    &:not([style*="display: none"]) {
+      display: flex;
     }
   }
 }

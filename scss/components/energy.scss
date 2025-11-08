@@ -89,6 +89,10 @@
     transition: background-color 0.3s ease;
     flex: 1;
     max-width: 200px;
+    min-height: 38px; // 高さを固定
+    height: 38px; // 高さを固定
+    box-sizing: border-box; // paddingを含めた高さ計算
+    white-space: nowrap; // テキストの改行を防ぐ
 
     &:hover {
       background-color: $blue-color;
@@ -211,6 +215,13 @@
       .triangle-btn:active {
         background: #cfd8dc;
       }
+    }
+
+    // イベントボーナス倍率のselectをボタンありの要素と同じ幅に
+    #potEventBonus {
+      flex: 1; // ボタンありのコントロールと同じflex設定で揃える
+      min-width: 0;
+      margin: 0;
     }
   }
 }

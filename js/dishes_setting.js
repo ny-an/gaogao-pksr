@@ -85,14 +85,18 @@ function setCookingEnergy(energy) {
 function loadSettings() {
   // FBボーナスの検証
   const fbBonus = validateInput(parseInt(localStorage.getItem('fbBonus'), 10), FB_BONUS_MIN, FB_BONUS_MAX);
-  // レシピボーナスの検証
+  // レシピボーナスの検証（デフォルトは1）
   const recipeLevel = validateInput(parseInt(localStorage.getItem('recipeLevel'), 10), RECIPE_LEVEL_MIN, RECIPE_LEVEL_MAX);
   // イベントボーナス
-  const eventBonus = localStorage.getItem('eventBonus') || 1;
+  const eventBonus = localStorage.getItem('eventBonus') || '1';
 
   document.getElementById('fbBonus').value = fbBonus;
   document.getElementById('eventBonus').value = eventBonus;
-  document.getElementById('recipeLevel').value = recipeLevel;
+  // recipeLevelがNaNの場合は1を設定
+  const recipeLevelElement = document.getElementById('recipeLevel');
+  if (recipeLevelElement) {
+    recipeLevelElement.value = isNaN(recipeLevel) ? 1 : recipeLevel;
+  }
   
   // 鍋容量設定も読み込む（pot_capacity.jsが読み込まれている場合）
   if (typeof loadPotCapacitySettings === 'function') {

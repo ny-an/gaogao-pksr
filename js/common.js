@@ -120,6 +120,17 @@ function updateFoodOptions(selectedCategory) {
       if (option) {
         foodSelect.value = currentSelectedDish;
       }
+    } else if (!currentSelectedDish || currentSelectedDish === '') {
+      // 現在選択されていない場合、localStorageから保存された料理を読み込む
+      try {
+        const categoryFoods = JSON.parse(localStorage.getItem('categoryFoods') || '{}');
+        const savedFood = categoryFoods[selectedCategory];
+        if (savedFood && foodSelect.querySelector(`option[value="${savedFood}"]`)) {
+          foodSelect.value = savedFood;
+        }
+      } catch (e) {
+        console.error('Error loading saved food from localStorage:', e);
+      }
     }
     
     // 制限表示の更新

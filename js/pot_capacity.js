@@ -4,6 +4,7 @@ const POT_CAPACITY_MAX = 81;
 const POT_CAPACITY_STEP = 3;
 const COOKING_POWER_UP_MIN = 0;
 const COOKING_POWER_UP_MAX = 200;
+const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5]; // イベントボーナスの選択肢
 
 /**
  * 鍋容量を計算する
@@ -19,8 +20,8 @@ function calculatePotCapacity() {
   }
   const potCapacity = parseInt(potCapacityElement.value, 10) || POT_CAPACITY_MAX;
   
-  // イベントボーナスを取得（既存のeventBonusを使用）
-  const eventBonusElement = document.getElementById('eventBonus');
+  // イベントボーナスを取得（鍋容量設定専用のpotEventBonusを使用）
+  const eventBonusElement = document.getElementById('potEventBonus');
   const eventBonus = eventBonusElement ? parseFloat(eventBonusElement.value) || 1.0 : 1.0;
   
   // ウィークエンドボーナス（2倍）を取得
@@ -97,6 +98,13 @@ function loadPotCapacitySettings() {
     goodCampTicketElement.checked = goodCampTicket;
   }
   
+  // イベントボーナス（デフォルトは1.0倍）
+  const potEventBonus = localStorage.getItem('potEventBonus') || '1.0';
+  const potEventBonusElement = document.getElementById('potEventBonus');
+  if (potEventBonusElement) {
+    potEventBonusElement.value = potEventBonus;
+  }
+  
   // ウィークエンドボーナス
   const weekendBonus = localStorage.getItem('weekendBonus') === 'true';
   const weekendBonusElement = document.getElementById('weekendBonus');
@@ -142,10 +150,22 @@ function savePotCapacitySettings() {
     localStorage.setItem('goodCampTicket', goodCampTicketCheckbox.checked);
   }
   
+  // イベントボーナス
+  const potEventBonusSelect = document.getElementById('potEventBonus');
+  if (potEventBonusSelect) {
+    localStorage.setItem('potEventBonus', potEventBonusSelect.value);
+  }
+  
   // ウィークエンドボーナス
   const weekendBonusCheckbox = document.getElementById('weekendBonus');
   if (weekendBonusCheckbox) {
     localStorage.setItem('weekendBonus', weekendBonusCheckbox.checked);
+  }
+  
+  // 作成できない料理を非表示にする
+  const hideUncookableCheckbox = document.getElementById('hideUncookableDishes');
+  if (hideUncookableCheckbox) {
+    localStorage.setItem('hideUncookableDishes', hideUncookableCheckbox.checked);
   }
 }
 
@@ -359,10 +379,11 @@ function setupPotCapacityEventListeners() {
     });
   }
   
-  // イベントボーナス（既存の設定）の変更も監視
-  const eventBonusSelect = document.getElementById('eventBonus');
-  if (eventBonusSelect) {
-    eventBonusSelect.addEventListener('change', () => {
+  // イベントボーナス（鍋容量設定専用）
+  const potEventBonusSelect = document.getElementById('potEventBonus');
+  if (potEventBonusSelect) {
+    potEventBonusSelect.addEventListener('change', () => {
+      savePotCapacitySettings();
       updatePotCapacityDisplay();
       // 表示フラグがONの場合のみ料理リストを更新
       if (shouldUpdateFoodOptions()) {
@@ -406,6 +427,7 @@ function updateFoodOptionsIfNeeded() {
     if (selectedCategoryButton) {
       const selectedCategory = selectedCategoryButton.getAttribute('data-category');
       updateFoodOptions(selectedCategory);
+      // updateFoodOptions内で既に保存された料理の復元処理が行われるため、ここでは処理しない
     } else {
       // カテゴリボタンがアクティブでない場合、デフォルトカテゴリで更新
       // または、app.jsの初期化を待つ
@@ -414,6 +436,7 @@ function updateFoodOptionsIfNeeded() {
         if (selectedCategoryButton) {
           const selectedCategory = selectedCategoryButton.getAttribute('data-category');
           updateFoodOptions(selectedCategory);
+          // updateFoodOptions内で既に保存された料理の復元処理が行われるため、ここでは処理しない
         }
       }, 100);
     }

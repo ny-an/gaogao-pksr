@@ -31,14 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateFoodOptions(selectedCategory);
 
       // このカテゴリの前回選択した料理があれば選択
-      const savedFood = lastCategoryFoods[selectedCategory];
-      if (savedFood && foodSelect.querySelector(`option[value="${savedFood}"]`)) {
-        foodSelect.value = savedFood;
-        updateFoods();
-      } else {
-        // デフォルト初期表示
-        selectFirstFoodOption();
-      }
+      // updateFoodOptions内で既に処理されるため、ここでは処理しない
     });
   });
 

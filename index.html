@@ -57,7 +57,7 @@
         <select id="foodSelect">
             <option value="">-- 料理を選択 --</option>
         </select>
-        <div id="foodFilterIndicator" class="food-filter-indicator" style="display: none;">
+        <div id="foodFilterIndicator" class="food-filter-indicator">
             <span class="filter-icon">🔒</span>
             <span class="filter-text">作成できる料理のみ表示中</span>
         </div>
@@ -152,6 +152,14 @@
                         <input type="number" id="cookingPowerUp" min="0" max="200" value="0">
                         <button type="button" class="triangle-btn triangle-up" id="cookingPowerUpIncrement" aria-label="increment">&#9650;</button>
                     </div>
+                </div>
+                <div class="setting-item">
+                    <label for="potEventBonus">イベントボーナス倍率</label>
+                    <select id="potEventBonus">
+                        <option value="1.0" selected>1.0倍</option>
+                        <option value="1.25">1.25倍</option>
+                        <option value="1.5">1.5倍</option>
+                    </select>
                 </div>
                 <div class="setting-item">
                     <label for="goodCampTicket">いいキャンプチケット</label>
