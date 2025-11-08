@@ -12,12 +12,12 @@ const COOKING_POWER_UP_MAX = 200;
  * @returns {number} 計算された鍋容量
  */
 function calculatePotCapacity() {
-  // なべ容量を取得（デフォルトは15）
+  // なべ容量を取得（デフォルトは81）
   const potCapacityElement = document.getElementById('potCapacity');
   if (!potCapacityElement) {
-    return POT_CAPACITY_MIN; // 要素が存在しない場合は最小値を返す
+    return POT_CAPACITY_MAX; // 要素が存在しない場合は最大値（デフォルト）を返す
   }
-  const potCapacity = parseInt(potCapacityElement.value, 10) || POT_CAPACITY_MIN;
+  const potCapacity = parseInt(potCapacityElement.value, 10) || POT_CAPACITY_MAX;
   
   // イベントボーナスを取得（既存のeventBonusを使用）
   const eventBonusElement = document.getElementById('eventBonus');
@@ -70,9 +70,9 @@ function validatePotCapacity(value) {
  * 鍋容量設定をlocalStorageから読み込む
  */
 function loadPotCapacitySettings() {
-  // なべ容量
+  // なべ容量（デフォルトは81）
   const potCapacity = validatePotCapacity(
-    parseInt(localStorage.getItem('potCapacity'), 10) || POT_CAPACITY_MIN
+    parseInt(localStorage.getItem('potCapacity'), 10) || POT_CAPACITY_MAX
   );
   const potCapacityElement = document.getElementById('potCapacity');
   if (potCapacityElement) {
@@ -120,7 +120,7 @@ function savePotCapacitySettings() {
   const potCapacityInput = document.getElementById('potCapacity');
   if (potCapacityInput) {
     const potCapacity = validatePotCapacity(
-      parseInt(potCapacityInput.value, 10) || POT_CAPACITY_MIN
+      parseInt(potCapacityInput.value, 10) || POT_CAPACITY_MAX
     );
     localStorage.setItem('potCapacity', potCapacity);
   }
