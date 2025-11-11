@@ -71,7 +71,7 @@ function isDishCookable(dishFoods) {
 // カテゴリ選択時に料理リストを更新する関数
 function updateFoodOptions(selectedCategory) {
   // 現在選択されている料理を保存（作れない料理かどうかをチェックするため）
-  const currentSelectedDish = foodSelect.value;
+  let currentSelectedDish = foodSelect.value;
   
   foodSelect.innerHTML = '<option value="">-- 料理を選択 --</option>';
 
@@ -92,6 +92,9 @@ function updateFoodOptions(selectedCategory) {
       currentDishIsUncookable = !isDishCookable(currentDishFoods);
       // 現在選択されている料理が表示されるかどうか
       currentDishWillBeVisible = !hideUncookable || !currentDishIsUncookable;
+    } else if (currentSelectedDish) {
+      // 別カテゴリの料理が選択されている場合はリセット
+      currentSelectedDish = '';
     }
     
     // 選択されたカテゴリに属する料理をfoodSelectに追加
