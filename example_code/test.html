@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>HSVしきい値 調整デモ（6スライダー）</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    canvas { border: 1px solid #ccc; display: block; margin-top: 10px; }
+    .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; }
+    .control-group { display: flex; flex-direction: column; font-size: 14px; }
+    .output { margin-top: 20px; white-space: pre-wrap; font-size: 1em; }
+  </style>
+  <style>
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+    .preview-area {
+      flex: 1;
+    }
+    .control-area {
+      flex: 1;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .buttons {
+      margin-top: 20px;
+    }
+    .ocr-result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="preview-area">
+    <input type="file" id="fileInput" accept="image/*">
+    <canvas id="previewCanvas"></canvas>
+  </div>
+
+
+<!--<h2>HSVしきい値 調整デモ（6スライダー）</h2>-->
+<!--<input type="file" id="fileInput" accept="image/*">-->
+<!--<canvas id="filteredCanvas" width="300" height="300"></canvas>-->
+
+<div class="controls">
+  <div class="control-group">
+    <label for="hMin">H Min</label>
+    <input type="range" id="hMin" min="0" max="360" value="0">
+    <span id="hMinVal">0</span>
+  </div>
+  <div class="control-group">
+    <label for="hMax">H Max</label>
+    <input type="range" id="hMax" min="0" max="360" value="360">
+    <span id="hMaxVal">360</span>
+  </div>
+  <div class="control-group">
+    <label for="sMin">S Min</label>
+    <input type="range" id="sMin" min="0" max="100" value="20">
+    <span id="sMinVal">20</span>
+  </div>
+  <div class="control-group">
+    <label for="sMax">S Max</label>
+    <input type="range" id="sMax" min="0" max="100" value="100">
+    <span id="sMaxVal">100</span>
+  </div>
+  <div class="control-group">
+    <label for="vMin">V Min</label>
+    <input type="range" id="vMin" min="0" max="100" value="30">
+    <span id="vMinVal">30</span>
+  </div>
+  <div class="control-group">
+    <label for="vMax">V Max</label>
+    <input type="range" id="vMax" min="0" max="100" value="100">
+    <span id="vMaxVal">100</span>
+  </div>
+</div>
+
+  <div class="buttons">
+    <button id="executeOcr">OCR実行</button>
+  </div>
+
+  <div class="ocr-result">
+    <h3>OCR結果:</h3>
+    <div id="ocrResult"></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract.min.js"></script>
+<script src="/js/calendar/OcrReader.js"></script>
+
+<script defer>
+  const fileInput = document.getElementById('fileInput');
+  const canvas = document.getElementById('previewCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let image = new Image();
+
+  const sliders = {
+    hMin: document.getElementById('hMin'),
+    hMax: document.getElementById('hMax'),
+    sMin: document.getElementById('sMin'),
+    sMax: document.getElementById('sMax'),
+    vMin: document.getElementById('vMin'),
+    vMax: document.getElementById('vMax'),
+  };
+
+  const sliderValues = {
+    hMinVal: document.getElementById('hMinVal'),
+    hMaxVal: document.getElementById('hMaxVal'),
+    sMinVal: document.getElementById('sMinVal'),
+    sMaxVal: document.getElementById('sMaxVal'),
+    vMinVal: document.getElementById('vMinVal'),
+    vMaxVal: document.getElementById('vMaxVal'),
+  };
+
+  function rgbToHsv(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, v = max;
+    const d = max - min;
+    s = max === 0 ? 0 : d / max;
+    if (max === min) {
+      h = 0;
+    } else {
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h *= 60;
+    }
+    return [Math.round(h), Math.round(s * 100), Math.round(v * 100)];
+  }
+
+  function applyFilter() {
+    const hMin = parseInt(sliders.hMin.value);
+    const hMax = parseInt(sliders.hMax.value);
+    const sMin = parseInt(sliders.sMin.value);
+    const sMax = parseInt(sliders.sMax.value);
+    const vMin = parseInt(sliders.vMin.value);
+    const vMax = parseInt(sliders.vMax.value);
+
+    sliderValues.hMinVal.innerText = hMin;
+    sliderValues.hMaxVal.innerText = hMax;
+    sliderValues.sMinVal.innerText = sMin;
+    sliderValues.sMaxVal.innerText = sMax;
+    sliderValues.vMinVal.innerText = vMin;
+    sliderValues.vMaxVal.innerText = vMax;
+
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const [h, s, v] = rgbToHsv(r, g, b);
+
+      const inRange =
+              h >= hMin && h <= hMax &&
+              s >= sMin && s <= sMax &&
+              v >= vMin && v <= vMax;
+
+      const value = inRange ? 255 : 0;
+      data[i] = data[i + 1] = data[i + 2] = value;
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  image.onload = () => {
+    // canvas.width = image.width;
+    // canvas.height = image.height;
+    applyFilter();
+  };
+
+  Object.values(sliders).forEach(slider => {
+    slider.addEventListener('input', applyFilter);
+  });
+
+
+  // OCR結果の文字列から数字のみを取得
+  function processOcrText(text) {
+    return text
+            .split('\n')
+            .map(line => line.trim()) // 空白を削除
+            .filter(line => line.length > 0) // 空行を除外
+            .filter(line => /^[0-9,\.]+$/.test(line)) // 数字、カンマ、ドットのみの行を抽出
+            .map(line => {
+              // カンマと小数点を含む数字を処理
+              const cleanedNumber = line
+                      .replace(/,/g, '') // カンマを削除
+                      .replace(/\./g, '') // 小数点を削除
+                      .trim();
+              return cleanedNumber;
+            })
+            .filter(num => parseInt(num, 10) >= 100); // 100以上の数値のみを抽出
+  }
+
+
+  // test
+  document.getElementById('executeOcr').addEventListener('click', async () => {
+    const canvas = document.getElementById('previewCanvas');
+    const resultDiv = document.getElementById('ocrResult');
+    resultDiv.textContent = 'OCR処理中...';
+
+    try {
+      // Canvas内容をBlobに変換
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+
+      // OCR実行
+      const { data: { text } } = await Tesseract.recognize(
+              URL.createObjectURL(blob),
+              'eng',
+              { logger: m => console.log(m) }
+      );
+
+      resultDiv.textContent = text;
+
+    } catch (error) {
+      resultDiv.textContent = 'OCR処理に失敗しました';
+      console.error(error);
+    }
+  });
+
+
+</script>
+</body>
+</html>
