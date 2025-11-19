@@ -1,0 +1,140 @@
+<html>
+<body>
+<img src="ng_yui1.jpg" width="448" height="892" id="normal">
+<!--<img src="kantan.jpg" width="448" height="892" id="normal">-->
+<!--<img src="success.jpg" width="448" height="892" id="normal">-->
+<canvas width="448" height="892"></canvas>
+<script>
+  function init() {
+    const normal = document.getElementById("normal");
+    if (normal === null) {
+      return;
+    }
+
+    const canvas = document.getElementsByTagName("canvas")[0];
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(normal, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // binarize the image
+    const bits = binarizeImage(data, canvas.width, canvas.height);
+    const labels = getLabels(bits);
+    console.log(labels);
+
+    for (let i = 0; i < data.length; i += 4) {
+      const x = (i / 4) % canvas.width;
+      const y = Math.floor(i / 4 / canvas.width);
+      if (isLabelBorder(labels, x, y)) {
+        data[i] = 0;
+        data[i + 1] = 128;
+        data[i + 2] = 255;
+      } else if (bits[x][y] === 1) {
+        data[i] = data[i + 1] = data[i + 2] = 255;
+      } else {
+        data[i] = data[i + 1] = data[i + 2] = 0;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+
+  function binarizeImage(data, width, height) {
+    const ret = Array
+      .from({length: width}, () => new Array(height).fill(0));
+    for (let i = 0; i < data.length; i += 4) {
+      const x = (i / 4) % width;
+      const y = Math.floor(i / 4 / width);
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      let h = 0, max = Math.max(r, g, b), min = Math.min(r, g, b);
+      if (r > g && r > b) {
+        h = (g - b) / (max - min) * 60;
+      }
+      else if (g > r && g > b) {
+        h = 120 + (b - r) / (max - min) * 60;
+      }
+      else if (b > r && b > g) {
+        h = 240 + (r - g) / (max - min) * 60;
+      }
+      if (h < 0) {
+        h += 360;
+      }
+      const s = max === 0 ? 0 : (max - min) / max * 100;
+      const v = max / 255 * 100;
+
+      let f = 0
+      if ((h < 40 || h >= 300 && h <= 360) && s >= 20) {
+        ret[x][y] = 1;
+      }
+    }
+    return ret;
+  }
+
+  function getLabels(bits) {
+    const copiedBits = bits.map(x => [...x]);
+    const w = copiedBits.length;
+    const h = copiedBits[0].length;
+    const ret = [];
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        if (copiedBits[i][j] === 1) {
+          ret.push(getLabel(copiedBits, i, j));
+        }
+      }
+    }
+    return ret;
+  }
+
+  function getLabel(bits, x, y) {
+    const w = bits.length;
+    const h = bits[0].length;
+    const ret = [];
+    const queue = [{x, y}];
+    let left = w, right = 0, top = h, bottom = 0;
+    while (queue.length > 0) {
+      const {x, y} = queue.pop();
+      left = Math.min(left, x);
+      right = Math.max(right, x);
+      top = Math.min(top, y);
+      bottom = Math.max(bottom, y);
+      bits[x][y] = 0;
+      if (x > 0 && bits[x - 1][y] === 1) {
+        queue.push({x: x - 1, y});
+      }
+      if (x < w - 1 && bits[x + 1][y] === 1) {
+        queue.push({x: x + 1, y});
+      }
+      if (y > 0 && bits[x][y - 1] === 1) {
+        queue.push({x, y: y - 1});
+      }
+      if (y < h - 1 && bits[x][y + 1] === 1) {
+        queue.push({x, y: y + 1});
+      }
+    }
+    return {left, right, top, bottom};
+  }
+
+  function isLabelBorder(labels, x, y) {
+    for (const label of labels) {
+      if ((x === label.left || x === label.left - 1) && y >= label.top && y <= label.bottom) {
+        return true;
+      }
+      if ((x === label.right || x === label.right + 1) && y >= label.top && y <= label.bottom) {
+        return true;
+      }
+      if ((y === label.top || y === label.top - 1) && x >= label.left && x <= label.right) {
+        return true;
+      }
+      if ((y === label.bottom || y === label.bottom + 1) && x >= label.left && x <= label.right) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>

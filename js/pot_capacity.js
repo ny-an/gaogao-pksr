@@ -4,7 +4,7 @@ const POT_CAPACITY_MAX = 81;
 const POT_CAPACITY_STEP = 3;
 const COOKING_POWER_UP_MIN = 0;
 const COOKING_POWER_UP_MAX = 200;
-const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5]; // イベントボーナスの選択肢
+const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5, 2.0]; // イベントボーナスの選択肢
 
 /**
  * 鍋容量を計算する
@@ -68,6 +68,50 @@ function validatePotCapacity(value) {
 }
 
 /**
+ * イベントボーナス倍率のselectのoptionを生成する
+ */
+function initializePotEventBonusOptions() {
+  const potEventBonusElement = document.getElementById('potEventBonus');
+  if (!potEventBonusElement) {
+    return;
+  }
+  
+  // 既存のoptionをクリア
+  potEventBonusElement.innerHTML = '';
+  
+  // EVENT_BONUS_VALUESからoptionを生成
+  EVENT_BONUS_VALUES.forEach(value => {
+    const option = document.createElement('option');
+    // valueは文字列として統一（1.0は"1.0"、1.25は"1.25"など）
+    option.value = value === 1.0 ? '1.0' : value.toString();
+    option.textContent = `${value}倍`;
+    potEventBonusElement.appendChild(option);
+  });
+}
+
+/**
+ * 鍋容量と料理パワーアップ増加分のinput要素の属性を初期化する
+ */
+function initializePotCapacityInputAttributes() {
+  // なべ容量のinput要素
+  const potCapacityElement = document.getElementById('potCapacity');
+  if (potCapacityElement) {
+    potCapacityElement.min = POT_CAPACITY_MIN.toString();
+    potCapacityElement.max = POT_CAPACITY_MAX.toString();
+    potCapacityElement.step = POT_CAPACITY_STEP.toString();
+    potCapacityElement.value = POT_CAPACITY_MAX.toString(); // デフォルト値
+  }
+  
+  // 料理パワーアップ増加分のinput要素
+  const cookingPowerUpElement = document.getElementById('cookingPowerUp');
+  if (cookingPowerUpElement) {
+    cookingPowerUpElement.min = COOKING_POWER_UP_MIN.toString();
+    cookingPowerUpElement.max = COOKING_POWER_UP_MAX.toString();
+    cookingPowerUpElement.value = COOKING_POWER_UP_MIN.toString(); // デフォルト値
+  }
+}
+
+/**
  * 鍋容量設定をlocalStorageから読み込む
  */
 function loadPotCapacitySettings() {
@@ -99,10 +143,24 @@ function loadPotCapacitySettings() {
   }
   
   // イベントボーナス（デフォルトは1.0倍）
-  const potEventBonus = localStorage.getItem('potEventBonus') || '1.0';
   const potEventBonusElement = document.getElementById('potEventBonus');
   if (potEventBonusElement) {
-    potEventBonusElement.value = potEventBonus;
+    const savedValue = localStorage.getItem('potEventBonus');
+    if (savedValue) {
+      // localStorageに保存された値がEVENT_BONUS_VALUESに含まれているか確認
+      const parsedValue = parseFloat(savedValue);
+      const isValidValue = EVENT_BONUS_VALUES.includes(parsedValue);
+      if (isValidValue) {
+        // 値が有効な場合、対応するvalue形式に変換（1.0は"1.0"、それ以外はそのまま）
+        potEventBonusElement.value = parsedValue === 1.0 ? '1.0' : savedValue;
+      } else {
+        // 無効な値の場合はデフォルトの1.0倍を設定
+        potEventBonusElement.value = '1.0';
+      }
+    } else {
+      // localStorageに値が無い場合はデフォルトの1.0倍を設定
+      potEventBonusElement.value = '1.0';
+    }
   }
   
   // ウィークエンドボーナス
@@ -484,6 +542,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // DOMContentLoaded時に初期化
 document.addEventListener('DOMContentLoaded', () => {
+  // input要素の属性を初期化（loadPotCapacitySettingsより先に実行）
+  initializePotCapacityInputAttributes();
+  // イベントボーナス倍率のoptionを生成（loadPotCapacitySettingsより先に実行）
+  initializePotEventBonusOptions();
   loadPotCapacitySettings();
   setupPotCapacityEventListeners();
   updatePotCapacityDisplay();
