@@ -161,9 +161,13 @@ async function initialWeekSelector() {
   const weeksToShow = 100; // 遡り表示する週数
   const validWeeks = [];
 
+  // 週列挙の起点は「今週の月曜」に固定（今日が木曜でも週境界を取りこぼさない）
+  const currentMondayStr = getMondayDateFromWeek(currentWeekStr);
+  const currentMondayDate = new Date(currentMondayStr);
+
   for (let i = 0; i < weeksToShow; i++) {
-    // 現在の日付から1週間ずつ過去にずらす
-    const pastDate = new Date(currentDate.getTime() - (7 * 24 * 60 * 60 * 1000 * i));
+    // 今週の月曜から1週間ずつ過去にずらす
+    const pastDate = new Date(currentMondayDate.getTime() - (7 * 24 * 60 * 60 * 1000 * i));
     const weekStr = getISOWeekString(pastDate);
 
     try {
