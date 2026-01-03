@@ -128,7 +128,12 @@ function setupEventListeners() {
 
     // 月曜日の日付を計算して表示
     const mondayDate = getMondayDateFromWeek(selectedWeek);
-    document.getElementById("mondayDate").innerText = mondayDate;
+    const mondayDateObj = new Date(mondayDate);
+    const formattedMondayDate = mondayDateObj.toLocaleDateString('ja-JP', {
+      month: 'numeric',
+      day: 'numeric'
+    });
+    document.getElementById("mondayDate").innerText = formattedMondayDate;
 
     // table自体のdata-week属性を更新
     const calendarTable = document.querySelector(".calendar-table");

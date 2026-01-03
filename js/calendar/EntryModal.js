@@ -354,7 +354,15 @@ class EntryModal {
       await calendarRender.updateCellContent(this.currentCell, record);
 
       // データベースの更新
+      // #region agent log
+      const day = this.currentCell.getAttribute("data-day");
+      const meal = this.currentCell.getAttribute("data-meal");
+      fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EntryModal.js:357',message:'before updateWeeklyRecord',data:{day,meal,cellWeekAttr,calculatedWeek,cellDateAttr},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
       await dbAPI.updateWeeklyRecord(this.currentCell, record);
+      // #region agent log
+      fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EntryModal.js:360',message:'after updateWeeklyRecord',data:{day,meal,cellWeekAttr},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
 
       // エネルギー合計の再計算
       await recalcEnergyTotals();

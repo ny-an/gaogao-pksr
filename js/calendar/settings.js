@@ -10,11 +10,16 @@ function getISOWeek(date) {
   const tmpDate = new Date(date.getTime());
   tmpDate.setDate(tmpDate.getDate() + 3 - ((tmpDate.getDay() + 6) % 7));
   const week1 = new Date(tmpDate.getFullYear(), 0, 4);
-  return 1 + Math.round(((tmpDate - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  const week = 1 + Math.round(((tmpDate - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+  return week;
 }
 function getISOWeekString(date) {
-  const year = date.getFullYear();
   const week = getISOWeek(date);
+  // ISO週の年は、その週の木曜日が含まれる年
+  // 週の大部分（4日以上）が含まれる年を使用する
+  const tmpDate = new Date(date.getTime());
+  tmpDate.setDate(tmpDate.getDate() + 3 - ((tmpDate.getDay() + 6) % 7)); // その週の木曜日
+  const year = tmpDate.getFullYear();
   return `${year}-W${week.toString().padStart(2, '0')}`;
 }
 
@@ -26,14 +31,23 @@ function getMondayDateFromWeek(weekString) {
 
   // 1月4日を基準に週の月曜日を計算
   const jan4 = new Date(year, 0, 4);
-  const dayOffset = jan4.getDay() - 1; // 月曜日を基準(0)とする
+  const jan4DayOfWeek = jan4.getDay(); // 0=日曜, 1=月曜, ..., 6=土曜
+  // ISO週では、1月4日を含む週が第1週
+  // 1月4日が月曜日の場合、その週の月曜日は1月4日
+  // 1月4日が日曜日の場合、その週の月曜日は前年の12月29日
+  // dayOffset: 1月4日からその週の月曜日までの日数
+  const dayOffset = (jan4DayOfWeek === 0 ? 6 : jan4DayOfWeek - 1); // 日曜日の場合は6、それ以外は-1
   const firstMonday = new Date(jan4.getTime() - dayOffset * 24 * 60 * 60 * 1000);
 
   // 目的の週の月曜日を計算
   const targetMonday = new Date(firstMonday.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
 
-  // 日付をフォーマット (例: "2024/1/1")
-  return `${targetMonday.getFullYear()}/${targetMonday.getMonth() + 1}/${targetMonday.getDate()}`;
+  // 日付をISO形式でフォーマット (例: "2024-01-01") - タイムゾーン問題を避けるため
+  const resultYear = targetMonday.getFullYear();
+  const resultMonth = String(targetMonday.getMonth() + 1).padStart(2, '0');
+  const resultDate = String(targetMonday.getDate()).padStart(2, '0');
+  const result = `${resultYear}-${resultMonth}-${resultDate}`;
+  return result;
 }
 
 
