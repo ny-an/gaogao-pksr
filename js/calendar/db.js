@@ -1,6 +1,58 @@
 const dbName = "GaogaoCalendarDB";
-const dbVersion = 1;
+const dbVersion = 2;
 let db;
+
+// --- ストア/移行設定 ---
+const STORE_LEGACY = "weeklyMenus";       // 旧ストア（破壊しない）
+const STORE_V2 = "weeklyMenus_v2";        // 新ストア（ISO週年に統一）
+const STORAGE_WEEK_SYSTEM = "calendarWeekSystem"; // 'v2' | 'legacy'
+
+function getActiveStoreName() {
+  try {
+    const v = localStorage.getItem(STORAGE_WEEK_SYSTEM);
+    return v === 'legacy' ? STORE_LEGACY : STORE_V2;
+  } catch (_) {
+    return STORE_V2;
+  }
+}
+
+/**
+ * v2ストア上で WeekRecord をマージして保存（既存データを壊さない）
+ * - 既存が優先
+ * - 既存に無い(day/meal)だけを埋める
+ * @param {IDBObjectStore} store
+ * @param {{week: string, data: object}} incoming
+ * @param {Function} done コールバック
+ */
+function mergePutWeekRecord(store, incoming, done) {
+  const getReq = store.get(incoming.week);
+  getReq.onsuccess = (e) => {
+    const existing = e.target.result;
+    if (!existing || !existing.data) {
+      store.put(incoming);
+      done();
+      return;
+    }
+    const merged = { week: incoming.week, data: existing.data || {} };
+    const inData = incoming.data || {};
+    Object.keys(inData).forEach((day) => {
+      merged.data[day] = merged.data[day] || {};
+      const mealsObj = inData[day] || {};
+      Object.keys(mealsObj).forEach((meal) => {
+        if (merged.data[day][meal] == null) {
+          merged.data[day][meal] = mealsObj[meal];
+        }
+      });
+    });
+    store.put(merged);
+    done();
+  };
+  getReq.onerror = () => {
+    // getに失敗しても put は試す（保険）
+    store.put(incoming);
+    done();
+  };
+}
 
 // IndexedDBを初期化する関数
 function openDatabase() {
@@ -8,9 +60,51 @@ function openDatabase() {
     const request = indexedDB.open(dbName, dbVersion);
     request.onupgradeneeded = (event) => {
       db = event.target.result;
-      // "weeklyMenus" オブジェクトストアを作成（キーはweek）
-      if (!db.objectStoreNames.contains("weeklyMenus")) {
-        db.createObjectStore("weeklyMenus", { keyPath: "week" });
+      const tx = event.target.transaction;
+
+      // 旧ストア（存在しなければ作るが、基本は既存ユーザーが持っている想定）
+      if (!db.objectStoreNames.contains(STORE_LEGACY)) {
+        db.createObjectStore(STORE_LEGACY, { keyPath: "week" });
+      }
+      // 新ストア（v2）
+      if (!db.objectStoreNames.contains(STORE_V2)) {
+        db.createObjectStore(STORE_V2, { keyPath: "week" });
+      }
+
+      // --- v1 -> v2 への複製移行 ---
+      // 旧ストアは残し、v2に「複製」する。年またぎの ambiguity もあるため
+      // 旧キーから推測できる複数候補へコピーする（データ保全優先）。
+      try {
+        const legacyStore = tx.objectStore(STORE_LEGACY);
+        const v2Store = tx.objectStore(STORE_V2);
+        const cursorReq = legacyStore.openCursor();
+        cursorReq.onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (!cursor) return;
+          const legacyRecord = cursor.value;
+          const legacyWeek = legacyRecord && legacyRecord.week;
+          const data = legacyRecord && legacyRecord.data ? legacyRecord.data : {};
+
+          const infer = (typeof window !== 'undefined' && window.weekUtils && window.weekUtils.inferIsoTargetsFromLegacyWeekString)
+            ? window.weekUtils.inferIsoTargetsFromLegacyWeekString
+            : null;
+
+          const targets = infer ? infer(String(legacyWeek || '')) : [String(legacyWeek || '')];
+          let pending = targets.length;
+          if (pending === 0) {
+            cursor.continue();
+            return;
+          }
+          targets.forEach((t) => {
+            const incoming = { week: t, data };
+            mergePutWeekRecord(v2Store, incoming, () => {
+              pending -= 1;
+              if (pending === 0) cursor.continue();
+            });
+          });
+        };
+      } catch (err) {
+        console.warn('v2 migration skipped:', err);
       }
     };
 
@@ -118,8 +212,9 @@ async function updateWeeklyRecord(cell, recordData) {
  */
 function saveWeeklyMenu(weekRecord) {
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["weeklyMenus"], "readwrite");
-    const store = transaction.objectStore("weeklyMenus");
+    const storeName = getActiveStoreName();
+    const transaction = db.transaction([storeName], "readwrite");
+    const store = transaction.objectStore(storeName);
     const request = store.put(weekRecord);
 
     request.onsuccess = () => resolve(weekRecord);
@@ -134,8 +229,9 @@ function saveWeeklyMenu(weekRecord) {
  */
 function getWeeklyMenu(week) {
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["weeklyMenus"], "readonly");
-    const store = transaction.objectStore("weeklyMenus");
+    const storeName = getActiveStoreName();
+    const transaction = db.transaction([storeName], "readonly");
+    const store = transaction.objectStore(storeName);
     const request = store.get(week);
 
     request.onsuccess = (event) => resolve(event.target.result);
@@ -149,8 +245,9 @@ function getWeeklyMenu(week) {
  */
 function getAllWeeklyMenus() {
   return new Promise((resolve, reject) => {
-    const transaction = db.transaction(["weeklyMenus"], "readonly");
-    const store = transaction.objectStore("weeklyMenus");
+    const storeName = getActiveStoreName();
+    const transaction = db.transaction([storeName], "readonly");
+    const store = transaction.objectStore(storeName);
     const request = store.getAll();
     request.onsuccess = (event) => resolve(event.target.result || []);
     request.onerror = (event) => reject(event.target.error);
