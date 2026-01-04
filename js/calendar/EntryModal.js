@@ -238,7 +238,13 @@ class EntryModal {
     this.reset();
     this.selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
     this.currentCell = document.querySelector(`.day-cell[data-date="${date}"][data-meal="${meal}"]`);
-    this.currentWeekDay = weekDays[new Date(date).getDay()];
+    // "YYYY-MM-DD"形式の文字列をローカル日付としてパース
+    const [year, month, day] = date.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    // getDay()は0=日曜、1=月曜...6=土曜を返す
+    // weekDays配列は["月", "火", "水", "木", "金", "土", "日"]なので、インデックスを調整
+    const dayIndex = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
+    this.currentWeekDay = weekDays[dayIndex];
     this.currentMeal = meal;
     this.updateDateDisplay(date, meal);
 
@@ -286,9 +292,14 @@ class EntryModal {
 
   // 日付の表示更新
   updateDateDisplay(date, meal) {
-    const dateObj = new Date(date);
+    // "YYYY-MM-DD"形式の文字列をローカル日付としてパース
+    const [year, month, day] = date.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
     this.dateDisplay.textContent = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
-    this.dayDisplay.textContent = `(${days[dateObj.getDay()]}) ${meal}`;
+    // getDay()は0=日曜、1=月曜...6=土曜を返す
+    // days配列は["月", "火", "水", "木", "金", "土", "日"]なので、インデックスを調整
+    const dayIndex = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
+    this.dayDisplay.textContent = `(${days[dayIndex]}) ${meal}`;
   }
 
   // OCR後の表示処理

@@ -12,7 +12,15 @@ const meals = ["朝", "昼", "夜"];
 if (typeof window !== 'undefined' && window.weekUtils) {
   // 既存コード互換のため、従来のグローバル関数名を維持
   window.getISOWeekString = window.getISOWeekString || window.weekUtils.getISOWeekString;
-  window.getMondayDateFromWeek = window.getMondayDateFromWeek || window.weekUtils.getMondayDateFromWeek;
+  // getMondayDateFromWeekはISO形式（YYYY-MM-DD）を返すラッパー関数を提供
+  window.getMondayDateFromWeek = window.getMondayDateFromWeek || function(weekString) {
+    const monday = window.weekUtils.getMondayDateObjectFromWeekString(weekString);
+    // 日付をISO形式でフォーマット (例: "2024-01-01") - タイムゾーン問題を避けるため
+    const year = monday.getFullYear();
+    const month = String(monday.getMonth() + 1).padStart(2, '0');
+    const date = String(monday.getDate()).padStart(2, '0');
+    return `${year}-${month}-${date}`;
+  };
 }
 
 

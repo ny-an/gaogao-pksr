@@ -68,11 +68,16 @@ class CalendarRenderer {
 
   // カレンダーテーブルに選択週の日付を反映
   updateWeekDates(weekString) {
-    const mondayDate = new Date(getMondayDateFromWeek(weekString));
+    const mondayDateStr = getMondayDateFromWeek(weekString);
+    const mondayDate = new Date(mondayDateStr);
     days.forEach((day, idx) => {
       const currentDate = new Date(mondayDate);
       currentDate.setDate(mondayDate.getDate() + idx);
-      const dateStr = currentDate.toISOString().split('T')[0];
+      // ローカル日付を直接フォーマット（UTC変換による日付ずれを防ぐ）
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const date = String(currentDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${date}`;
       // 日付要素
       const dateElements = document.querySelectorAll('.date-container');
       const dateEl = dateElements[idx]?.querySelector('.date');
