@@ -175,12 +175,6 @@ async function updateWeeklyRecord(cell, recordData) {
   // table要素のdata-week属性から現在選択中の週を取得
   const calendarTable = document.querySelector(".calendar-table");
   const selectedWeek = calendarTable.getAttribute("data-week");
-  // #region agent log
-  const cellDateAttr = cell.getAttribute("data-date");
-  const dateObj = cellDateAttr ? new Date(cellDateAttr) : null;
-  const calculatedWeek = dateObj ? getISOWeekString(dateObj) : null;
-  fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:77',message:'updateWeeklyRecord entry',data:{day,meal,selectedWeek,cellDateAttr,calculatedWeek,dateObjISO:dateObj?.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
 
   let weekRecord = await dbAPI.getWeeklyMenu(selectedWeek);
   if (!weekRecord) {
@@ -190,15 +184,9 @@ async function updateWeeklyRecord(cell, recordData) {
     weekRecord.data[day] = {};
   }
   weekRecord.data[day][meal] = recordData;
-  // #region agent log
-  fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:92',message:'before saveWeeklyMenu',data:{selectedWeek,day,meal,weekRecordWeek:weekRecord.week},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
 
   try {
     await dbAPI.saveWeeklyMenu(weekRecord);
-    // #region agent log
-    fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'db.js:95',message:'after saveWeeklyMenu',data:{selectedWeek,day,meal},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
   } catch (error) {
     console.error("DB保存エラー:", error);
   }
