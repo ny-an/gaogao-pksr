@@ -238,7 +238,13 @@ class EntryModal {
     this.reset();
     this.selectedWeek = document.querySelector(".calendar-table").getAttribute("data-week");
     this.currentCell = document.querySelector(`.day-cell[data-date="${date}"][data-meal="${meal}"]`);
-    this.currentWeekDay = weekDays[new Date(date).getDay()];
+    // "YYYY-MM-DD"形式の文字列をローカル日付としてパース
+    const [year, month, day] = date.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    // getDay()は0=日曜、1=月曜...6=土曜を返す
+    // weekDays配列は["月", "火", "水", "木", "金", "土", "日"]なので、インデックスを調整
+    const dayIndex = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
+    this.currentWeekDay = weekDays[dayIndex];
     this.currentMeal = meal;
     this.updateDateDisplay(date, meal);
 
@@ -286,9 +292,14 @@ class EntryModal {
 
   // 日付の表示更新
   updateDateDisplay(date, meal) {
-    const dateObj = new Date(date);
+    // "YYYY-MM-DD"形式の文字列をローカル日付としてパース
+    const [year, month, day] = date.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
     this.dateDisplay.textContent = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
-    this.dayDisplay.textContent = `(${days[dateObj.getDay()]}) ${meal}`;
+    // getDay()は0=日曜、1=月曜...6=土曜を返す
+    // days配列は["月", "火", "水", "木", "金", "土", "日"]なので、インデックスを調整
+    const dayIndex = dateObj.getDay() === 0 ? 6 : dateObj.getDay() - 1;
+    this.dayDisplay.textContent = `(${days[dayIndex]}) ${meal}`;
   }
 
   // OCR後の表示処理
@@ -354,15 +365,7 @@ class EntryModal {
       await calendarRender.updateCellContent(this.currentCell, record);
 
       // データベースの更新
-      // #region agent log
-      const day = this.currentCell.getAttribute("data-day");
-      const meal = this.currentCell.getAttribute("data-meal");
-      fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EntryModal.js:357',message:'before updateWeeklyRecord',data:{day,meal,cellWeekAttr,calculatedWeek,cellDateAttr},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       await dbAPI.updateWeeklyRecord(this.currentCell, record);
-      // #region agent log
-      fetch('http://127.0.0.1:7250/ingest/f725afde-511d-41ad-8c06-69753d91160d',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'EntryModal.js:360',message:'after updateWeeklyRecord',data:{day,meal,cellWeekAttr},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
 
       // エネルギー合計の再計算
       await recalcEnergyTotals();
