@@ -417,6 +417,21 @@ function initWeeklyMenuModal() {
     copyButton.addEventListener('click', exporter.copyCSVContent);
   }
 
+  // 備考欄も出力チェック変更時にCSVを再生成
+  const exportIncludeMemo = document.getElementById('exportIncludeMemo');
+  if (exportIncludeMemo) {
+    exportIncludeMemo.addEventListener('change', async () => {
+      const calendarTable = document.querySelector('.calendar-table');
+      const selectedWeek = calendarTable?.getAttribute('data-week');
+      if (!selectedWeek) return;
+      const includeMemo = exportIncludeMemo.checked;
+      const csvContent = await exporter.createWeeklyDataCSV(selectedWeek, includeMemo);
+      if (csvContent) {
+        document.getElementById('csvContent').value = csvContent;
+      }
+    });
+  }
+
   // モーダルを閉じる機能
   const modal = document.getElementById('csvModal');
   const closeBtn = modal.querySelector('.close');
