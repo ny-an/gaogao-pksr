@@ -22,6 +22,8 @@ class EntryModal {
     this.saveButton = document.getElementById('saveEntryButton');
     this.imageButton = document.getElementById('imageSelectButton');
     this.imagePreview = document.getElementById('selectedImagePreview');
+    this.listImageDisplayOptions = document.getElementById('listImageDisplayOptions');
+    this.preferCoverRadios = document.querySelectorAll('input[name="preferCoverInList"]');
 
     // memo
     this.memoEditArea = document.getElementById('memoEditArea');
@@ -257,6 +259,7 @@ class EntryModal {
       this.isManualInputFlg = record.isManual;
       this.ocrEnergyValue.textContent = record.energy?.toLocaleString() ?? '-';
       this.memoTextArea.value = memoStr;
+      if (record.image) this.setListImageDisplayFromRecord(record);
     }
 
     // 大成功表示切り替え
@@ -288,6 +291,12 @@ class EntryModal {
     this.currentMeal = null;
     this.ocrEnergyValue.classList.remove("extra-tasty");
     this.extraFlg = false;
+    if (this.listImageDisplayOptions) {
+      this.listImageDisplayOptions.style.display = 'none';
+      this.preferCoverRadios.forEach(radio => {
+        radio.checked = radio.value === 'contain';
+      });
+    }
   }
 
   // 日付の表示更新
@@ -334,6 +343,26 @@ class EntryModal {
 
     this.imagePreview.innerHTML = '';
     this.imagePreview.appendChild(wrapper);
+
+    // 一覧表示オプションを表示し、新規アップロード時は OCR 成功なら中央・失敗なら全体をデフォルトに
+    if (this.listImageDisplayOptions) {
+      this.listImageDisplayOptions.style.display = '';
+      const preferCover = !error_message;
+      this.preferCoverRadios.forEach(radio => {
+        radio.checked = (radio.value === 'cover') === preferCover;
+      });
+    }
+  }
+
+  // 既存レコードを開いたときの一覧表示オプション初期値
+  setListImageDisplayFromRecord(record) {
+    if (!record?.image || !this.listImageDisplayOptions) return;
+    this.listImageDisplayOptions.style.display = '';
+    const preferCover = record.preferCoverInList === true ||
+      (record.preferCoverInList !== false && !record.isManual && record.energy != 0);
+    this.preferCoverRadios.forEach(radio => {
+      radio.checked = (radio.value === 'cover') === preferCover;
+    });
   }
 
   // 保存ボタン
@@ -358,6 +387,8 @@ class EntryModal {
     record.energy = energy;
     record.extra = this.extraFlg;
     record.isManual = this.isManualInputFlg;
+    const checkedCover = Array.from(this.preferCoverRadios || []).find(r => r.checked);
+    record.preferCoverInList = checkedCover ? checkedCover.value === 'cover' : undefined;
     console.log('save before record:', record);
 
     try {
