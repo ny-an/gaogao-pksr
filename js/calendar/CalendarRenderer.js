@@ -21,9 +21,10 @@ class CalendarRenderer {
   // 単一セルの内容を表示切替
   updateCellContent(cell, record) {
 
-    // 状態管理でclass変更
-    let imgClass = record.isManual ? "image-manual" : "";
-    if(record.energy == 0) imgClass = "image-manual";
+    // 一覧表示: 中央(cover) or 全体(contain)。preferCoverInList が明示されていればそれに従い、未設定のときは isManual/energy で従来どおり
+    const useCoverInList = record.preferCoverInList === true ||
+      (record.preferCoverInList !== false && !record.isManual && record.energy != 0);
+    const imgClass = useCoverInList ? "" : "image-manual";
 
     // メモプレビュー：1行目の15文字まで取得
     const maxLen = 15;
