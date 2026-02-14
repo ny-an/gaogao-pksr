@@ -10,8 +10,9 @@ class WeeklyDataExporter {
     console.log('showWeeklyDataCSV start');
     const calendarTable = document.querySelector(".calendar-table");
     const selectedWeek = calendarTable.getAttribute("data-week");
+    const includeMemo = document.getElementById('exportIncludeMemo')?.checked !== false;
 
-    const csvContent = await this.createWeeklyDataCSV(selectedWeek);
+    const csvContent = await this.createWeeklyDataCSV(selectedWeek, includeMemo);
 
     if (!csvContent) {
       alert('エクスポートするデータがありません。');
@@ -30,7 +31,8 @@ class WeeklyDataExporter {
   }
 
   // CSV文字列作成専用
-  async createWeeklyDataCSV (selectedWeek) {
+  // includeMemo: true のとき「朝備考,昼備考,夜備考」列を出力（デフォルト true）
+  async createWeeklyDataCSV (selectedWeek, includeMemo = true) {
     const weekRecord = await this.dbAPI.getWeeklyMenu(selectedWeek);
 
     if (!weekRecord || !weekRecord.data) {
@@ -38,7 +40,9 @@ class WeeklyDataExporter {
     }
 
     const mondayDate = new Date(getMondayDateFromWeek(selectedWeek));
-    let csvContent = '日付,曜日,朝,昼,夜,日計\n';
+    let csvContent = includeMemo
+      ? '日付,曜日,朝,昼,夜,日計,朝備考,昼備考,夜備考\n'
+      : '日付,曜日,朝,昼,夜,日計\n';
 
     let morningTotal = 0;
     let noonTotal = 0;
@@ -74,15 +78,31 @@ class WeeklyDataExporter {
       if (noonObj?.extra) noon = '!' + noon;
       if (nightObj?.extra) night = '!' + night;
 
-      const row = `${dateStr},${day},${morning},${noon},${night},${dayTotal}\n`;
-      console.log('row:',row);
+      let row;
+      if (includeMemo) {
+        const escapeCsvCell = (val) => {
+          const s = (val != null && val !== '') ? String(val).trim() : '';
+          if (s === '') return '';
+          if (/[,"\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+          return s;
+        };
+        const morningMemo = escapeCsvCell(morningObj?.memo);
+        const noonMemo = escapeCsvCell(noonObj?.memo);
+        const nightMemo = escapeCsvCell(nightObj?.memo);
+        row = `${dateStr},${day},${morning},${noon},${night},${dayTotal},${morningMemo},${noonMemo},${nightMemo}\n`;
+      } else {
+        row = `${dateStr},${day},${morning},${noon},${night},${dayTotal}\n`;
+      }
+      console.log('row:', row);
 
       csvContent += row;
     });
 
     // 週間合計を追加
     const weeklyTotal = document.getElementById('weeklyEnergyNum').textContent.replace(/,/g, '');
-    csvContent += `合計,${morningTotal},${noonTotal},${nightTotal},${weeklyTotal}\n`;
+    csvContent += includeMemo
+      ? `合計,,${morningTotal},${noonTotal},${nightTotal},${weeklyTotal},,,\n`
+      : `合計,,${morningTotal},${noonTotal},${nightTotal},${weeklyTotal}\n`;
 
     return csvContent;
   }

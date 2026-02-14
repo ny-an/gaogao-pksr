@@ -289,6 +289,18 @@ $button-orange-color: #f0ab42;
       margin: 15px 0;
     }
 
+    .export-option {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      input[type="checkbox"] {
+        margin-right: 6px;
+        vertical-align: middle;
+      }
+    }
+
     textarea#csvContent {
       width: 275px;
       height: 200px;
