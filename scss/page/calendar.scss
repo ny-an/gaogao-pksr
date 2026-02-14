@@ -562,6 +562,34 @@ $button-orange-color: #f0ab42;
           }
         }
       }
+
+      .list-image-display-options {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px 16px;
+        width: 100%;
+        padding: 8px 0;
+
+        .list-image-display-label {
+          font-size: 14px;
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        .list-image-display-option {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          user-select: none;
+
+          input[type="radio"] {
+            margin: 0;
+            accent-color: #2196f3;
+          }
+        }
+      }
     }
 
     .save-button {
