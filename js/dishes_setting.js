@@ -2,7 +2,7 @@
 const FB_BONUS_MIN = 0;
 const FB_BONUS_MAX = 85;
 const RECIPE_LEVEL_MIN = 0;
-const RECIPE_LEVEL_MAX = 65;
+const RECIPE_LEVEL_MAX = 70;
 
 /**
  * 入力値を検証し、範囲内に収める
