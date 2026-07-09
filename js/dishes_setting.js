@@ -137,6 +137,47 @@ function handleSettingChange() {
   }
 }
 
+/**
+ * イベントボーナス（料理エナジー倍率）のoptionを生成する
+ * events.js の EVENT_COOKING_BONUS_VALUES を優先する
+ */
+function initializeEventBonusOptions() {
+  const eventBonusSelect = document.getElementById('eventBonus');
+  if (!eventBonusSelect) {
+    return;
+  }
+
+  const values =
+    typeof EVENT_COOKING_BONUS_VALUES !== "undefined"
+      ? EVENT_COOKING_BONUS_VALUES
+      : [1, 1.1, 1.25, 1.5];
+
+  const previousValue = eventBonusSelect.value || localStorage.getItem('eventBonus') || '1';
+  eventBonusSelect.innerHTML = '';
+
+  values.forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value === 1 ? '1' : value.toString();
+    option.textContent = value === 1 ? '通常' : `${value}倍`;
+    eventBonusSelect.appendChild(option);
+  });
+
+  // 保存値があれば復元、なければ現在有効なイベント倍率を候補にする
+  const parsedPrevious = parseFloat(previousValue);
+  const hasPrevious = values.some((v) => v === parsedPrevious);
+  if (hasPrevious) {
+    eventBonusSelect.value = parsedPrevious === 1 ? '1' : previousValue;
+  } else if (typeof getActiveCookingEnergyMultiplier === 'function') {
+    const active = getActiveCookingEnergyMultiplier();
+    const hasActive = values.some((v) => v === active);
+    eventBonusSelect.value = hasActive
+      ? (active === 1 ? '1' : active.toString())
+      : '1';
+  } else {
+    eventBonusSelect.value = '1';
+  }
+}
+
 // 設定関連のselect要素の初期化
 function initializeSettingOptions() {
 
@@ -164,4 +205,7 @@ function initializeSettingOptions() {
       recipeLevelSelect.appendChild(option);
     }
   }
+
+  // イベントボーナス（料理エナジー倍率）のoption生成
+  initializeEventBonusOptions();
 }

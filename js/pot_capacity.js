@@ -4,7 +4,11 @@ const POT_CAPACITY_MAX = 81;
 const POT_CAPACITY_STEP = 3;
 const COOKING_POWER_UP_MIN = 0;
 const COOKING_POWER_UP_MAX = 200;
-const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5, 2.0]; // イベントボーナスの選択肢
+// イベントボーナスの選択肢（events.js の EVENT_POT_BONUS_VALUES を優先）
+const EVENT_BONUS_VALUES =
+  typeof EVENT_POT_BONUS_VALUES !== "undefined"
+    ? EVENT_POT_BONUS_VALUES
+    : [1.0, 1.25, 1.5, 2.0];
 
 /**
  * 鍋容量を計算する
