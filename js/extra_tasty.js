@@ -4,6 +4,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const energyIcon = document.getElementById('energyIcon');
   const energyTastyIcon = document.getElementById('extraTastyIcon');
+  const energyValueRaw = document.getElementById('energyValueRaw');
   const energyValue = document.getElementById('energyValue');
 
   // HTML要素の複製用関数を追加
@@ -24,17 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Extra Tastyアイコンをクリックしたときの処理
   energyIcon.addEventListener('click', () => {
     if (!isClickable) return;
-    const currentEnergy = parseInt(energyValue.textContent.replace(/,/g, ''), 10); // カンマを除去して数値に変換
+    const currentEnergy = parseFloat(energyValueRaw.textContent); // 数値に変換
     let targetEnergy;
 
     if (clickState === 0) {
       // 1回目のクリック: 2倍
-      targetEnergy = currentEnergy * 2;
+      targetEnergy = Math.floor(currentEnergy * 2);
       clickState = 1;
       energyValue.classList.add('doubled');
     } else if (clickState === 1) {
-      // 2回目のクリック: さらに1.5倍
-      targetEnergy = currentEnergy * 1.5;
+      // 2回目のクリック: 3倍
+      targetEnergy = Math.floor(currentEnergy * 3);
       clickState = 2;
       energyValue.classList.add('tripled');
 

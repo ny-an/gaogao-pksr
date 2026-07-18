@@ -65,7 +65,7 @@ function getCookingEnergy() {
   console.log('eventBonus:',eventBonus)
 
   // 最終エナジー
-  const finalEnergy = Math.floor((recipeDisplayEnergy + extraAddEnergy ) * fbBonus * eventBonus);
+  const finalEnergy = (recipeDisplayEnergy + extraAddEnergy ) * fbBonus * eventBonus;
   console.log('finalEnergy:',finalEnergy)
   console.log('type',typeof finalEnergy);
 
@@ -74,7 +74,9 @@ function getCookingEnergy() {
 
 // 料理エナジー表示
 function setCookingEnergy(energy) {
-  const finalEnergy = energy ?? getCookingEnergy(); // エナジーを取得
+  const rawEnergy = energy ?? getCookingEnergy(); // エナジーを取得
+  const finalEnergy = Math.floor(rawEnergy);
+  document.getElementById('energyValueRaw').textContent = rawEnergy
   document.getElementById('energyValue').textContent = finalEnergy.toLocaleString(); // エナジーを表示
 
   // エナジーを送信
