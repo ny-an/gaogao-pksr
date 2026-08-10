@@ -212,6 +212,56 @@
     </div>
 </div>
 
+<!-- 目標エナジー逆算モーダル（1週合計セルのダブルクリックで起動） -->
+<div id="energyReverseModal" class="modal energy-reverse-modal" aria-hidden="true">
+    <div class="modal-content energy-reverse-content" role="dialog" aria-modal="true" aria-labelledby="energyReverseTitle">
+        <button type="button" class="energy-reverse-close" aria-label="閉じる">&times;</button>
+        <h2 id="energyReverseTitle">エナジー逆算</h2>
+        <p class="energy-reverse-pot-row">
+            現在のなべ容量 <strong><span id="energyReversePotCapacity">0</span>個</strong>
+        </p>
+
+        <form id="energyReverseForm">
+            <label class="energy-reverse-field energy-reverse-target-field" for="energyReverseTarget">
+                <span>目標エナジー</span>
+                <input type="number" id="energyReverseTarget" min="1" max="99999999" step="1" inputmode="numeric" placeholder="目標数値を入力" required>
+            </label>
+
+            <div class="energy-reverse-settings">
+                <label class="energy-reverse-field" for="energyReverseFbBonus">
+                    <span>FBボーナス</span>
+                    <select id="energyReverseFbBonus"></select>
+                </label>
+                <label class="energy-reverse-field" for="energyReverseRecipeLevel">
+                    <span>レシピレベル</span>
+                    <select id="energyReverseRecipeLevel"></select>
+                </label>
+                <label class="energy-reverse-field" for="energyReverseEventBonus">
+                    <span>イベント</span>
+                    <select id="energyReverseEventBonus"></select>
+                </label>
+                <label class="energy-reverse-field" for="energyReverseSuccess">
+                    <span>できばえ</span>
+                    <select id="energyReverseSuccess">
+                        <option value="1">通常</option>
+                        <option value="2">大成功（2倍）</option>
+                        <option value="3">超成功（3倍）</option>
+                    </select>
+                </label>
+            </div>
+
+            <label class="energy-reverse-field" for="energyReverseDish">
+                <span>料理</span>
+                <select id="energyReverseDish"></select>
+            </label>
+
+            <button type="submit" class="energy-reverse-submit">逆算する</button>
+        </form>
+
+        <div id="energyReverseResult" class="energy-reverse-result" aria-live="polite"></div>
+    </div>
+</div>
+
 <!-- footer -->
 <footer class="app-footer">
     <div class="footer-container">
@@ -255,11 +305,13 @@
 <script src="js/version_manager.js"></script>
 <script src="js/dishes_setting.js"></script>
 <script src="js/pot_capacity.js"></script>
+<script src="js/energy_reverse.js"></script>
 
 <!-- DOM event -->
 <script src="js/setting_icon.js"></script>
 <script src="js/dishes_energy.js"></script>
 <script src="js/extra_foods.js"></script>
+<script src="js/energy_reverse_ui.js"></script>
 
 <!-- メイン -->
 <script src="js/app.js"></script>
