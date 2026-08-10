@@ -1,0 +1,256 @@
+.energy-reverse-open {
+  overflow: hidden;
+}
+
+.energy-reverse-modal {
+  &.open {
+    display: block;
+  }
+
+  .energy-reverse-content {
+    width: calc(100% - 32px);
+    max-width: 440px;
+    max-height: calc(100vh - 32px);
+    padding: 22px 20px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    text-align: left;
+    border-radius: 12px;
+  }
+
+  .energy-reverse-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    padding: 4px 8px;
+    border: 0;
+    background: transparent;
+    color: #777;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  h2 {
+    margin: 0 32px 14px;
+    color: #333;
+    font-size: 1.35rem;
+    text-align: center;
+  }
+
+  .energy-reverse-pot-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 18px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    background: #f2f8f2;
+    color: #555;
+    font-size: 14px;
+
+    strong {
+      color: $primary-color;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 16px;
+    }
+  }
+
+  .energy-reverse-settings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .energy-reverse-field {
+    display: block;
+    min-width: 0;
+    margin-bottom: 14px;
+
+    > span {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      height: 42px;
+      margin: 0;
+      padding: 8px 28px 8px 10px;
+      box-sizing: border-box;
+      border: 1px solid #d8d8d8;
+      border-radius: 6px;
+      background-color: #fff;
+      color: #333;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: normal;
+      text-align: center;
+      text-align-last: center;
+
+      &:focus {
+        border-color: $primary-color;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.14);
+      }
+    }
+
+    input {
+      padding-right: 10px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+
+  .energy-reverse-target-field {
+    > span {
+      font-size: 14px;
+    }
+  }
+
+  .energy-reverse-submit {
+    width: 100%;
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 6px;
+    background: $primary-color;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover {
+      background: $primary-color-hover;
+    }
+  }
+
+  .energy-reverse-result {
+    &:empty {
+      display: none;
+    }
+
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #e3e3e3;
+  }
+
+  .energy-reverse-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: 12px;
+
+    strong {
+      color: #f0ab42;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 22px;
+    }
+  }
+
+  .energy-reverse-exact-label {
+    color: $primary-color;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .energy-reverse-capacity-detail,
+  .energy-reverse-result-note {
+    color: #777;
+    font-size: 12px;
+  }
+
+  .energy-reverse-food-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .energy-reverse-food-item {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fafafa;
+
+    img {
+      width: 36px;
+      height: 36px;
+    }
+
+    strong {
+      color: #4f6570;
+      font-family: 'Montserrat', sans-serif;
+      white-space: nowrap;
+    }
+  }
+
+  .energy-reverse-food-name {
+    overflow: hidden;
+    color: #555;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .energy-reverse-result-note {
+    margin: 10px 0 0;
+    text-align: center;
+  }
+
+  .energy-reverse-no-match,
+  .energy-reverse-no-extra {
+    margin: 0;
+    color: #777;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .energy-reverse-no-match {
+    font-size: 18px;
+  }
+
+  .energy-reverse-no-extra {
+    grid-column: 1 / -1;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .energy-reverse-modal {
+    .energy-reverse-content {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    .energy-reverse-settings {
+      gap: 6px;
+    }
+
+    .energy-reverse-field {
+      > span {
+        font-size: 11px;
+      }
+
+      select {
+        padding-right: 22px;
+        padding-left: 6px;
+        font-size: 14px;
+      }
+    }
+
+    .energy-reverse-food-list {
+      grid-template-columns: 1fr;
+    }
+  }
+}
