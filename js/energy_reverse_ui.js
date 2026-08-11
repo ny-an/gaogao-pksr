@@ -4,6 +4,7 @@
   const ALL_DISHES_VALUE = '__all_dishes__';
   const ALL_SUCCESS_VALUE = 'all';
   const ALL_RECIPE_LEVELS_VALUE = 'all';
+  const ALL_EVENT_BONUSES_VALUE = 'all';
   const MIN_CALCULATING_DISPLAY_MS = 400;
 
   function copySelectOptions(sourceId, target) {
@@ -73,6 +74,14 @@
     return value === ALL_SUCCESS_VALUE ? [1, 2, 3] : [Number(value)];
   }
 
+  function getEventBonuses(value) {
+    if (value !== ALL_EVENT_BONUSES_VALUE) return [value];
+
+    return Array.from(document.getElementById('eventBonus')?.options || [])
+      .map(option => option.value)
+      .filter(Boolean);
+  }
+
   function getRecipeLevels(value) {
     if (value !== ALL_RECIPE_LEVELS_VALUE) return [Number(value)];
 
@@ -92,17 +101,24 @@
     select.value = ALL_RECIPE_LEVELS_VALUE;
   }
 
-  function getCurrentSuccessMultiplier() {
-    if (document.getElementById('extraTastyIcon2')) return '3';
+  function populateEventBonusOptions(select) {
+    copySelectOptions('eventBonus', select);
 
-    const energyValue = document.getElementById('energyValue');
-    return energyValue?.classList.contains('doubled') ? '2' : '1';
+    const allBonusesOption = document.createElement('option');
+    allBonusesOption.value = ALL_EVENT_BONUSES_VALUE;
+    allBonusesOption.textContent = '指定なし（全計算）';
+    select.prepend(allBonusesOption);
+    select.value = '1';
   }
 
   function getSuccessLabel(multiplier) {
     if (Number(multiplier) === 3) return '超成功（3倍）';
     if (Number(multiplier) === 2) return '大成功（2倍）';
     return '通常';
+  }
+
+  function getEventBonusLabel(eventBonus) {
+    return Number(eventBonus) === 1 ? '通常' : `${eventBonus}倍`;
   }
 
   function populateDishCategoryOptions(select) {
@@ -266,7 +282,7 @@
       'レシピレベル',
       result.dishName ? `Lv${result.recipeLevel}` : '対象外'
     );
-    appendCondition(conditionList, 'イベント', conditions.eventBonusLabel);
+    appendCondition(conditionList, 'イベント', getEventBonusLabel(result.eventBonus));
     appendCondition(conditionList, 'できばえ', getSuccessLabel(result.successMultiplier));
     appendCondition(conditionList, '料理エナジー', result.recipeDisplayEnergy.toLocaleString());
     appendCondition(conditionList, '追加エナジー', result.extraEnergy.toLocaleString());
@@ -356,8 +372,8 @@
     function openModal() {
       copySelectOptions('fbBonus', fbBonusSelect);
       populateRecipeLevelOptions(recipeLevelSelect);
-      copySelectOptions('eventBonus', eventBonusSelect);
-      successSelect.value = getCurrentSuccessMultiplier();
+      populateEventBonusOptions(eventBonusSelect);
+      successSelect.value = ALL_SUCCESS_VALUE;
 
       const currentDish = document.getElementById('foodSelect')?.value || '';
       dishCategorySelect.value = currentDish
@@ -430,7 +446,7 @@
         recipeLevels: getRecipeLevels(recipeLevelSelect.value),
         recipeBonusPercentMap: recipeLevelBonusList,
         fbBonusPercent: Number(fbBonusSelect.value),
-        eventBonus: eventBonusSelect.value,
+        eventBonuses: getEventBonuses(eventBonusSelect.value),
         successMultipliers: getSuccessMultipliers(successSelect.value),
         potCapacity,
         recipes: getRecipeCandidates(dishCategorySelect.value, dishSelect.value),
@@ -439,7 +455,6 @@
       };
       const resultConditions = {
         fbBonusPercent: calculationOptions.fbBonusPercent,
-        eventBonusLabel: eventBonusSelect.selectedOptions[0]?.textContent || '通常',
       };
 
       clearResult(resultElement);
