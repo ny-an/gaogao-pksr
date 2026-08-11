@@ -449,7 +449,6 @@
     alternativeList.className = 'energy-reverse-alternative-list';
     alternativeSection.append(alternativeHeader, alternativeStatus, alternativeList);
 
-    let hasSearchedAlternatives = false;
     let isSearchingAlternatives = false;
     function searchAlternativePatterns() {
       if (isSearchingAlternatives) return;
@@ -482,14 +481,10 @@
             : '別の追加食材パターンはありません。';
           searchButton.disabled = false;
           isSearchingAlternatives = false;
-          hasSearchedAlternatives = true;
         }, 0);
       });
     }
 
-    candidate.addEventListener('toggle', () => {
-      if (candidate.open && !hasSearchedAlternatives) searchAlternativePatterns();
-    });
     searchButton.addEventListener('click', searchAlternativePatterns);
 
     detail.append(
