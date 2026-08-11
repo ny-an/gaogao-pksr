@@ -286,6 +286,17 @@
         .map(Number)
         .filter(multiplier => Number.isFinite(multiplier) && multiplier > 0)
     ));
+    const requestedEventBonuses = Array.isArray(options.eventBonuses)
+      ? options.eventBonuses
+      : [options.eventBonus ?? '1'];
+    const eventBonuses = Array.from(new Set(
+      requestedEventBonuses
+        .map(String)
+        .filter(eventBonus => {
+          const fraction = decimalToFraction(eventBonus);
+          return fraction && fraction.numerator > 0;
+        })
+    ));
     const requestedRecipeLevels = Array.isArray(options.recipeLevels) && options.recipeLevels.length > 0
       ? options.recipeLevels
       : [options.recipeLevel ?? null];
@@ -317,26 +328,30 @@
           ? Number(options.recipeBonusPercent || 0)
           : Number(options.recipeBonusPercentMap?.[recipeLevel] ?? options.recipeBonusPercent ?? 0);
 
-        for (const successMultiplier of successMultipliers) {
-          const result = solveExactEnergy({
-            ...options,
-            recipeEnergy: Number(recipe.energy || 0),
-            recipeFoodCount: Number(recipe.foodCount || 0),
-            recipeBonusPercent,
-            successMultiplier,
-            foodCombinationFinder,
-          });
+        for (const eventBonus of eventBonuses) {
+          for (const successMultiplier of successMultipliers) {
+            const result = solveExactEnergy({
+              ...options,
+              recipeEnergy: Number(recipe.energy || 0),
+              recipeFoodCount: Number(recipe.foodCount || 0),
+              recipeBonusPercent,
+              eventBonus,
+              successMultiplier,
+              foodCombinationFinder,
+            });
 
-          if (!result.found) continue;
+            if (!result.found) continue;
 
-          results.push({
-            ...result,
-            dishName: String(recipe.name || ''),
-            dishCategory: String(recipe.category || ''),
-            recipeEnergy: Number(recipe.energy || 0),
-            recipeLevel,
-            recipeBonusPercent,
-          });
+            results.push({
+              ...result,
+              dishName: String(recipe.name || ''),
+              dishCategory: String(recipe.category || ''),
+              recipeEnergy: Number(recipe.energy || 0),
+              recipeLevel,
+              recipeBonusPercent,
+              eventBonus,
+            });
+          }
         }
       }
     }
@@ -359,12 +374,15 @@
       if (left.recipeLevel !== right.recipeLevel) {
         return Number(left.recipeLevel || 0) - Number(right.recipeLevel || 0);
       }
+      if (Number(left.eventBonus) !== Number(right.eventBonus)) {
+        return Number(left.eventBonus) - Number(right.eventBonus);
+      }
       return left.successMultiplier - right.successMultiplier;
     });
 
     const seenRecipeSuccessPairs = new Set();
     const uniqueResults = sortedResults.filter(result => {
-      const key = `${result.dishName}\u0000${result.successMultiplier}`;
+      const key = `${result.dishName}\u0000${result.eventBonus}\u0000${result.successMultiplier}`;
       if (seenRecipeSuccessPairs.has(key)) return false;
 
       seenRecipeSuccessPairs.add(key);

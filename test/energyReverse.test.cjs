@@ -333,3 +333,29 @@ test('候補は料理の基礎エナジーが高い順に最大10案を返す', 
     ['料理12', '料理11', '料理10', '料理9', '料理8', '料理7', '料理6', '料理5', '料理4', '料理3']
   );
 });
+
+test('イベント指定なしでは同じ料理の全倍率候補を返す', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 300,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonuses: ['1', '1.5'],
+    potCapacity: 2,
+    foodEnergyMap: { 食材: 100 },
+    successMultipliers: [1],
+    recipes: [{ name: 'イベント探索料理', energy: 200, foodCount: 1 }],
+  });
+
+  assert.equal(results.length, 2);
+  assert.deepEqual(
+    results.map(result => ({
+      eventBonus: result.eventBonus,
+      extraFoodCount: result.extraFoodCount,
+      finalEnergy: result.finalEnergy,
+    })),
+    [
+      { eventBonus: '1.5', extraFoodCount: 0, finalEnergy: 300 },
+      { eventBonus: '1', extraFoodCount: 1, finalEnergy: 300 },
+    ]
+  );
+});

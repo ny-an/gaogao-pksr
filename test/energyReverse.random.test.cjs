@@ -259,7 +259,7 @@ test('実データのランダム目標1000ケースを独立全探索結果と�
   assert.ok(noMatchCases > 500);
 });
 
-test('実データのランダム120ケースで複数料理・全レベル・全できばえの候補に正解を含む', () => {
+test('実データのランダム120ケースで複数料理・全レベル・全イベント・全できばえの候補に正解を含む', () => {
   const random = createRandom(0x3c6ef372);
   const namedRecipes = recipes.filter(recipe => recipe.name);
 
@@ -296,7 +296,7 @@ test('実データのランダム120ケースで複数料理・全レベル・�
       recipeLevels: allRecipeLevels,
       recipeBonusPercentMap: gameData.recipeLevelBonusList,
       fbBonusPercent,
-      eventBonus,
+      eventBonuses,
       potCapacity,
       foodEnergyMap: gameData.foodEnergyMap,
       successMultipliers,
@@ -315,6 +315,7 @@ test('実データのランダム120ケースで複数料理・全レベル・�
     assert.ok(
       results.some(result => (
         result.dishName === recipe.name &&
+        result.eventBonus === eventBonus &&
         result.successMultiplier === successMultiplier &&
         result.finalEnergy === targetEnergy &&
         result.recipeLevel >= 1 &&
