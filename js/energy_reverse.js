@@ -99,47 +99,64 @@
 
     const foods = normalizeFoodEntries(foodEnergyMap);
     if (foods.length === 0 || maxFoodCount === 0) return null;
+    if (requiredEnergy > maxFoodCount * foods[0].energy) return null;
 
-    const maxFoodEnergy = foods[0].energy;
-    if (requiredEnergy > maxFoodCount * maxFoodEnergy) return null;
+    return createFoodCombinationFinder(requiredEnergy, foodEnergyMap)(
+      requiredEnergy,
+      maxFoodCount
+    );
+  }
 
-    const unreachable = maxFoodCount + 1;
-    const minimumCounts = new Int32Array(requiredEnergy + 1);
-    const previousFoodIndexes = new Int16Array(requiredEnergy + 1);
+  function createFoodCombinationFinder(maxEnergy, foodEnergyMap) {
+    const normalizedMaxEnergy = Math.max(0, Math.floor(Number(maxEnergy) || 0));
+    const foods = normalizeFoodEntries(foodEnergyMap);
+    const unreachable = normalizedMaxEnergy + 1;
+    const minimumCounts = new Int32Array(normalizedMaxEnergy + 1);
+    const previousFoodIndexes = new Int16Array(normalizedMaxEnergy + 1);
     minimumCounts.fill(unreachable);
     previousFoodIndexes.fill(-1);
     minimumCounts[0] = 0;
 
-    for (let energy = 1; energy <= requiredEnergy; energy += 1) {
+    for (let energy = 1; energy <= normalizedMaxEnergy; energy += 1) {
       for (let index = 0; index < foods.length; index += 1) {
         const foodEnergy = foods[index].energy;
         if (foodEnergy > energy) continue;
 
         const previousCount = minimumCounts[energy - foodEnergy];
         const nextCount = previousCount + 1;
-        if (previousCount < maxFoodCount && nextCount < minimumCounts[energy]) {
+        if (previousCount < unreachable && nextCount < minimumCounts[energy]) {
           minimumCounts[energy] = nextCount;
           previousFoodIndexes[energy] = index;
         }
       }
     }
 
-    if (minimumCounts[requiredEnergy] > maxFoodCount) return null;
+    return function(requiredEnergy, maxFoodCount) {
+      if (!Number.isInteger(requiredEnergy) || requiredEnergy < 0) return null;
+      if (!Number.isInteger(maxFoodCount) || maxFoodCount < 0) return null;
+      if (requiredEnergy === 0) return { foods: {}, count: 0 };
+      if (foods.length === 0 || maxFoodCount === 0) return null;
+      if (requiredEnergy > normalizedMaxEnergy) return null;
 
-    const result = {};
-    let remainingEnergy = requiredEnergy;
-    while (remainingEnergy > 0) {
-      const foodIndex = previousFoodIndexes[remainingEnergy];
-      if (foodIndex < 0) return null;
+      const maxFoodEnergy = foods[0].energy;
+      if (requiredEnergy > maxFoodCount * maxFoodEnergy) return null;
+      if (minimumCounts[requiredEnergy] > maxFoodCount) return null;
 
-      const food = foods[foodIndex];
-      result[food.name] = (result[food.name] || 0) + 1;
-      remainingEnergy -= food.energy;
-    }
+      const result = {};
+      let remainingEnergy = requiredEnergy;
+      while (remainingEnergy > 0) {
+        const foodIndex = previousFoodIndexes[remainingEnergy];
+        if (foodIndex < 0) return null;
 
-    return {
-      foods: result,
-      count: minimumCounts[requiredEnergy],
+        const food = foods[foodIndex];
+        result[food.name] = (result[food.name] || 0) + 1;
+        remainingEnergy -= food.energy;
+      }
+
+      return {
+        foods: result,
+        count: minimumCounts[requiredEnergy],
+      };
     };
   }
 
@@ -200,15 +217,17 @@
       }
     }
     let bestResult = null;
+    const findCombination = typeof options.foodCombinationFinder === 'function'
+      ? options.foodCombinationFinder
+      : (energy, capacity) => findFoodCombination(energy, capacity, options.foodEnergyMap);
 
     for (const baseEnergy of candidates) {
       const requiredExtraEnergy = baseEnergy - recipeDisplayEnergy;
       if (requiredExtraEnergy < 0) continue;
 
-      const combination = findFoodCombination(
+      const combination = findCombination(
         requiredExtraEnergy,
-        remainingCapacity,
-        options.foodEnergyMap
+        remainingCapacity
       );
       if (!combination) continue;
 
@@ -275,6 +294,20 @@
         .map(level => level === null ? null : Number(level))
         .filter(level => level === null || (Number.isInteger(level) && level >= 1))
     ));
+    const normalizedFoods = normalizeFoodEntries(options.foodEnergyMap);
+    const potCapacity = Math.max(0, Math.floor(Number(options.potCapacity) || 0));
+    const maxCombinationEnergy = potCapacity * Number(normalizedFoods[0]?.energy || 0);
+    let sharedFoodCombinationFinder = null;
+    const foodCombinationFinder = (requiredEnergy, maxFoodCount) => {
+      if (requiredEnergy === 0) return { foods: {}, count: 0 };
+      if (!sharedFoodCombinationFinder) {
+        sharedFoodCombinationFinder = createFoodCombinationFinder(
+          maxCombinationEnergy,
+          options.foodEnergyMap
+        );
+      }
+      return sharedFoodCombinationFinder(requiredEnergy, maxFoodCount);
+    };
     const results = [];
 
     for (const recipe of recipes) {
@@ -291,6 +324,7 @@
             recipeFoodCount: Number(recipe.foodCount || 0),
             recipeBonusPercent,
             successMultiplier,
+            foodCombinationFinder,
           });
 
           if (!result.found) continue;
@@ -299,6 +333,7 @@
             ...result,
             dishName: String(recipe.name || ''),
             dishCategory: String(recipe.category || ''),
+            recipeEnergy: Number(recipe.energy || 0),
             recipeLevel,
             recipeBonusPercent,
           });
@@ -307,6 +342,10 @@
     }
 
     const sortedResults = results.sort((left, right) => {
+      if (right.recipeEnergy !== left.recipeEnergy) {
+        return right.recipeEnergy - left.recipeEnergy;
+      }
+
       if (left.extraFoodCount !== right.extraFoodCount) {
         return left.extraFoodCount - right.extraFoodCount;
       }
@@ -324,13 +363,17 @@
     });
 
     const seenRecipeSuccessPairs = new Set();
-    return sortedResults.filter(result => {
+    const uniqueResults = sortedResults.filter(result => {
       const key = `${result.dishName}\u0000${result.successMultiplier}`;
       if (seenRecipeSuccessPairs.has(key)) return false;
 
       seenRecipeSuccessPairs.add(key);
       return true;
     });
+    const maxCandidates = Number.isInteger(options.maxCandidates) && options.maxCandidates > 0
+      ? options.maxCandidates
+      : uniqueResults.length;
+    return uniqueResults.slice(0, maxCandidates);
   }
 
   return {

@@ -198,9 +198,9 @@ test('できばえ指定なしでは通常・大成功・超成功の候補を�
   assert.deepEqual(
     results.map(result => [result.dishName, result.successMultiplier]),
     [
-      ['超成功料理', 3],
-      ['大成功料理', 2],
       ['通常料理', 1],
+      ['大成功料理', 2],
+      ['超成功料理', 3],
     ]
   );
 });
@@ -303,4 +303,33 @@ test('同じ料理とできばえでは追加食材が最少のレベルだけ�
   assert.equal(results.length, 1);
   assert.equal(results[0].recipeLevel, 3);
   assert.equal(results[0].extraFoodCount, 0);
+});
+
+test('候補は料理の基礎エナジーが高い順に最大10案を返す', () => {
+  const recipes = Array.from({ length: 12 }, (_, index) => ({
+    name: `料理${index + 1}`,
+    energy: (index + 1) * 100,
+    foodCount: 1,
+  }));
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 1200,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 12,
+    foodEnergyMap: { 食材: 100 },
+    successMultipliers: [1],
+    recipes,
+    maxCandidates: 10,
+  });
+
+  assert.equal(results.length, 10);
+  assert.deepEqual(
+    results.map(result => result.recipeEnergy),
+    [1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300]
+  );
+  assert.deepEqual(
+    results.map(result => result.dishName),
+    ['料理12', '料理11', '料理10', '料理9', '料理8', '料理7', '料理6', '料理5', '料理4', '料理3']
+  );
 });
