@@ -267,28 +267,46 @@
         .map(Number)
         .filter(multiplier => Number.isFinite(multiplier) && multiplier > 0)
     ));
+    const requestedRecipeLevels = Array.isArray(options.recipeLevels) && options.recipeLevels.length > 0
+      ? options.recipeLevels
+      : [options.recipeLevel ?? null];
+    const recipeLevels = Array.from(new Set(
+      requestedRecipeLevels
+        .map(level => level === null ? null : Number(level))
+        .filter(level => level === null || (Number.isInteger(level) && level >= 1))
+    ));
     const results = [];
 
     for (const recipe of recipes) {
-      for (const successMultiplier of successMultipliers) {
-        const result = solveExactEnergy({
-          ...options,
-          recipeEnergy: Number(recipe.energy || 0),
-          recipeFoodCount: Number(recipe.foodCount || 0),
-          successMultiplier,
-        });
+      const levelsForRecipe = recipe.name ? recipeLevels : [null];
+      for (const recipeLevel of levelsForRecipe) {
+        const recipeBonusPercent = recipeLevel === null
+          ? Number(options.recipeBonusPercent || 0)
+          : Number(options.recipeBonusPercentMap?.[recipeLevel] ?? options.recipeBonusPercent ?? 0);
 
-        if (!result.found) continue;
+        for (const successMultiplier of successMultipliers) {
+          const result = solveExactEnergy({
+            ...options,
+            recipeEnergy: Number(recipe.energy || 0),
+            recipeFoodCount: Number(recipe.foodCount || 0),
+            recipeBonusPercent,
+            successMultiplier,
+          });
 
-        results.push({
-          ...result,
-          dishName: String(recipe.name || ''),
-          dishCategory: String(recipe.category || ''),
-        });
+          if (!result.found) continue;
+
+          results.push({
+            ...result,
+            dishName: String(recipe.name || ''),
+            dishCategory: String(recipe.category || ''),
+            recipeLevel,
+            recipeBonusPercent,
+          });
+        }
       }
     }
 
-    return results.sort((left, right) => {
+    const sortedResults = results.sort((left, right) => {
       if (left.extraFoodCount !== right.extraFoodCount) {
         return left.extraFoodCount - right.extraFoodCount;
       }
@@ -299,7 +317,19 @@
 
       const dishOrder = left.dishName.localeCompare(right.dishName, 'ja');
       if (dishOrder !== 0) return dishOrder;
+      if (left.recipeLevel !== right.recipeLevel) {
+        return Number(left.recipeLevel || 0) - Number(right.recipeLevel || 0);
+      }
       return left.successMultiplier - right.successMultiplier;
+    });
+
+    const seenRecipeSuccessPairs = new Set();
+    return sortedResults.filter(result => {
+      const key = `${result.dishName}\u0000${result.successMultiplier}`;
+      if (seenRecipeSuccessPairs.has(key)) return false;
+
+      seenRecipeSuccessPairs.add(key);
+      return true;
     });
   }
 

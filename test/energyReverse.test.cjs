@@ -250,3 +250,57 @@ test('料理なし候補は料理名なしとして明示できる', () => {
   assert.equal(results[0].dishName, '');
   assert.deepEqual(results[0].foods, { 食材: 1 });
 });
+
+test('レシピレベル指定なしでは全レベルから一致するレベルを返す', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 150,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 2,
+    foodEnergyMap: {},
+    successMultipliers: [1],
+    recipeLevels: [1, 2, 3],
+    recipeBonusPercentMap: { 1: 0, 2: 50, 3: 100 },
+    recipes: [{ name: 'レベル探索料理', energy: 100, foodCount: 1 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].recipeLevel, 2);
+  assert.equal(results[0].recipeBonusPercent, 50);
+  assert.equal(results[0].recipeDisplayEnergy, 150);
+});
+
+test('料理なしはレシピレベルを変えても重複候補を作らない', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 100,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 2,
+    foodEnergyMap: { 食材: 100 },
+    successMultipliers: [1],
+    recipeLevels: [1, 2, 3],
+    recipeBonusPercentMap: { 1: 0, 2: 50, 3: 100 },
+    recipes: [{ name: '', energy: 0, foodCount: 0 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].recipeLevel, null);
+});
+
+test('同じ料理とできばえでは追加食材が最少のレベルだけを返す', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 300,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 4,
+    foodEnergyMap: { 食材: 100 },
+    successMultipliers: [1],
+    recipeLevels: [1, 2, 3],
+    recipeBonusPercentMap: { 1: 0, 2: 100, 3: 200 },
+    recipes: [{ name: '最適レベル料理', energy: 100, foodCount: 1 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].recipeLevel, 3);
+  assert.equal(results[0].extraFoodCount, 0);
+});
