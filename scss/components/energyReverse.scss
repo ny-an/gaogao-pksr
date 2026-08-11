@@ -134,6 +134,37 @@
     &:hover {
       background: $primary-color-hover;
     }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.72;
+    }
+  }
+
+  .energy-reverse-calculating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 18px;
+    margin-top: 8px;
+    color: #777;
+    font-size: 12px;
+    font-weight: bold;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &::before {
+      width: 12px;
+      height: 12px;
+      border: 2px solid #d8ead9;
+      border-top-color: $primary-color;
+      border-radius: 50%;
+      content: '';
+      animation: energy-reverse-spin 0.75s linear infinite;
+    }
   }
 
   .energy-reverse-result {
@@ -340,6 +371,12 @@
   .energy-reverse-no-extra {
     grid-column: 1 / -1;
     padding: 8px;
+  }
+}
+
+@keyframes energy-reverse-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

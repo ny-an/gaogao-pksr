@@ -4,6 +4,7 @@
   const ALL_DISHES_VALUE = '__all_dishes__';
   const ALL_SUCCESS_VALUE = 'all';
   const ALL_RECIPE_LEVELS_VALUE = 'all';
+  const MIN_CALCULATING_DISPLAY_MS = 400;
 
   function copySelectOptions(sourceId, target) {
     const source = document.getElementById(sourceId);
@@ -320,13 +321,15 @@
     const successSelect = document.getElementById('energyReverseSuccess');
     const dishCategorySelect = document.getElementById('energyReverseDishCategory');
     const dishSelect = document.getElementById('energyReverseDish');
+    const submitButton = form?.querySelector('.energy-reverse-submit');
+    const calculatingElement = document.getElementById('energyReverseCalculating');
     const potCapacityValue = document.getElementById('energyReversePotCapacity');
     const resultElement = document.getElementById('energyReverseResult');
 
     if (
       !trigger || !modal || !dialog || !closeButton || !form || !targetInput ||
       !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect ||
-      !dishCategorySelect || !dishSelect ||
+      !dishCategorySelect || !dishSelect || !submitButton || !calculatingElement ||
       !potCapacityValue || !resultElement
     ) {
       return;
@@ -334,11 +337,20 @@
 
     populateDishCategoryOptions(dishCategorySelect);
     populateDishOptions(dishSelect, ALL_DISH_CATEGORIES_VALUE);
+    let calculationRequestId = 0;
 
     function closeModal() {
+      calculationRequestId += 1;
+      setCalculating(false);
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('energy-reverse-open');
+    }
+
+    function setCalculating(isCalculating) {
+      calculatingElement.hidden = !isCalculating;
+      submitButton.disabled = isCalculating;
+      form.setAttribute('aria-busy', String(isCalculating));
     }
 
     function openModal() {
@@ -361,6 +373,7 @@
         ? calculatePotCapacity()
         : 0;
       potCapacityValue.textContent = potCapacity.toLocaleString();
+      setCalculating(false);
       clearResult(resultElement);
 
       modal.classList.add('open');
@@ -387,8 +400,13 @@
       }
     });
 
-    form.addEventListener('input', () => clearResult(resultElement));
-    form.addEventListener('change', () => clearResult(resultElement));
+    function handleCriteriaChange() {
+      calculationRequestId += 1;
+      clearResult(resultElement);
+    }
+
+    form.addEventListener('input', handleCriteriaChange);
+    form.addEventListener('change', handleCriteriaChange);
     dishCategorySelect.addEventListener('change', () => {
       populateDishOptions(dishSelect, dishCategorySelect.value);
     });
@@ -407,8 +425,7 @@
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
         : 0;
-
-      const results = energyReverse.solveExactEnergyCandidates({
+      const calculationOptions = {
         targetEnergy,
         recipeLevels: getRecipeLevels(recipeLevelSelect.value),
         recipeBonusPercentMap: recipeLevelBonusList,
@@ -418,16 +435,44 @@
         potCapacity,
         recipes: getRecipeCandidates(dishCategorySelect.value, dishSelect.value),
         foodEnergyMap,
-      });
+        maxCandidates: 10,
+      };
+      const resultConditions = {
+        fbBonusPercent: calculationOptions.fbBonusPercent,
+        eventBonusLabel: eventBonusSelect.selectedOptions[0]?.textContent || '通常',
+      };
 
-      if (results.length > 0) {
-        renderResults(resultElement, results, {
-          fbBonusPercent: Number(fbBonusSelect.value),
-          eventBonusLabel: eventBonusSelect.selectedOptions[0]?.textContent || '通常',
-        });
-      } else {
-        renderNoMatch(resultElement);
-      }
+      clearResult(resultElement);
+      const currentRequestId = ++calculationRequestId;
+      const calculationStartedAt = performance.now();
+      setCalculating(true);
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          try {
+            const results = energyReverse.solveExactEnergyCandidates(calculationOptions);
+            const remainingDisplayMs = Math.max(
+              0,
+              MIN_CALCULATING_DISPLAY_MS - (performance.now() - calculationStartedAt)
+            );
+            setTimeout(() => {
+              try {
+                if (currentRequestId !== calculationRequestId) return;
+
+                if (results.length > 0) {
+                  renderResults(resultElement, results, resultConditions);
+                } else {
+                  renderNoMatch(resultElement);
+                }
+              } finally {
+                setCalculating(false);
+              }
+            }, remainingDisplayMs);
+          } catch (error) {
+            setCalculating(false);
+            throw error;
+          }
+        }, 0);
+      });
     });
   });
 })();
