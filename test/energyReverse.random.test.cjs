@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const {
+  findFoodCombinations,
   solveExactEnergy,
   solveExactEnergyCandidates,
 } = require('../js/energy_reverse.js');
@@ -87,6 +88,13 @@ function getReturnedFoodTotals(foods, foodEnergyMap) {
   );
 }
 
+function getFoodCombinationKey(foods) {
+  return Object.entries(foods)
+    .sort((left, right) => left[0].localeCompare(right[0], 'ja'))
+    .map(([foodName, quantity]) => `${foodName}:${quantity}`)
+    .join('|');
+}
+
 function getReachableExtraEnergies(maxCount, foodEnergyMap) {
   const allReachable = new Set([0]);
   let previousCounts = new Set([0]);
@@ -115,6 +123,67 @@ const allRecipeLevels = Object.keys(gameData.recipeLevelBonusList)
   .map(Number)
   .filter(level => level >= 1)
   .sort((left, right) => left - right);
+
+test('小規模ランダム200ケースで追加食材パターンを独立全探索結果と照合する', () => {
+  const random = createRandom(0xa54ff53a);
+
+  for (let caseIndex = 0; caseIndex < 200; caseIndex += 1) {
+    const foodEnergyMap = Object.fromEntries(
+      Array.from({ length: 4 }, (_, index) => [
+        `食材${index + 1}`,
+        randomInteger(random, 1, 12),
+      ])
+    );
+    const maxFoodCount = randomInteger(random, 0, 7);
+    const targetEnergy = randomInteger(
+      random,
+      0,
+      Math.max(1, maxFoodCount * Math.max(...Object.values(foodEnergyMap)))
+    );
+    const bruteForceKeys = new Set();
+    const entries = Object.entries(foodEnergyMap);
+
+    function enumerate(index, remainingCount, energy, quantities) {
+      if (index === entries.length) {
+        if (energy === targetEnergy) {
+          bruteForceKeys.add(getFoodCombinationKey(quantities));
+        }
+        return;
+      }
+
+      const [foodName, foodEnergy] = entries[index];
+      for (let quantity = 0; quantity <= remainingCount; quantity += 1) {
+        const nextQuantities = quantity > 0
+          ? { ...quantities, [foodName]: quantity }
+          : quantities;
+        enumerate(
+          index + 1,
+          remainingCount - quantity,
+          energy + (foodEnergy * quantity),
+          nextQuantities
+        );
+      }
+    }
+
+    enumerate(0, maxFoodCount, 0, {});
+    const results = findFoodCombinations(
+      targetEnergy,
+      maxFoodCount,
+      foodEnergyMap,
+      10
+    );
+    const message = `case=${caseIndex} ${JSON.stringify({ targetEnergy, maxFoodCount, foodEnergyMap })}`;
+
+    assert.equal(results.length, Math.min(10, bruteForceKeys.size), message);
+    assert.equal(new Set(results.map(result => getFoodCombinationKey(result.foods))).size, results.length, message);
+    for (const result of results) {
+      assert.ok(bruteForceKeys.has(getFoodCombinationKey(result.foods)), message);
+    }
+    for (let index = 1; index < results.length; index += 1) {
+      assert.ok(results[index - 1].count <= results[index].count, message);
+    }
+  }
+});
 
 test('実データのランダム600ケースで生成済み目標を必ず逆算できる', () => {
   const random = createRandom(0x6a09e667);

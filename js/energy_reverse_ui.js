@@ -6,6 +6,7 @@
   const ALL_RECIPE_LEVELS_VALUE = 'all';
   const ALL_EVENT_BONUSES_VALUE = 'all';
   const MIN_CALCULATING_DISPLAY_MS = 400;
+  const MAX_ALTERNATIVE_PATTERNS = 10;
 
   function copySelectOptions(sourceId, target) {
     const source = document.getElementById(sourceId);
@@ -124,23 +125,28 @@
   function populateExcludedFoodOptions(container) {
     container.replaceChildren();
 
-    Object.keys(foodEnergyMap).forEach((foodName, index) => {
-      const label = document.createElement('label');
-      label.className = 'energy-reverse-exclusion-option';
-      label.htmlFor = `energyReverseExcludedFood${index}`;
+    Object.entries(foodEnergyMap)
+      .sort((left, right) => {
+        if (Number(right[1]) !== Number(left[1])) return Number(right[1]) - Number(left[1]);
+        return left[0].localeCompare(right[0], 'ja');
+      })
+      .forEach(([foodName], index) => {
+        const label = document.createElement('label');
+        label.className = 'energy-reverse-exclusion-option';
+        label.htmlFor = `energyReverseExcludedFood${index}`;
 
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = label.htmlFor;
-      checkbox.name = 'excludedExtraFood';
-      checkbox.value = foodName;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = label.htmlFor;
+        checkbox.name = 'excludedExtraFood';
+        checkbox.value = foodName;
 
-      const name = document.createElement('span');
-      name.textContent = foodName;
+        const name = document.createElement('span');
+        name.textContent = foodName;
 
-      label.append(checkbox, name);
-      container.appendChild(label);
-    });
+        label.append(checkbox, name);
+        container.appendChild(label);
+      });
   }
 
   function getExcludedFoodNames(container) {
@@ -249,11 +255,13 @@
     resultElement.replaceChildren(text, note);
   }
 
-  function createFoodList(result) {
+  function createFoodList(result, currentFoodEnergyMap) {
     const foodList = document.createElement('div');
     foodList.className = 'energy-reverse-food-list';
     const foods = Object.entries(result.foods).sort((left, right) => {
-      if (right[1] !== left[1]) return right[1] - left[1];
+      const energyDifference = Number(currentFoodEnergyMap[right[0]]) -
+        Number(currentFoodEnergyMap[left[0]]);
+      if (energyDifference !== 0) return energyDifference;
       return left[0].localeCompare(right[0], 'ja');
     });
 
@@ -284,6 +292,29 @@
     }
 
     return foodList;
+  }
+
+  function getFoodCombinationKey(foods) {
+    return Object.entries(foods)
+      .filter(([, quantity]) => Number(quantity) > 0)
+      .sort((left, right) => left[0].localeCompare(right[0], 'ja'))
+      .map(([foodName, quantity]) => `${foodName}:${quantity}`)
+      .join('|');
+  }
+
+  function createAlternativePattern(pattern, index, currentFoodEnergyMap) {
+    const item = document.createElement('div');
+    item.className = 'energy-reverse-alternative-pattern';
+
+    const heading = document.createElement('p');
+    const name = document.createElement('strong');
+    name.textContent = `別パターン ${index + 1}`;
+    const count = document.createElement('span');
+    count.textContent = `追加 ${pattern.count}個`;
+    heading.append(name, count);
+
+    item.append(heading, createFoodList(pattern, currentFoodEnergyMap));
+    return item;
   }
 
   function appendCondition(container, label, value) {
@@ -349,7 +380,77 @@
     foodHeading.className = 'energy-reverse-food-heading';
     foodHeading.textContent = '追加食材';
 
-    detail.append(conditionList, foodHeading, createFoodList(result));
+    const alternativeSection = document.createElement('div');
+    alternativeSection.className = 'energy-reverse-alternatives';
+
+    const alternativeHeader = document.createElement('div');
+    alternativeHeader.className = 'energy-reverse-alternative-header';
+    const alternativeHeading = document.createElement('p');
+    alternativeHeading.textContent = '追加食材の別パターン';
+    const searchButton = document.createElement('button');
+    searchButton.type = 'button';
+    searchButton.className = 'energy-reverse-alternative-search';
+    searchButton.textContent = '再検索する';
+    alternativeHeader.append(alternativeHeading, searchButton);
+
+    const alternativeStatus = document.createElement('p');
+    alternativeStatus.className = 'energy-reverse-alternative-status';
+    alternativeStatus.setAttribute('role', 'status');
+    alternativeStatus.setAttribute('aria-live', 'polite');
+
+    const alternativeList = document.createElement('div');
+    alternativeList.className = 'energy-reverse-alternative-list';
+    alternativeSection.append(alternativeHeader, alternativeStatus, alternativeList);
+
+    let hasSearchedAlternatives = false;
+    let isSearchingAlternatives = false;
+    function searchAlternativePatterns() {
+      if (isSearchingAlternatives) return;
+
+      isSearchingAlternatives = true;
+      searchButton.disabled = true;
+      alternativeStatus.classList.add('calculating');
+      alternativeStatus.textContent = '別パターンを検索中...';
+      alternativeList.replaceChildren();
+
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const primaryKey = getFoodCombinationKey(result.foods);
+          const alternatives = energyReverse.findFoodCombinations(
+            result.extraEnergy,
+            result.remainingCapacity,
+            conditions.foodEnergyMap,
+            MAX_ALTERNATIVE_PATTERNS + 1
+          ).filter(pattern => getFoodCombinationKey(pattern.foods) !== primaryKey)
+            .slice(0, MAX_ALTERNATIVE_PATTERNS);
+
+          alternativeList.replaceChildren(
+            ...alternatives.map((pattern, index) => (
+              createAlternativePattern(pattern, index, conditions.foodEnergyMap)
+            ))
+          );
+          alternativeStatus.classList.remove('calculating');
+          alternativeStatus.textContent = alternatives.length > 0
+            ? `別パターン ${alternatives.length}案`
+            : '別の追加食材パターンはありません。';
+          searchButton.disabled = false;
+          isSearchingAlternatives = false;
+          hasSearchedAlternatives = true;
+        }, 0);
+      });
+    }
+
+    candidate.addEventListener('toggle', () => {
+      if (candidate.open && !hasSearchedAlternatives) searchAlternativePatterns();
+    });
+    searchButton.addEventListener('click', searchAlternativePatterns);
+
+    detail.append(
+      conditionList,
+      foodHeading,
+      createFoodList(result, conditions.foodEnergyMap),
+      alternativeSection
+    );
     candidate.append(candidateSummary, detail);
     return candidate;
   }
@@ -519,6 +620,11 @@
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
         : 0;
+      const excludedFoodNames = getExcludedFoodNames(excludedOptions);
+      const availableFoodEnergyMap = Object.fromEntries(
+        Object.entries(foodEnergyMap)
+          .filter(([foodName]) => !excludedFoodNames.includes(foodName))
+      );
       const calculationOptions = {
         targetEnergy,
         recipeLevels: getRecipeLevels(recipeLevelSelect.value),
@@ -529,11 +635,12 @@
         potCapacity,
         recipes: getRecipeCandidates(dishCategorySelect.value, dishSelect.value),
         foodEnergyMap,
-        excludedFoodNames: getExcludedFoodNames(excludedOptions),
+        excludedFoodNames,
         maxCandidates: 10,
       };
       const resultConditions = {
         fbBonusPercent: calculationOptions.fbBonusPercent,
+        foodEnergyMap: availableFoodEnergyMap,
       };
 
       clearResult(resultElement);
