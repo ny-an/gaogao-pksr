@@ -3,6 +3,7 @@
   const NO_DISH_CATEGORY_VALUE = '__no_dish__';
   const ALL_DISHES_VALUE = '__all_dishes__';
   const ALL_SUCCESS_VALUE = 'all';
+  const ALL_FB_BONUSES_VALUE = 'all';
   const ALL_RECIPE_LEVELS_VALUE = 'all';
   const ALL_EVENT_BONUSES_VALUE = 'all';
   const MIN_CALCULATING_DISPLAY_MS = 400;
@@ -83,6 +84,14 @@
       .filter(Boolean);
   }
 
+  function getFbBonusPercents(value) {
+    if (value !== ALL_FB_BONUSES_VALUE) return [Number(value)];
+
+    return Array.from(document.getElementById('fbBonus')?.options || [])
+      .map(option => Number(option.value))
+      .filter(percent => Number.isInteger(percent) && percent >= 0);
+  }
+
   function getRecipeLevels(value) {
     if (value !== ALL_RECIPE_LEVELS_VALUE) return [Number(value)];
 
@@ -100,6 +109,17 @@
     allLevelsOption.textContent = '指定なし（全Lv計算）';
     select.prepend(allLevelsOption);
     select.value = ALL_RECIPE_LEVELS_VALUE;
+  }
+
+  function populateFbBonusOptions(select) {
+    copySelectOptions('fbBonus', select);
+    const inheritedValue = select.value;
+
+    const allBonusesOption = document.createElement('option');
+    allBonusesOption.value = ALL_FB_BONUSES_VALUE;
+    allBonusesOption.textContent = '指定なし（全計算）';
+    select.prepend(allBonusesOption);
+    select.value = inheritedValue;
   }
 
   function populateEventBonusOptions(select) {
@@ -365,7 +385,7 @@
       'なべ使用',
       `${result.recipeFoodCount + result.extraFoodCount} / ${result.potCapacity}個`
     );
-    appendCondition(conditionList, 'FBボーナス', `${conditions.fbBonusPercent}%`);
+    appendCondition(conditionList, 'FBボーナス', `${result.fbBonusPercent}%`);
     appendCondition(
       conditionList,
       'レシピレベル',
@@ -535,7 +555,7 @@
     }
 
     function openModal() {
-      copySelectOptions('fbBonus', fbBonusSelect);
+      populateFbBonusOptions(fbBonusSelect);
       populateRecipeLevelOptions(recipeLevelSelect);
       populateEventBonusOptions(eventBonusSelect);
       successSelect.value = ALL_SUCCESS_VALUE;
@@ -629,7 +649,7 @@
         targetEnergy,
         recipeLevels: getRecipeLevels(recipeLevelSelect.value),
         recipeBonusPercentMap: recipeLevelBonusList,
-        fbBonusPercent: Number(fbBonusSelect.value),
+        fbBonusPercents: getFbBonusPercents(fbBonusSelect.value),
         eventBonuses: getEventBonuses(eventBonusSelect.value),
         successMultipliers: getSuccessMultipliers(successSelect.value),
         potCapacity,
@@ -639,7 +659,6 @@
         maxCandidates: 10,
       };
       const resultConditions = {
-        fbBonusPercent: calculationOptions.fbBonusPercent,
         foodEnergyMap: availableFoodEnergyMap,
       };
 

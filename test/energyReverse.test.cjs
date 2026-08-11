@@ -309,6 +309,23 @@ test('レシピレベル指定なしでは全レベルから一致するレベ�
   assert.equal(results[0].recipeDisplayEnergy, 150);
 });
 
+test('FBボーナス指定なしでは全FBから一致する値を返す', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 110,
+    recipeBonusPercent: 0,
+    fbBonusPercents: [0, 10, 20],
+    eventBonus: '1',
+    potCapacity: 1,
+    foodEnergyMap: {},
+    successMultipliers: [1],
+    recipes: [{ name: 'FB探索料理', energy: 100, foodCount: 1 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].fbBonusPercent, 10);
+  assert.equal(results[0].finalEnergy, 110);
+});
+
 test('料理なしはレシピレベルを変えても重複候補を作らない', () => {
   const results = solveExactEnergyCandidates({
     targetEnergy: 100,

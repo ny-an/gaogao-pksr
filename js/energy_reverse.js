@@ -351,6 +351,7 @@
         found: true,
         targetEnergy,
         finalEnergy,
+        fbBonusPercent,
         recipeDisplayEnergy,
         recipeLevelBonus,
         extraEnergy: requiredExtraEnergy,
@@ -393,6 +394,14 @@
       requestedMultipliers
         .map(Number)
         .filter(multiplier => Number.isFinite(multiplier) && multiplier > 0)
+    ));
+    const requestedFbBonusPercents = Array.isArray(options.fbBonusPercents)
+      ? options.fbBonusPercents
+      : [options.fbBonusPercent ?? 0];
+    const fbBonusPercents = Array.from(new Set(
+      requestedFbBonusPercents
+        .map(Number)
+        .filter(percent => Number.isInteger(percent) && percent >= 0)
     ));
     const requestedEventBonuses = Array.isArray(options.eventBonuses)
       ? options.eventBonuses
@@ -446,28 +455,31 @@
 
         for (const eventBonus of eventBonuses) {
           for (const successMultiplier of successMultipliers) {
-            const result = solveExactEnergy({
-              ...options,
-              recipeEnergy: Number(recipe.energy || 0),
-              recipeFoodCount: Number(recipe.foodCount || 0),
-              recipeBonusPercent,
-              eventBonus,
-              successMultiplier,
-              foodEnergyMap: availableFoodEnergyMap,
-              foodCombinationFinder,
-            });
+            for (const fbBonusPercent of fbBonusPercents) {
+              const result = solveExactEnergy({
+                ...options,
+                recipeEnergy: Number(recipe.energy || 0),
+                recipeFoodCount: Number(recipe.foodCount || 0),
+                recipeBonusPercent,
+                fbBonusPercent,
+                eventBonus,
+                successMultiplier,
+                foodEnergyMap: availableFoodEnergyMap,
+                foodCombinationFinder,
+              });
 
-            if (!result.found) continue;
+              if (!result.found) continue;
 
-            results.push({
-              ...result,
-              dishName: String(recipe.name || ''),
-              dishCategory: String(recipe.category || ''),
-              recipeEnergy: Number(recipe.energy || 0),
-              recipeLevel,
-              recipeBonusPercent,
-              eventBonus,
-            });
+              results.push({
+                ...result,
+                dishName: String(recipe.name || ''),
+                dishCategory: String(recipe.category || ''),
+                recipeEnergy: Number(recipe.energy || 0),
+                recipeLevel,
+                recipeBonusPercent,
+                eventBonus,
+              });
+            }
           }
         }
       }
@@ -494,7 +506,10 @@
       if (Number(left.eventBonus) !== Number(right.eventBonus)) {
         return Number(left.eventBonus) - Number(right.eventBonus);
       }
-      return left.successMultiplier - right.successMultiplier;
+      if (left.successMultiplier !== right.successMultiplier) {
+        return left.successMultiplier - right.successMultiplier;
+      }
+      return left.fbBonusPercent - right.fbBonusPercent;
     });
 
     const seenRecipeSuccessPairs = new Set();
