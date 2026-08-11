@@ -121,6 +121,64 @@
     return Number(eventBonus) === 1 ? '通常' : `${eventBonus}倍`;
   }
 
+  function populateExcludedFoodOptions(container) {
+    container.replaceChildren();
+
+    Object.keys(foodEnergyMap).forEach((foodName, index) => {
+      const label = document.createElement('label');
+      label.className = 'energy-reverse-exclusion-option';
+      label.htmlFor = `energyReverseExcludedFood${index}`;
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = label.htmlFor;
+      checkbox.name = 'excludedExtraFood';
+      checkbox.value = foodName;
+
+      const name = document.createElement('span');
+      name.textContent = foodName;
+
+      label.append(checkbox, name);
+      container.appendChild(label);
+    });
+  }
+
+  function getExcludedFoodNames(container) {
+    return Array.from(container.querySelectorAll('input:checked'))
+      .map(checkbox => checkbox.value);
+  }
+
+  function renderExcludedFoodSelection(container, selectedElement, countElement) {
+    const excludedFoodNames = getExcludedFoodNames(container);
+    countElement.textContent = excludedFoodNames.length === 0
+      ? 'なし'
+      : `${excludedFoodNames.length}種`;
+
+    container.querySelectorAll('.energy-reverse-exclusion-option').forEach(label => {
+      label.classList.toggle('selected', label.querySelector('input')?.checked === true);
+    });
+
+    const chips = excludedFoodNames.map(foodName => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'energy-reverse-excluded-chip';
+      chip.dataset.foodName = foodName;
+      chip.setAttribute('aria-label', `${foodName}を除外から戻す`);
+
+      const name = document.createElement('span');
+      name.textContent = foodName;
+      const remove = document.createElement('span');
+      remove.textContent = '×';
+      remove.setAttribute('aria-hidden', 'true');
+
+      chip.append(name, remove);
+      return chip;
+    });
+
+    selectedElement.replaceChildren(...chips);
+    selectedElement.hidden = chips.length === 0;
+  }
+
   function populateDishCategoryOptions(select) {
     select.replaceChildren();
 
@@ -337,6 +395,9 @@
     const successSelect = document.getElementById('energyReverseSuccess');
     const dishCategorySelect = document.getElementById('energyReverseDishCategory');
     const dishSelect = document.getElementById('energyReverseDish');
+    const excludedOptions = document.getElementById('energyReverseExcludedOptions');
+    const excludedSelected = document.getElementById('energyReverseExcludedSelected');
+    const excludedCount = document.getElementById('energyReverseExcludedCount');
     const submitButton = form?.querySelector('.energy-reverse-submit');
     const calculatingElement = document.getElementById('energyReverseCalculating');
     const potCapacityValue = document.getElementById('energyReversePotCapacity');
@@ -345,7 +406,8 @@
     if (
       !trigger || !modal || !dialog || !closeButton || !form || !targetInput ||
       !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect ||
-      !dishCategorySelect || !dishSelect || !submitButton || !calculatingElement ||
+      !dishCategorySelect || !dishSelect || !excludedOptions || !excludedSelected ||
+      !excludedCount || !submitButton || !calculatingElement ||
       !potCapacityValue || !resultElement
     ) {
       return;
@@ -353,6 +415,8 @@
 
     populateDishCategoryOptions(dishCategorySelect);
     populateDishOptions(dishSelect, ALL_DISH_CATEGORIES_VALUE);
+    populateExcludedFoodOptions(excludedOptions);
+    renderExcludedFoodSelection(excludedOptions, excludedSelected, excludedCount);
     let calculationRequestId = 0;
 
     function closeModal() {
@@ -426,6 +490,20 @@
     dishCategorySelect.addEventListener('change', () => {
       populateDishOptions(dishSelect, dishCategorySelect.value);
     });
+    excludedOptions.addEventListener('change', () => {
+      renderExcludedFoodSelection(excludedOptions, excludedSelected, excludedCount);
+    });
+    excludedSelected.addEventListener('click', event => {
+      const chip = event.target.closest('.energy-reverse-excluded-chip');
+      if (!chip) return;
+
+      const checkbox = Array.from(excludedOptions.querySelectorAll('input'))
+        .find(input => input.value === chip.dataset.foodName);
+      if (!checkbox) return;
+
+      checkbox.checked = false;
+      checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+    });
 
     form.addEventListener('submit', event => {
       event.preventDefault();
@@ -451,6 +529,7 @@
         potCapacity,
         recipes: getRecipeCandidates(dishCategorySelect.value, dishSelect.value),
         foodEnergyMap,
+        excludedFoodNames: getExcludedFoodNames(excludedOptions),
         maxCandidates: 10,
       };
       const resultConditions = {

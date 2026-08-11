@@ -305,7 +305,15 @@
         .map(level => level === null ? null : Number(level))
         .filter(level => level === null || (Number.isInteger(level) && level >= 1))
     ));
-    const normalizedFoods = normalizeFoodEntries(options.foodEnergyMap);
+    const excludedFoodNames = new Set(
+      (Array.isArray(options.excludedFoodNames) ? options.excludedFoodNames : [])
+        .map(String)
+    );
+    const availableFoodEnergyMap = Object.fromEntries(
+      Object.entries(options.foodEnergyMap || {})
+        .filter(([foodName]) => !excludedFoodNames.has(foodName))
+    );
+    const normalizedFoods = normalizeFoodEntries(availableFoodEnergyMap);
     const potCapacity = Math.max(0, Math.floor(Number(options.potCapacity) || 0));
     const maxCombinationEnergy = potCapacity * Number(normalizedFoods[0]?.energy || 0);
     let sharedFoodCombinationFinder = null;
@@ -314,7 +322,7 @@
       if (!sharedFoodCombinationFinder) {
         sharedFoodCombinationFinder = createFoodCombinationFinder(
           maxCombinationEnergy,
-          options.foodEnergyMap
+          availableFoodEnergyMap
         );
       }
       return sharedFoodCombinationFinder(requiredEnergy, maxFoodCount);
@@ -337,6 +345,7 @@
               recipeBonusPercent,
               eventBonus,
               successMultiplier,
+              foodEnergyMap: availableFoodEnergyMap,
               foodCombinationFinder,
             });
 

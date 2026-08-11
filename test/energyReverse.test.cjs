@@ -359,3 +359,37 @@ test('イベント指定なしでは同じ料理の全倍率候補を返す', ()
     ]
   );
 });
+
+test('使わない追加食材は候補から除外する', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 300,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 3,
+    foodEnergyMap: { 除外食材: 300, 使用食材: 100 },
+    excludedFoodNames: ['除外食材'],
+    successMultipliers: [1],
+    recipes: [{ name: '', energy: 0, foodCount: 0 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.deepEqual(results[0].foods, { 使用食材: 3 });
+  assert.equal(results[0].foods.除外食材, undefined);
+});
+
+test('利用可能な追加食材をすべて除外すると該当なしになる', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 100,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 1,
+    foodEnergyMap: { 除外食材: 100 },
+    excludedFoodNames: ['除外食材'],
+    successMultipliers: [1],
+    recipes: [{ name: '', energy: 0, foodCount: 0 }],
+  });
+
+  assert.equal(results.length, 0);
+});

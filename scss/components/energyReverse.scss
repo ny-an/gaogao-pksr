@@ -119,6 +119,122 @@
     }
   }
 
+  .energy-reverse-exclusions {
+    margin-bottom: 14px;
+    overflow: hidden;
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+    background: #fff;
+
+    &[open] summary::after {
+      transform: rotate(180deg);
+    }
+
+    summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto 18px;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 10px;
+      color: #555;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &::after {
+        color: $primary-color;
+        content: '▼';
+        font-size: 10px;
+        transition: transform 0.15s ease;
+      }
+
+      strong {
+        color: $primary-color;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .energy-reverse-exclusion-options {
+    display: grid;
+    max-height: 210px;
+    padding: 9px;
+    overflow-y: auto;
+    border-top: 1px solid #ededed;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .energy-reverse-exclusion-option {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 8px;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    background: #fafafa;
+    color: #555;
+    cursor: pointer;
+    font-size: 11px;
+
+    &.selected {
+      border-color: rgba(76, 175, 80, 0.55);
+      background: #edf7ee;
+      color: #356b39;
+      font-weight: bold;
+    }
+
+    input {
+      flex: 0 0 auto;
+      margin: 0;
+      accent-color: $primary-color;
+    }
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .energy-reverse-excluded-selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: -7px 0 14px;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  .energy-reverse-excluded-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: 1px solid rgba(76, 175, 80, 0.42);
+    border-radius: 14px;
+    background: #edf7ee;
+    color: #356b39;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+
+    span:last-child {
+      color: #6e8b71;
+      font-size: 14px;
+      line-height: 1;
+    }
+  }
+
   .energy-reverse-submit {
     width: 100%;
     padding: 11px 16px;

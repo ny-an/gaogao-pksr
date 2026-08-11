@@ -261,6 +261,15 @@
                 <select id="energyReverseDish"></select>
             </label>
 
+            <details class="energy-reverse-exclusions">
+                <summary>
+                    <span>使わない追加食材</span>
+                    <strong id="energyReverseExcludedCount">なし</strong>
+                </summary>
+                <div id="energyReverseExcludedOptions" class="energy-reverse-exclusion-options"></div>
+            </details>
+            <div id="energyReverseExcludedSelected" class="energy-reverse-excluded-selected" aria-live="polite" hidden></div>
+
             <button type="submit" class="energy-reverse-submit">逆算する</button>
             <div id="energyReverseCalculating" class="energy-reverse-calculating" role="status" aria-live="polite" hidden>計算中...</div>
         </form>
