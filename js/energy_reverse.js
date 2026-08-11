@@ -432,8 +432,34 @@
     );
     const normalizedFoods = normalizeFoodEntries(availableFoodEnergyMap);
     const potCapacity = Math.max(0, Math.floor(Number(options.potCapacity) || 0));
-    const maxCombinationEnergy = potCapacity * Number(normalizedFoods[0]?.energy || 0);
+    let maxTargetBaseEnergy = 0;
+    for (const fbBonusPercent of fbBonusPercents) {
+      for (const eventBonus of eventBonuses) {
+        for (const successMultiplier of successMultipliers) {
+          const multiplier = getMultiplierFraction(
+            fbBonusPercent,
+            eventBonus,
+            successMultiplier
+          );
+          if (!multiplier) continue;
+
+          for (const nearbyTarget of [
+            Number(options.targetEnergy) - 1,
+            Number(options.targetEnergy),
+            Number(options.targetEnergy) + 1,
+          ]) {
+            if (nearbyTarget < 0) continue;
+            for (const baseEnergy of getCandidateBaseEnergies(nearbyTarget, multiplier)) {
+              maxTargetBaseEnergy = Math.max(maxTargetBaseEnergy, baseEnergy);
+            }
+          }
+        }
+      }
+    }
+    const capacityEnergyLimit = potCapacity * Number(normalizedFoods[0]?.energy || 0);
+    const maxCombinationEnergy = Math.min(capacityEnergyLimit, maxTargetBaseEnergy);
     let sharedFoodCombinationFinder = null;
+    const foodCombinationCache = new Map();
     const foodCombinationFinder = (requiredEnergy, maxFoodCount) => {
       if (requiredEnergy === 0) return { foods: {}, count: 0 };
       if (!sharedFoodCombinationFinder) {
@@ -442,9 +468,44 @@
           availableFoodEnergyMap
         );
       }
-      return sharedFoodCombinationFinder(requiredEnergy, maxFoodCount);
+      if (!foodCombinationCache.has(requiredEnergy)) {
+        foodCombinationCache.set(
+          requiredEnergy,
+          sharedFoodCombinationFinder(requiredEnergy, potCapacity)
+        );
+      }
+
+      const combination = foodCombinationCache.get(requiredEnergy);
+      return combination && combination.count <= maxFoodCount ? combination : null;
     };
-    const results = [];
+    function compareResults(left, right) {
+      if (right.recipeEnergy !== left.recipeEnergy) {
+        return right.recipeEnergy - left.recipeEnergy;
+      }
+
+      if (left.extraFoodCount !== right.extraFoodCount) {
+        return left.extraFoodCount - right.extraFoodCount;
+      }
+
+      const leftFoodCount = left.recipeFoodCount + left.extraFoodCount;
+      const rightFoodCount = right.recipeFoodCount + right.extraFoodCount;
+      if (leftFoodCount !== rightFoodCount) return leftFoodCount - rightFoodCount;
+
+      const dishOrder = left.dishName.localeCompare(right.dishName, 'ja');
+      if (dishOrder !== 0) return dishOrder;
+      if (left.recipeLevel !== right.recipeLevel) {
+        return Number(left.recipeLevel || 0) - Number(right.recipeLevel || 0);
+      }
+      if (Number(left.eventBonus) !== Number(right.eventBonus)) {
+        return Number(left.eventBonus) - Number(right.eventBonus);
+      }
+      if (left.successMultiplier !== right.successMultiplier) {
+        return left.successMultiplier - right.successMultiplier;
+      }
+      return left.fbBonusPercent - right.fbBonusPercent;
+    }
+
+    const bestResults = new Map();
 
     for (const recipe of recipes) {
       const levelsForRecipe = recipe.name ? recipeLevels : [null];
@@ -470,7 +531,7 @@
 
               if (!result.found) continue;
 
-              results.push({
+              const candidate = {
                 ...result,
                 dishName: String(recipe.name || ''),
                 dishCategory: String(recipe.category || ''),
@@ -478,48 +539,19 @@
                 recipeLevel,
                 recipeBonusPercent,
                 eventBonus,
-              });
+              };
+              const key = `${candidate.dishName}\u0000${candidate.eventBonus}\u0000${candidate.successMultiplier}`;
+              const currentBest = bestResults.get(key);
+              if (!currentBest || compareResults(candidate, currentBest) < 0) {
+                bestResults.set(key, candidate);
+              }
             }
           }
         }
       }
     }
 
-    const sortedResults = results.sort((left, right) => {
-      if (right.recipeEnergy !== left.recipeEnergy) {
-        return right.recipeEnergy - left.recipeEnergy;
-      }
-
-      if (left.extraFoodCount !== right.extraFoodCount) {
-        return left.extraFoodCount - right.extraFoodCount;
-      }
-
-      const leftFoodCount = left.recipeFoodCount + left.extraFoodCount;
-      const rightFoodCount = right.recipeFoodCount + right.extraFoodCount;
-      if (leftFoodCount !== rightFoodCount) return leftFoodCount - rightFoodCount;
-
-      const dishOrder = left.dishName.localeCompare(right.dishName, 'ja');
-      if (dishOrder !== 0) return dishOrder;
-      if (left.recipeLevel !== right.recipeLevel) {
-        return Number(left.recipeLevel || 0) - Number(right.recipeLevel || 0);
-      }
-      if (Number(left.eventBonus) !== Number(right.eventBonus)) {
-        return Number(left.eventBonus) - Number(right.eventBonus);
-      }
-      if (left.successMultiplier !== right.successMultiplier) {
-        return left.successMultiplier - right.successMultiplier;
-      }
-      return left.fbBonusPercent - right.fbBonusPercent;
-    });
-
-    const seenRecipeSuccessPairs = new Set();
-    const uniqueResults = sortedResults.filter(result => {
-      const key = `${result.dishName}\u0000${result.eventBonus}\u0000${result.successMultiplier}`;
-      if (seenRecipeSuccessPairs.has(key)) return false;
-
-      seenRecipeSuccessPairs.add(key);
-      return true;
-    });
+    const uniqueResults = Array.from(bestResults.values()).sort(compareResults);
     const maxCandidates = Number.isInteger(options.maxCandidates) && options.maxCandidates > 0
       ? options.maxCandidates
       : uniqueResults.length;

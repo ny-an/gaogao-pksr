@@ -33,9 +33,9 @@ function loadPotCapacity(elements = {}, initialStorage = {}) {
     'this.fixture = {',
     '  GAME_POT_CAPACITY_MAX,',
     '  calculatePotCapacity,',
+    '  getEnergyReversePotCapacity,',
     '  loadPotCapacitySettings,',
     '  savePotCapacitySettings,',
-    '  validateManualPotCapacity,',
     '};',
   ].join('\n');
 
@@ -43,57 +43,37 @@ function loadPotCapacity(elements = {}, initialStorage = {}) {
   return { ...context.fixture, storage };
 }
 
-function createAutomaticElements(manualValue = '') {
+function createAutomaticElements() {
   return {
-    maxPotCapacity: { value: manualValue },
     potCapacity: { value: '81' },
-    potEventBonus: { value: '2' },
+    potEventBonus: { value: '1.0' },
     weekendBonus: { checked: true },
-    cookingPowerUp: { value: '200' },
+    cookingPowerUp: { value: '0' },
     goodCampTicket: { checked: true },
   };
 }
 
-test('鍋容量の直接指定は既存のボーナス計算より優先される', () => {
-  const fixture = loadPotCapacity(createAutomaticElements('500'));
+test('現在の鍋容量は既存の鍋設定から計算する', () => {
+  const fixture = loadPotCapacity(createAutomaticElements());
 
-  assert.equal(fixture.calculatePotCapacity(), 500);
+  assert.equal(fixture.calculatePotCapacity(), 243);
+  assert.equal(fixture.getEnergyReversePotCapacity('current'), 243);
 });
 
-test('鍋容量の直接指定と自動計算はゲーム上限786を超えない', () => {
-  const manualFixture = loadPotCapacity(createAutomaticElements('999'));
-  const automaticFixture = loadPotCapacity({
-    ...createAutomaticElements(''),
+test('逆算の自動選択はゲーム上限786を返す', () => {
+  const fixture = loadPotCapacity(createAutomaticElements());
+
+  assert.equal(fixture.GAME_POT_CAPACITY_MAX, 786);
+  assert.equal(fixture.getEnergyReversePotCapacity('max'), 786);
+});
+
+test('既存の鍋設定からの計算もゲーム上限786を超えない', () => {
+  const fixture = loadPotCapacity({
+    ...createAutomaticElements(),
     potCapacity: { value: '999' },
+    potEventBonus: { value: '2' },
+    cookingPowerUp: { value: '200' },
   });
 
-  assert.equal(manualFixture.GAME_POT_CAPACITY_MAX, 786);
-  assert.equal(manualFixture.calculatePotCapacity(), 786);
-  assert.equal(automaticFixture.calculatePotCapacity(), 786);
-});
-
-test('鍋容量を空欄にすると従来の設定から自動計算する', () => {
-  const fixture = loadPotCapacity(createAutomaticElements(''));
-
   assert.equal(fixture.calculatePotCapacity(), 786);
-});
-
-test('直接指定した鍋容量を保存し、空欄では設定を削除する', () => {
-  const elements = createAutomaticElements('432');
-  const fixture = loadPotCapacity(elements);
-
-  fixture.savePotCapacitySettings();
-  assert.equal(fixture.storage.get('maxPotCapacity'), '432');
-
-  elements.maxPotCapacity.value = '';
-  fixture.savePotCapacitySettings();
-  assert.equal(fixture.storage.has('maxPotCapacity'), false);
-});
-
-test('保存済み鍋容量は読み込み時に現在のゲーム上限へ補正する', () => {
-  const elements = createAutomaticElements('');
-  const fixture = loadPotCapacity(elements, { maxPotCapacity: '900' });
-
-  fixture.loadPotCapacitySettings();
-  assert.equal(elements.maxPotCapacity.value, 786);
 });
