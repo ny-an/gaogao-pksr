@@ -7,6 +7,7 @@ const {
   getCandidateBaseEnergies,
   getMultiplierFraction,
   solveExactEnergy,
+  solveExactEnergyCandidates,
 } = require('../js/energy_reverse.js');
 
 test('FBボーナスとイベント倍率を正確な分数に変換する', () => {
@@ -176,4 +177,76 @@ test('鍋の残り枠内に組み合わせがない場合は該当なし', () =>
 
   assert.equal(result.found, false);
   assert.equal(result.reason, 'no-match');
+});
+
+test('できばえ指定なしでは通常・大成功・超成功の候補をまとめて返す', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 600,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 10,
+    foodEnergyMap: {},
+    successMultipliers: [1, 2, 3],
+    recipes: [
+      { name: '通常料理', energy: 600, foodCount: 3 },
+      { name: '大成功料理', energy: 300, foodCount: 2 },
+      { name: '超成功料理', energy: 200, foodCount: 1 },
+    ],
+  });
+
+  assert.deepEqual(
+    results.map(result => [result.dishName, result.successMultiplier]),
+    [
+      ['超成功料理', 3],
+      ['大成功料理', 2],
+      ['通常料理', 1],
+    ]
+  );
+});
+
+test('料理候補ごとに最小追加食材案を返し、料理名も保持する', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 500,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 6,
+    foodEnergyMap: { '100エナジー食材': 100 },
+    successMultipliers: [1],
+    recipes: [
+      { name: '料理A', category: 'サラダ', energy: 300, foodCount: 2 },
+      { name: '料理B', category: 'カレー', energy: 400, foodCount: 3 },
+    ],
+  });
+
+  assert.equal(results.length, 2);
+  assert.deepEqual(
+    results.map(result => ({
+      dishName: result.dishName,
+      category: result.dishCategory,
+      extraFoodCount: result.extraFoodCount,
+    })),
+    [
+      { dishName: '料理B', category: 'カレー', extraFoodCount: 1 },
+      { dishName: '料理A', category: 'サラダ', extraFoodCount: 2 },
+    ]
+  );
+});
+
+test('料理なし候補は料理名なしとして明示できる', () => {
+  const results = solveExactEnergyCandidates({
+    targetEnergy: 100,
+    recipeBonusPercent: 0,
+    fbBonusPercent: 0,
+    eventBonus: '1',
+    potCapacity: 2,
+    foodEnergyMap: { 食材: 100 },
+    successMultipliers: [1],
+    recipes: [{ name: '', energy: 0, foodCount: 0 }],
+  });
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].dishName, '');
+  assert.deepEqual(results[0].foods, { 食材: 1 });
 });

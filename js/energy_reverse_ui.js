@@ -1,4 +1,8 @@
 (function() {
+  const ALL_DISHES_VALUE = '__all__';
+  const NO_DISH_VALUE = '__none__';
+  const ALL_SUCCESS_VALUE = 'all';
+
   function copySelectOptions(sourceId, target) {
     const source = document.getElementById(sourceId);
     if (!source || !target) return;
@@ -7,23 +11,38 @@
     target.value = source.value;
   }
 
-  function getDishFoods(dishName) {
-    if (!dishName) return {};
-
-    for (const category of Object.values(org_dishes)) {
-      if (Object.prototype.hasOwnProperty.call(category, dishName)) {
-        return category[dishName];
-      }
-    }
-
-    return {};
-  }
-
   function countRecipeFoods(dishFoods) {
     return Object.values(dishFoods || {}).reduce(
       (total, amount) => total + (Number(amount) || 0),
       0
     );
+  }
+
+  function getRecipeCandidates(selectedDish) {
+    if (selectedDish === NO_DISH_VALUE) {
+      return [{ name: '', category: '', energy: 0, foodCount: 0 }];
+    }
+
+    const candidates = [];
+    for (const [categoryName, categoryDishes] of Object.entries(org_dishes)) {
+      for (const [dishName, dishFoods] of Object.entries(categoryDishes)) {
+        if (!Object.prototype.hasOwnProperty.call(dishesEnergyList, dishName)) continue;
+        if (selectedDish !== ALL_DISHES_VALUE && selectedDish !== dishName) continue;
+
+        candidates.push({
+          name: dishName,
+          category: categoryName,
+          energy: dishesEnergyList[dishName],
+          foodCount: countRecipeFoods(dishFoods),
+        });
+      }
+    }
+
+    return candidates;
+  }
+
+  function getSuccessMultipliers(value) {
+    return value === ALL_SUCCESS_VALUE ? [1, 2, 3] : [Number(value)];
   }
 
   function getCurrentSuccessMultiplier() {
@@ -42,9 +61,14 @@
   function populateDishOptions(select) {
     select.innerHTML = '';
 
+    const allDishesOption = document.createElement('option');
+    allDishesOption.value = ALL_DISHES_VALUE;
+    allDishesOption.textContent = '指定なし（全料理から計算）';
+    select.appendChild(allDishesOption);
+
     const noDishOption = document.createElement('option');
-    noDishOption.value = '';
-    noDishOption.textContent = '料理なし';
+    noDishOption.value = NO_DISH_VALUE;
+    noDishOption.textContent = '料理なし（追加食材のみ）';
     select.appendChild(noDishOption);
 
     for (const [categoryName, categoryDishes] of Object.entries(org_dishes)) {
@@ -83,26 +107,7 @@
     resultElement.replaceChildren(text, note);
   }
 
-  function renderResult(resultElement, result, dishName) {
-    resultElement.className = 'energy-reverse-result matched';
-
-    const summary = document.createElement('div');
-    summary.className = 'energy-reverse-summary';
-
-    const exactLabel = document.createElement('span');
-    exactLabel.className = 'energy-reverse-exact-label';
-    exactLabel.textContent = 'ぴったり';
-
-    const energy = document.createElement('strong');
-    energy.textContent = `${result.finalEnergy.toLocaleString()} エナジー`;
-
-    const capacity = document.createElement('span');
-    capacity.className = 'energy-reverse-capacity-detail';
-    const recipeDetail = dishName ? `料理 ${result.recipeFoodCount}個 ＋ ` : '';
-    capacity.textContent = `${recipeDetail}追加 ${result.extraFoodCount}個 ／ なべ ${result.potCapacity}個`;
-
-    summary.append(exactLabel, energy, capacity);
-
+  function createFoodList(result) {
     const foodList = document.createElement('div');
     foodList.className = 'energy-reverse-food-list';
     const foods = Object.entries(result.foods).sort((left, right) => {
@@ -136,11 +141,102 @@
       }
     }
 
-    const note = document.createElement('p');
-    note.className = 'energy-reverse-result-note';
-    note.textContent = `追加食材エナジー ${result.extraEnergy.toLocaleString()} ／ ${getSuccessLabel(result.successMultiplier)}`;
+    return foodList;
+  }
 
-    resultElement.replaceChildren(summary, foodList, note);
+  function appendCondition(container, label, value) {
+    const item = document.createElement('div');
+    item.className = 'energy-reverse-condition';
+
+    const name = document.createElement('span');
+    name.textContent = label;
+
+    const conditionValue = document.createElement('strong');
+    conditionValue.textContent = value;
+
+    item.append(name, conditionValue);
+    container.appendChild(item);
+  }
+
+  function createCandidate(result, conditions) {
+    const candidate = document.createElement('details');
+    candidate.className = 'energy-reverse-candidate';
+
+    const candidateSummary = document.createElement('summary');
+    candidateSummary.className = 'energy-reverse-candidate-summary';
+
+    const summaryMain = document.createElement('span');
+    summaryMain.className = 'energy-reverse-candidate-main';
+
+    const dishName = document.createElement('strong');
+    dishName.textContent = result.dishName || '料理なし（追加食材のみ）';
+
+    const foodCount = document.createElement('span');
+    foodCount.textContent = `料理 ${result.recipeFoodCount}個 ＋ 追加 ${result.extraFoodCount}個`;
+    summaryMain.append(dishName, foodCount);
+
+    const success = document.createElement('span');
+    success.className = 'energy-reverse-success-badge';
+    success.textContent = getSuccessLabel(result.successMultiplier);
+    candidateSummary.append(summaryMain, success);
+
+    const detail = document.createElement('div');
+    detail.className = 'energy-reverse-candidate-detail';
+
+    const conditionList = document.createElement('div');
+    conditionList.className = 'energy-reverse-condition-list';
+    appendCondition(conditionList, '目標', `${result.finalEnergy.toLocaleString()} エナジー`);
+    appendCondition(
+      conditionList,
+      'なべ使用',
+      `${result.recipeFoodCount + result.extraFoodCount} / ${result.potCapacity}個`
+    );
+    appendCondition(conditionList, 'FBボーナス', `${conditions.fbBonusPercent}%`);
+    appendCondition(
+      conditionList,
+      'レシピレベル',
+      result.dishName ? `Lv${conditions.recipeLevel}` : '対象外'
+    );
+    appendCondition(conditionList, 'イベント', conditions.eventBonusLabel);
+    appendCondition(conditionList, 'できばえ', getSuccessLabel(result.successMultiplier));
+    appendCondition(conditionList, '料理エナジー', result.recipeDisplayEnergy.toLocaleString());
+    appendCondition(conditionList, '追加エナジー', result.extraEnergy.toLocaleString());
+
+    const foodHeading = document.createElement('p');
+    foodHeading.className = 'energy-reverse-food-heading';
+    foodHeading.textContent = '追加食材';
+
+    detail.append(conditionList, foodHeading, createFoodList(result));
+    candidate.append(candidateSummary, detail);
+    return candidate;
+  }
+
+  function renderResults(resultElement, results, conditions) {
+    resultElement.className = 'energy-reverse-result matched';
+
+    const summary = document.createElement('div');
+    summary.className = 'energy-reverse-summary';
+
+    const exactLabel = document.createElement('span');
+    exactLabel.className = 'energy-reverse-exact-label';
+    exactLabel.textContent = 'ぴったり';
+
+    const energy = document.createElement('strong');
+    energy.textContent = `${results[0].finalEnergy.toLocaleString()} エナジー`;
+
+    const resultCount = document.createElement('span');
+    resultCount.className = 'energy-reverse-capacity-detail';
+    resultCount.textContent = `${results.length}案（クリックで詳細）`;
+
+    summary.append(exactLabel, energy, resultCount);
+
+    const candidateList = document.createElement('div');
+    candidateList.className = 'energy-reverse-candidate-list';
+    for (const result of results) {
+      candidateList.appendChild(createCandidate(result, conditions));
+    }
+
+    resultElement.replaceChildren(summary, candidateList);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -183,7 +279,7 @@
       const currentDish = document.getElementById('foodSelect')?.value || '';
       dishSelect.value = Array.from(dishSelect.options).some(option => option.value === currentDish)
         ? currentDish
-        : '';
+        : ALL_DISHES_VALUE;
 
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
@@ -229,28 +325,28 @@
       }
       targetInput.setCustomValidity('');
 
-      const dishName = dishSelect.value;
-      const dishFoods = getDishFoods(dishName);
-      const recipeFoodCount = countRecipeFoods(dishFoods);
       const recipeLevel = Number(recipeLevelSelect.value);
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
         : 0;
 
-      const result = energyReverse.solveExactEnergy({
+      const results = energyReverse.solveExactEnergyCandidates({
         targetEnergy,
-        recipeEnergy: dishName ? dishesEnergyList[dishName] : 0,
         recipeBonusPercent: Number(recipeLevelBonusList[recipeLevel] || 0),
         fbBonusPercent: Number(fbBonusSelect.value),
         eventBonus: eventBonusSelect.value,
-        successMultiplier: Number(successSelect.value),
+        successMultipliers: getSuccessMultipliers(successSelect.value),
         potCapacity,
-        recipeFoodCount,
+        recipes: getRecipeCandidates(dishSelect.value),
         foodEnergyMap,
       });
 
-      if (result.found) {
-        renderResult(resultElement, result, dishName);
+      if (results.length > 0) {
+        renderResults(resultElement, results, {
+          fbBonusPercent: Number(fbBonusSelect.value),
+          recipeLevel,
+          eventBonusLabel: eventBonusSelect.selectedOptions[0]?.textContent || '通常',
+        });
       } else {
         renderNoMatch(resultElement);
       }
