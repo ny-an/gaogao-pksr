@@ -49,10 +49,25 @@
     color: #555;
     font-size: 14px;
 
-    strong {
+    span {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    select {
+      width: auto;
+      min-width: 180px;
+      height: 34px;
+      margin: 0;
+      padding: 5px 28px 5px 10px;
+      border: 1px solid #d8e5d8;
+      border-radius: 6px;
+      background-color: #fff;
       color: $primary-color;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 16px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      text-align-last: center;
     }
   }
 

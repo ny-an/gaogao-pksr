@@ -6,6 +6,8 @@
   const ALL_FB_BONUSES_VALUE = 'all';
   const ALL_RECIPE_LEVELS_VALUE = 'all';
   const ALL_EVENT_BONUSES_VALUE = 'all';
+  const CURRENT_POT_CAPACITY_MODE = 'current';
+  const MAX_POT_CAPACITY_MODE = 'max';
   const MIN_CALCULATING_DISPLAY_MS = 400;
   const MAX_ALTERNATIVE_PATTERNS = 10;
 
@@ -130,6 +132,31 @@
     allBonusesOption.textContent = '指定なし（全計算）';
     select.prepend(allBonusesOption);
     select.value = '1';
+  }
+
+  function getReversePotCapacity(mode) {
+    if (typeof getEnergyReversePotCapacity === 'function') {
+      return getEnergyReversePotCapacity(mode);
+    }
+
+    return typeof calculatePotCapacity === 'function' ? calculatePotCapacity() : 0;
+  }
+
+  function populatePotCapacityOptions(select) {
+    const currentCapacity = getReversePotCapacity(CURRENT_POT_CAPACITY_MODE);
+    const maximumCapacity = getReversePotCapacity(MAX_POT_CAPACITY_MODE);
+    const options = [
+      [CURRENT_POT_CAPACITY_MODE, `現在（${currentCapacity.toLocaleString()}個）`],
+      [MAX_POT_CAPACITY_MODE, `自動（最大${maximumCapacity.toLocaleString()}個）`],
+    ];
+
+    select.replaceChildren(...options.map(([value, text]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = text;
+      return option;
+    }));
+    select.value = CURRENT_POT_CAPACITY_MODE;
   }
 
   function getSuccessLabel(multiplier) {
@@ -270,7 +297,7 @@
 
     const note = document.createElement('p');
     note.className = 'energy-reverse-result-note';
-    note.textContent = '現在のなべ容量と設定では、目標に一致する追加食材がありません。';
+    note.textContent = '選択したなべ容量と設定では、目標に一致する追加食材がありません。';
 
     resultElement.replaceChildren(text, note);
   }
@@ -521,7 +548,7 @@
     const excludedCount = document.getElementById('energyReverseExcludedCount');
     const submitButton = form?.querySelector('.energy-reverse-submit');
     const calculatingElement = document.getElementById('energyReverseCalculating');
-    const potCapacityValue = document.getElementById('energyReversePotCapacity');
+    const potCapacitySelect = document.getElementById('energyReversePotCapacityMode');
     const resultElement = document.getElementById('energyReverseResult');
 
     if (
@@ -529,7 +556,7 @@
       !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect ||
       !dishCategorySelect || !dishSelect || !excludedOptions || !excludedSelected ||
       !excludedCount || !submitButton || !calculatingElement ||
-      !potCapacityValue || !resultElement
+      !potCapacitySelect || !resultElement
     ) {
       return;
     }
@@ -558,6 +585,7 @@
       populateFbBonusOptions(fbBonusSelect);
       populateRecipeLevelOptions(recipeLevelSelect);
       populateEventBonusOptions(eventBonusSelect);
+      populatePotCapacityOptions(potCapacitySelect);
       successSelect.value = ALL_SUCCESS_VALUE;
 
       const currentDish = document.getElementById('foodSelect')?.value || '';
@@ -570,10 +598,6 @@
         currentDish || ALL_DISHES_VALUE
       );
 
-      const potCapacity = typeof calculatePotCapacity === 'function'
-        ? calculatePotCapacity()
-        : 0;
-      potCapacityValue.textContent = potCapacity.toLocaleString();
       setCalculating(false);
       clearResult(resultElement);
 
@@ -637,9 +661,7 @@
       }
       targetInput.setCustomValidity('');
 
-      const potCapacity = typeof calculatePotCapacity === 'function'
-        ? calculatePotCapacity()
-        : 0;
+      const potCapacity = getReversePotCapacity(potCapacitySelect.value);
       const excludedFoodNames = getExcludedFoodNames(excludedOptions);
       const availableFoodEnergyMap = Object.fromEntries(
         Object.entries(foodEnergyMap)
