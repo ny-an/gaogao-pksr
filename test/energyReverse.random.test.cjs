@@ -4,7 +4,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const { solveExactEnergy } = require('../js/energy_reverse.js');
+const {
+  solveExactEnergy,
+  solveExactEnergyCandidates,
+} = require('../js/energy_reverse.js');
 
 function loadGameData() {
   const projectRoot = path.join(__dirname, '..');
@@ -250,4 +253,67 @@ test('実データのランダム目標1000ケースを独立全探索結果と�
 
   assert.ok(foundCases > 250);
   assert.ok(noMatchCases > 500);
+});
+
+test('実データのランダム120ケースで複数料理・全できばえの候補に正解を含む', () => {
+  const random = createRandom(0x3c6ef372);
+  const namedRecipes = recipes.filter(recipe => recipe.name);
+
+  for (let caseIndex = 0; caseIndex < 120; caseIndex += 1) {
+    const recipe = pick(random, namedRecipes);
+    const extraCapacity = randomInteger(random, 0, 5);
+    const potCapacity = recipe.foodCount + extraCapacity;
+    const recipeLevel = randomInteger(random, 1, 70);
+    const recipeBonusPercent = Number(gameData.recipeLevelBonusList[recipeLevel]);
+    const fbBonusPercent = randomInteger(random, 0, 30);
+    const eventBonus = pick(random, eventBonuses);
+    const successMultiplier = pick(random, successMultipliers);
+    const extraFoodCount = randomInteger(random, 0, extraCapacity);
+    let extraEnergy = 0;
+
+    for (let index = 0; index < extraFoodCount; index += 1) {
+      extraEnergy += gameData.foodEnergyMap[pick(random, foodNames)];
+    }
+
+    const recipeDisplayEnergy = recipe.energy + Math.round(
+      recipe.energy * (recipeBonusPercent / 100)
+    );
+    const targetEnergy = calculateLikeScreen(
+      recipeDisplayEnergy + extraEnergy,
+      fbBonusPercent,
+      eventBonus,
+      successMultiplier
+    );
+    const candidateRecipes = Array.from(new Map(
+      [recipe, ...namedRecipes.slice(0, 7)].map(candidate => [candidate.name, candidate])
+    ).values());
+    const results = solveExactEnergyCandidates({
+      targetEnergy,
+      recipeBonusPercent,
+      fbBonusPercent,
+      eventBonus,
+      potCapacity,
+      foodEnergyMap: gameData.foodEnergyMap,
+      successMultipliers,
+      recipes: candidateRecipes,
+    });
+    const message = `case=${caseIndex} ${JSON.stringify({
+      recipe: recipe.name,
+      successMultiplier,
+      targetEnergy,
+      potCapacity,
+      recipeLevel,
+      fbBonusPercent,
+      eventBonus,
+    })}`;
+
+    assert.ok(
+      results.some(result => (
+        result.dishName === recipe.name &&
+        result.successMultiplier === successMultiplier &&
+        result.finalEnergy === targetEnergy
+      )),
+      message
+    );
+  }
 });

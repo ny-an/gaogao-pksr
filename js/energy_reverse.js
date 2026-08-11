@@ -251,6 +251,58 @@
     };
   }
 
+  function solveExactEnergyCandidates(options) {
+    const recipes = Array.isArray(options.recipes) && options.recipes.length > 0
+      ? options.recipes
+      : [{
+          name: options.dishName || '',
+          energy: options.recipeEnergy || 0,
+          foodCount: options.recipeFoodCount || 0,
+        }];
+    const requestedMultipliers = Array.isArray(options.successMultipliers)
+      ? options.successMultipliers
+      : [options.successMultiplier ?? 1];
+    const successMultipliers = Array.from(new Set(
+      requestedMultipliers
+        .map(Number)
+        .filter(multiplier => Number.isFinite(multiplier) && multiplier > 0)
+    ));
+    const results = [];
+
+    for (const recipe of recipes) {
+      for (const successMultiplier of successMultipliers) {
+        const result = solveExactEnergy({
+          ...options,
+          recipeEnergy: Number(recipe.energy || 0),
+          recipeFoodCount: Number(recipe.foodCount || 0),
+          successMultiplier,
+        });
+
+        if (!result.found) continue;
+
+        results.push({
+          ...result,
+          dishName: String(recipe.name || ''),
+          dishCategory: String(recipe.category || ''),
+        });
+      }
+    }
+
+    return results.sort((left, right) => {
+      if (left.extraFoodCount !== right.extraFoodCount) {
+        return left.extraFoodCount - right.extraFoodCount;
+      }
+
+      const leftFoodCount = left.recipeFoodCount + left.extraFoodCount;
+      const rightFoodCount = right.recipeFoodCount + right.extraFoodCount;
+      if (leftFoodCount !== rightFoodCount) return leftFoodCount - rightFoodCount;
+
+      const dishOrder = left.dishName.localeCompare(right.dishName, 'ja');
+      if (dishOrder !== 0) return dishOrder;
+      return left.successMultiplier - right.successMultiplier;
+    });
+  }
+
   return {
     calculateDisplayedEnergy,
     decimalToFraction,
@@ -258,5 +310,6 @@
     getCandidateBaseEnergies,
     getMultiplierFraction,
     solveExactEnergy,
+    solveExactEnergyCandidates,
   };
 });
