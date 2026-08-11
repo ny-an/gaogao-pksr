@@ -123,6 +123,7 @@ const allRecipeLevels = Object.keys(gameData.recipeLevelBonusList)
   .map(Number)
   .filter(level => level >= 1)
   .sort((left, right) => left - right);
+const allFbBonusPercents = Array.from({ length: 86 }, (_, percent) => percent);
 
 test('小規模ランダム200ケースで追加食材パターンを独立全探索結果と照合する', () => {
   const random = createRandom(0xa54ff53a);
@@ -395,6 +396,71 @@ test('実データのランダム120ケースで複数料理・全レベル・�
         result.recipeLevel >= 1 &&
         result.recipeLevel <= 70
       )),
+      message
+    );
+  }
+});
+
+test('実データのランダム100ケースで全FB探索からぴったり一致を返す', () => {
+  const random = createRandom(0x510e527f);
+  const namedRecipes = recipes.filter(recipe => recipe.name);
+
+  for (let caseIndex = 0; caseIndex < 100; caseIndex += 1) {
+    const recipe = pick(random, namedRecipes);
+    const recipeLevel = randomInteger(random, 1, 70);
+    const recipeBonusPercent = Number(gameData.recipeLevelBonusList[recipeLevel]);
+    const generatedFbBonusPercent = randomInteger(random, 0, 85);
+    const eventBonus = pick(random, eventBonuses);
+    const successMultiplier = pick(random, successMultipliers);
+    const extraFoodCount = randomInteger(random, 0, 5);
+    const potCapacity = recipe.foodCount + extraFoodCount;
+    let extraEnergy = 0;
+
+    for (let index = 0; index < extraFoodCount; index += 1) {
+      extraEnergy += gameData.foodEnergyMap[pick(random, foodNames)];
+    }
+
+    const recipeDisplayEnergy = recipe.energy + Math.round(
+      recipe.energy * (recipeBonusPercent / 100)
+    );
+    const targetEnergy = calculateLikeScreen(
+      recipeDisplayEnergy + extraEnergy,
+      generatedFbBonusPercent,
+      eventBonus,
+      successMultiplier
+    );
+    const results = solveExactEnergyCandidates({
+      targetEnergy,
+      recipeLevels: [recipeLevel],
+      recipeBonusPercentMap: gameData.recipeLevelBonusList,
+      fbBonusPercents: allFbBonusPercents,
+      eventBonuses: [eventBonus],
+      potCapacity,
+      foodEnergyMap: gameData.foodEnergyMap,
+      successMultipliers: [successMultiplier],
+      recipes: [recipe],
+    });
+    const message = `case=${caseIndex} ${JSON.stringify({
+      recipe: recipe.name,
+      targetEnergy,
+      potCapacity,
+      recipeLevel,
+      generatedFbBonusPercent,
+      eventBonus,
+      successMultiplier,
+    })}`;
+
+    assert.equal(results.length, 1, message);
+    assert.equal(results[0].finalEnergy, targetEnergy, message);
+    assert.ok(results[0].fbBonusPercent >= 0 && results[0].fbBonusPercent <= 85, message);
+    assert.equal(
+      calculateLikeScreen(
+        results[0].recipeDisplayEnergy + results[0].extraEnergy,
+        results[0].fbBonusPercent,
+        results[0].eventBonus,
+        results[0].successMultiplier
+      ),
+      targetEnergy,
       message
     );
   }
