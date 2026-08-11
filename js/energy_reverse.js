@@ -107,6 +107,114 @@
     );
   }
 
+  function findFoodCombinations(requiredEnergy, maxFoodCount, foodEnergyMap, maxResults = 10) {
+    if (!Number.isInteger(requiredEnergy) || requiredEnergy < 0) return [];
+    if (!Number.isInteger(maxFoodCount) || maxFoodCount < 0) return [];
+    if (!Number.isInteger(maxResults) || maxResults < 1) return [];
+    if (requiredEnergy === 0) return [{ foods: {}, count: 0 }];
+
+    const foods = normalizeFoodEntries(foodEnergyMap);
+    if (foods.length === 0 || maxFoodCount === 0) return [];
+
+    const highestEnergy = foods[0].energy;
+    const lowestEnergy = foods[foods.length - 1].energy;
+    const minimumCount = Math.ceil(requiredEnergy / highestEnergy);
+    const maximumCount = Math.min(
+      maxFoodCount,
+      Math.floor(requiredEnergy / lowestEnergy)
+    );
+    if (minimumCount > maximumCount) return [];
+
+    const suffixDivisors = new Int32Array(foods.length);
+    for (let index = foods.length - 1; index >= 0; index -= 1) {
+      suffixDivisors[index] = index === foods.length - 1
+        ? foods[index].energy
+        : greatestCommonDivisor(foods[index].energy, suffixDivisors[index + 1]);
+    }
+
+    const results = [];
+    const quantities = new Int16Array(foods.length);
+    const failedStates = new Set();
+
+    function search(index, remainingEnergy, remainingCount) {
+      if (results.length >= maxResults) return;
+      if (remainingCount === 0) {
+        if (remainingEnergy !== 0) return;
+
+        const combination = {};
+        for (let foodIndex = 0; foodIndex < foods.length; foodIndex += 1) {
+          if (quantities[foodIndex] > 0) {
+            combination[foods[foodIndex].name] = quantities[foodIndex];
+          }
+        }
+        results.push({
+          foods: combination,
+          count: quantities.reduce((sum, value) => sum + value, 0),
+        });
+        return;
+      }
+      if (index >= foods.length || remainingEnergy <= 0) return;
+
+      const maximumEnergy = foods[index].energy;
+      const minimumEnergy = foods[foods.length - 1].energy;
+      if (
+        remainingEnergy > remainingCount * maximumEnergy ||
+        remainingEnergy < remainingCount * minimumEnergy ||
+        remainingEnergy % suffixDivisors[index] !== 0
+      ) {
+        return;
+      }
+
+      const stateKey = `${index}:${remainingEnergy}:${remainingCount}`;
+      if (failedStates.has(stateKey)) return;
+      const resultCountBeforeSearch = results.length;
+
+      if (index === foods.length - 1) {
+        if (remainingEnergy === remainingCount * foods[index].energy) {
+          quantities[index] = remainingCount;
+          search(index + 1, 0, 0);
+          quantities[index] = 0;
+        }
+      } else {
+        const foodEnergy = foods[index].energy;
+        const nextMaximumEnergy = foods[index + 1].energy;
+        const maximumQuantity = Math.min(
+          remainingCount,
+          Math.floor(remainingEnergy / foodEnergy)
+        );
+
+        for (let quantity = maximumQuantity; quantity >= 0; quantity -= 1) {
+          const nextCount = remainingCount - quantity;
+          const nextEnergy = remainingEnergy - (quantity * foodEnergy);
+          if (nextCount === 0 && nextEnergy !== 0) continue;
+          if (
+            nextCount > 0 &&
+            (nextEnergy > nextCount * nextMaximumEnergy ||
+              nextEnergy < nextCount * minimumEnergy)
+          ) {
+            continue;
+          }
+
+          quantities[index] = quantity;
+          search(index + 1, nextEnergy, nextCount);
+          quantities[index] = 0;
+          if (results.length >= maxResults) return;
+        }
+      }
+
+      if (results.length === resultCountBeforeSearch) {
+        failedStates.add(stateKey);
+      }
+    }
+
+    for (let count = minimumCount; count <= maximumCount; count += 1) {
+      search(0, requiredEnergy, count);
+      if (results.length >= maxResults) break;
+    }
+
+    return results;
+  }
+
   function createFoodCombinationFinder(maxEnergy, foodEnergyMap) {
     const normalizedMaxEnergy = Math.max(0, Math.floor(Number(maxEnergy) || 0));
     const foods = normalizeFoodEntries(foodEnergyMap);
@@ -407,6 +515,7 @@
     calculateDisplayedEnergy,
     decimalToFraction,
     findFoodCombination,
+    findFoodCombinations,
     getCandidateBaseEnergies,
     getMultiplierFraction,
     solveExactEnergy,

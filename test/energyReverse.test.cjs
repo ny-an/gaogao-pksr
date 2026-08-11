@@ -4,11 +4,50 @@ const assert = require('node:assert/strict');
 const {
   calculateDisplayedEnergy,
   findFoodCombination,
+  findFoodCombinations,
   getCandidateBaseEnergies,
   getMultiplierFraction,
   solveExactEnergy,
   solveExactEnergyCandidates,
 } = require('../js/energy_reverse.js');
+
+test('同じ追加エナジーになる食材パターンを少ない個数から列挙する', () => {
+  const results = findFoodCombinations(200, 4, {
+    '100エナジー食材': 100,
+    '50エナジー食材': 50,
+  }, 10);
+
+  assert.deepEqual(results, [
+    { foods: { '100エナジー食材': 2 }, count: 2 },
+    { foods: { '100エナジー食材': 1, '50エナジー食材': 2 }, count: 3 },
+    { foods: { '50エナジー食材': 4 }, count: 4 },
+  ]);
+});
+
+test('追加食材パターンは指定した最大件数まで返す', () => {
+  const foodEnergyMap = Object.fromEntries(
+    Array.from({ length: 10 }, (_, index) => [`${10 - index}エナジー食材`, 10 - index])
+  );
+  const results = findFoodCombinations(60, 20, foodEnergyMap, 10);
+
+  assert.equal(results.length, 10);
+  assert.equal(new Set(results.map(result => JSON.stringify(result.foods))).size, 10);
+  for (const result of results) {
+    const energy = Object.entries(result.foods).reduce(
+      (sum, [foodName, quantity]) => sum + (foodEnergyMap[foodName] * quantity),
+      0
+    );
+    assert.equal(energy, 60);
+    assert.ok(result.count <= 20);
+  }
+});
+
+test('追加食材パターン探索は不正値や該当なしを空配列で返す', () => {
+  assert.deepEqual(findFoodCombinations(-1, 5, { 食材: 100 }, 10), []);
+  assert.deepEqual(findFoodCombinations(100, 0, { 食材: 100 }, 10), []);
+  assert.deepEqual(findFoodCombinations(100, 5, {}, 10), []);
+  assert.deepEqual(findFoodCombinations(100, 5, { 食材: 90 }, 10), []);
+});
 
 test('FBボーナスとイベント倍率を正確な分数に変換する', () => {
   assert.deepEqual(getMultiplierFraction(15, '1.1', 3), {

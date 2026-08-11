@@ -467,6 +467,95 @@
     white-space: nowrap;
   }
 
+  .energy-reverse-alternatives {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #d8e2d8;
+  }
+
+  .energy-reverse-alternative-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    p {
+      margin: 0;
+      color: #555;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  }
+
+  .energy-reverse-alternative-search {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border: 1px solid rgba(76, 175, 80, 0.48);
+    border-radius: 14px;
+    background: #f4faf4;
+    color: #39713d;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.6;
+    }
+  }
+
+  .energy-reverse-alternative-status {
+    min-height: 17px;
+    margin: 7px 0 0;
+    color: #777;
+    font-size: 11px;
+
+    &.calculating::before {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      border: 2px solid rgba(76, 175, 80, 0.25);
+      border-top-color: $primary-color;
+      border-radius: 50%;
+      content: '';
+      vertical-align: -2px;
+      animation: energy-reverse-spin 0.75s linear infinite;
+    }
+  }
+
+  .energy-reverse-alternative-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 7px;
+  }
+
+  .energy-reverse-alternative-pattern {
+    padding: 9px;
+    border: 1px solid #e0e8e0;
+    border-radius: 7px;
+    background: #f8fbf8;
+
+    > p {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 7px;
+      color: #5b6a5e;
+      font-size: 11px;
+
+      span {
+        color: #777;
+      }
+    }
+
+    .energy-reverse-food-item {
+      background: #fff;
+    }
+  }
+
   .energy-reverse-result-note {
     margin: 10px 0 0;
     text-align: center;
