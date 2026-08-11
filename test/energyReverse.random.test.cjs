@@ -272,11 +272,14 @@ test('実データのランダム120ケースで複数料理・全レベル・�
     const fbBonusPercent = randomInteger(random, 0, 30);
     const eventBonus = pick(random, eventBonuses);
     const successMultiplier = pick(random, successMultipliers);
+    const excludedFoodNames = foodNames.filter(() => random() < 0.25);
+    if (excludedFoodNames.length === foodNames.length) excludedFoodNames.pop();
+    const availableFoodNames = foodNames.filter(foodName => !excludedFoodNames.includes(foodName));
     const extraFoodCount = randomInteger(random, 0, extraCapacity);
     let extraEnergy = 0;
 
     for (let index = 0; index < extraFoodCount; index += 1) {
-      extraEnergy += gameData.foodEnergyMap[pick(random, foodNames)];
+      extraEnergy += gameData.foodEnergyMap[pick(random, availableFoodNames)];
     }
 
     const recipeDisplayEnergy = recipe.energy + Math.round(
@@ -299,6 +302,7 @@ test('実データのランダム120ケースで複数料理・全レベル・�
       eventBonuses,
       potCapacity,
       foodEnergyMap: gameData.foodEnergyMap,
+      excludedFoodNames,
       successMultipliers,
       recipes: candidateRecipes,
     });
@@ -318,6 +322,7 @@ test('実データのランダム120ケースで複数料理・全レベル・�
         result.eventBonus === eventBonus &&
         result.successMultiplier === successMultiplier &&
         result.finalEnergy === targetEnergy &&
+        Object.keys(result.foods).every(foodName => !excludedFoodNames.includes(foodName)) &&
         result.recipeLevel >= 1 &&
         result.recipeLevel <= 70
       )),
