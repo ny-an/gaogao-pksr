@@ -177,6 +177,26 @@
       font-weight: 100;
     }
 
+    // 鍋容量の直接指定
+    .manual-pot-capacity-control {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+
+      input {
+        width: 100%;
+      }
+
+      small {
+        color: #777;
+        font-size: 10px;
+        white-space: nowrap;
+      }
+    }
+
     // 料理パワーアップコントロール
     .cooking-power-up-control {
       flex: 1;

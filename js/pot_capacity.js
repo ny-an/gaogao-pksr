@@ -1,7 +1,9 @@
-// 鍋容量設定の最小値と最大値
-const POT_CAPACITY_MIN = 15;
-const POT_CAPACITY_MAX = 81;
-const POT_CAPACITY_STEP = 3;
+// ゲーム仕様変更時は、この上限だけを更新する
+const GAME_POT_CAPACITY_MAX = 786;
+const MANUAL_POT_CAPACITY_MIN = 1;
+const BASE_POT_CAPACITY_MIN = 15;
+const BASE_POT_CAPACITY_MAX = 81;
+const BASE_POT_CAPACITY_STEP = 3;
 const COOKING_POWER_UP_MIN = 0;
 const COOKING_POWER_UP_MAX = 200;
 const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5, 2.0]; // イベントボーナスの選択肢
@@ -13,12 +15,17 @@ const EVENT_BONUS_VALUES = [1.0, 1.25, 1.5, 2.0]; // イベントボーナスの
  * @returns {number} 計算された鍋容量
  */
 function calculatePotCapacity() {
+  const manualPotCapacity = getManualPotCapacity();
+  if (manualPotCapacity !== null) {
+    return manualPotCapacity;
+  }
+
   // なべ容量を取得（デフォルトは81）
   const potCapacityElement = document.getElementById('potCapacity');
   if (!potCapacityElement) {
-    return POT_CAPACITY_MAX; // 要素が存在しない場合は最大値（デフォルト）を返す
+    return BASE_POT_CAPACITY_MAX; // 要素が存在しない場合は最大値（デフォルト）を返す
   }
-  const potCapacity = parseInt(potCapacityElement.value, 10) || POT_CAPACITY_MAX;
+  const potCapacity = parseInt(potCapacityElement.value, 10) || BASE_POT_CAPACITY_MAX;
   
   // イベントボーナスを取得（鍋容量設定専用のpotEventBonusを使用）
   const eventBonusElement = document.getElementById('potEventBonus');
@@ -48,7 +55,37 @@ function calculatePotCapacity() {
   // ステップ4: ステップ3の結果 × いいキャンプチケットの効果 → 四捨五入
   let finalCapacity = Math.round(step3 * goodCampTicket);
   
-  return finalCapacity;
+  return Math.min(finalCapacity, GAME_POT_CAPACITY_MAX);
+}
+
+/**
+ * 直接指定する鍋容量を1〜ゲーム上限の整数に収める
+ * @returns {number|null} 空欄や数値以外の場合はnull
+ */
+function validateManualPotCapacity(value) {
+  if (value === null || value === undefined || String(value).trim() === '') {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+  if (!Number.isFinite(parsedValue)) return null;
+
+  return validateInput(
+    Math.round(parsedValue),
+    MANUAL_POT_CAPACITY_MIN,
+    GAME_POT_CAPACITY_MAX
+  );
+}
+
+/**
+ * 直接指定された鍋容量を取得する
+ * @returns {number|null} 未指定の場合はnull
+ */
+function getManualPotCapacity() {
+  const manualPotCapacityElement = document.getElementById('maxPotCapacity');
+  return manualPotCapacityElement
+    ? validateManualPotCapacity(manualPotCapacityElement.value)
+    : null;
 }
 
 /**
@@ -56,13 +93,15 @@ function calculatePotCapacity() {
  */
 function validatePotCapacity(value) {
   // 最小値・最大値の範囲内に収める
-  let validated = validateInput(value, POT_CAPACITY_MIN, POT_CAPACITY_MAX);
+  let validated = validateInput(value, BASE_POT_CAPACITY_MIN, BASE_POT_CAPACITY_MAX);
   // step=3に合わせる（15, 18, 21, ... 81）
-  const remainder = (validated - POT_CAPACITY_MIN) % POT_CAPACITY_STEP;
+  const remainder = (validated - BASE_POT_CAPACITY_MIN) % BASE_POT_CAPACITY_STEP;
   if (remainder !== 0) {
     // 最も近いstepの値に丸める
-    validated = Math.round((validated - POT_CAPACITY_MIN) / POT_CAPACITY_STEP) * POT_CAPACITY_STEP + POT_CAPACITY_MIN;
-    validated = validateInput(validated, POT_CAPACITY_MIN, POT_CAPACITY_MAX);
+    validated = Math.round(
+      (validated - BASE_POT_CAPACITY_MIN) / BASE_POT_CAPACITY_STEP
+    ) * BASE_POT_CAPACITY_STEP + BASE_POT_CAPACITY_MIN;
+    validated = validateInput(validated, BASE_POT_CAPACITY_MIN, BASE_POT_CAPACITY_MAX);
   }
   return validated;
 }
@@ -93,13 +132,26 @@ function initializePotEventBonusOptions() {
  * 鍋容量と料理パワーアップ増加分のinput要素の属性を初期化する
  */
 function initializePotCapacityInputAttributes() {
+  const manualPotCapacityElement = document.getElementById('maxPotCapacity');
+  if (manualPotCapacityElement) {
+    manualPotCapacityElement.min = MANUAL_POT_CAPACITY_MIN.toString();
+    manualPotCapacityElement.max = GAME_POT_CAPACITY_MAX.toString();
+    manualPotCapacityElement.step = '1';
+    manualPotCapacityElement.value = '';
+  }
+  const manualPotCapacityHint = document.getElementById('maxPotCapacityHint');
+  if (manualPotCapacityHint) {
+    manualPotCapacityHint.textContent =
+      `${MANUAL_POT_CAPACITY_MIN}〜${GAME_POT_CAPACITY_MAX}・空欄は自動`;
+  }
+
   // なべ容量のinput要素
   const potCapacityElement = document.getElementById('potCapacity');
   if (potCapacityElement) {
-    potCapacityElement.min = POT_CAPACITY_MIN.toString();
-    potCapacityElement.max = POT_CAPACITY_MAX.toString();
-    potCapacityElement.step = POT_CAPACITY_STEP.toString();
-    potCapacityElement.value = POT_CAPACITY_MAX.toString(); // デフォルト値
+    potCapacityElement.min = BASE_POT_CAPACITY_MIN.toString();
+    potCapacityElement.max = BASE_POT_CAPACITY_MAX.toString();
+    potCapacityElement.step = BASE_POT_CAPACITY_STEP.toString();
+    potCapacityElement.value = BASE_POT_CAPACITY_MAX.toString(); // デフォルト値
   }
   
   // 料理パワーアップ増加分のinput要素
@@ -115,9 +167,19 @@ function initializePotCapacityInputAttributes() {
  * 鍋容量設定をlocalStorageから読み込む
  */
 function loadPotCapacitySettings() {
+  const manualPotCapacity = validateManualPotCapacity(
+    localStorage.getItem('maxPotCapacity')
+  );
+  const manualPotCapacityElement = document.getElementById('maxPotCapacity');
+  if (manualPotCapacityElement) {
+    manualPotCapacityElement.value = manualPotCapacity === null
+      ? ''
+      : manualPotCapacity;
+  }
+
   // なべ容量（デフォルトは81）
   const potCapacity = validatePotCapacity(
-    parseInt(localStorage.getItem('potCapacity'), 10) || POT_CAPACITY_MAX
+    parseInt(localStorage.getItem('potCapacity'), 10) || BASE_POT_CAPACITY_MAX
   );
   const potCapacityElement = document.getElementById('potCapacity');
   if (potCapacityElement) {
@@ -182,11 +244,21 @@ function loadPotCapacitySettings() {
  * 鍋容量設定をlocalStorageに保存する
  */
 function savePotCapacitySettings() {
+  const manualPotCapacityInput = document.getElementById('maxPotCapacity');
+  if (manualPotCapacityInput) {
+    const manualPotCapacity = validateManualPotCapacity(manualPotCapacityInput.value);
+    if (manualPotCapacity === null) {
+      localStorage.removeItem('maxPotCapacity');
+    } else {
+      localStorage.setItem('maxPotCapacity', manualPotCapacity);
+    }
+  }
+
   // なべ容量
   const potCapacityInput = document.getElementById('potCapacity');
   if (potCapacityInput) {
     const potCapacity = validatePotCapacity(
-      parseInt(potCapacityInput.value, 10) || POT_CAPACITY_MAX
+      parseInt(potCapacityInput.value, 10) || BASE_POT_CAPACITY_MAX
     );
     localStorage.setItem('potCapacity', potCapacity);
   }
@@ -231,6 +303,26 @@ function savePotCapacitySettings() {
  * 鍋容量設定のイベントリスナーを設定
  */
 function setupPotCapacityEventListeners() {
+  const manualPotCapacityInput = document.getElementById('maxPotCapacity');
+  if (manualPotCapacityInput) {
+    manualPotCapacityInput.addEventListener('input', () => {
+      const value = validateManualPotCapacity(manualPotCapacityInput.value);
+      manualPotCapacityInput.value = value === null ? '' : value;
+      savePotCapacitySettings();
+      updatePotCapacityDisplay();
+    });
+
+    manualPotCapacityInput.addEventListener('change', () => {
+      const value = validateManualPotCapacity(manualPotCapacityInput.value);
+      manualPotCapacityInput.value = value === null ? '' : value;
+      savePotCapacitySettings();
+      updatePotCapacityDisplay();
+      if (shouldUpdateFoodOptions()) {
+        updateFoodOptionsIfNeeded();
+      }
+    });
+  }
+
   // なべ容量
   const potCapacityInput = document.getElementById('potCapacity');
   const potCapacityIncrementBtn = document.getElementById('potCapacityIncrement');
@@ -246,8 +338,8 @@ function setupPotCapacityEventListeners() {
     }
 
     function stepPotCapacity(delta) {
-      const current = parseInt(potCapacityInput.value, 10) || POT_CAPACITY_MIN;
-      setPotCapacityValue(current + (delta * POT_CAPACITY_STEP));
+      const current = parseInt(potCapacityInput.value, 10) || BASE_POT_CAPACITY_MIN;
+      setPotCapacityValue(current + (delta * BASE_POT_CAPACITY_STEP));
     }
 
     // 入力値の検証
@@ -561,4 +653,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 200);
 });
-
