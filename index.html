@@ -139,7 +139,14 @@
         <div id="potCapacityContainer" class="settings-container">
             <div class="setting-item-list">
                 <div class="setting-item">
-                    <label for="potCapacity">なべ容量</label>
+                    <label for="maxPotCapacity">鍋容量（最大）</label>
+                    <div class="manual-pot-capacity-control">
+                        <input type="number" id="maxPotCapacity" inputmode="numeric" placeholder="自動">
+                        <small id="maxPotCapacityHint">空欄は自動</small>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label for="potCapacity">通常時のなべ容量</label>
                     <div class="cooking-power-up-control">
                         <button type="button" class="triangle-btn triangle-down" id="potCapacityDecrement" aria-label="decrement">&#9660;</button>
                         <input type="number" id="potCapacity">
