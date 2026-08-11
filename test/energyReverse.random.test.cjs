@@ -111,6 +111,10 @@ const recipes = getRecipeEntries(gameData);
 const foodNames = Object.keys(gameData.foodEnergyMap);
 const eventBonuses = ['1', '1.1', '1.25', '1.5'];
 const successMultipliers = [1, 2, 3];
+const allRecipeLevels = Object.keys(gameData.recipeLevelBonusList)
+  .map(Number)
+  .filter(level => level >= 1)
+  .sort((left, right) => left - right);
 
 test('実データのランダム600ケースで生成済み目標を必ず逆算できる', () => {
   const random = createRandom(0x6a09e667);
@@ -255,7 +259,7 @@ test('実データのランダム目標1000ケースを独立全探索結果と�
   assert.ok(noMatchCases > 500);
 });
 
-test('実データのランダム120ケースで複数料理・全できばえの候補に正解を含む', () => {
+test('実データのランダム120ケースで複数料理・全レベル・全できばえの候補に正解を含む', () => {
   const random = createRandom(0x3c6ef372);
   const namedRecipes = recipes.filter(recipe => recipe.name);
 
@@ -289,7 +293,8 @@ test('実データのランダム120ケースで複数料理・全できばえ�
     ).values());
     const results = solveExactEnergyCandidates({
       targetEnergy,
-      recipeBonusPercent,
+      recipeLevels: allRecipeLevels,
+      recipeBonusPercentMap: gameData.recipeLevelBonusList,
       fbBonusPercent,
       eventBonus,
       potCapacity,
@@ -311,7 +316,9 @@ test('実データのランダム120ケースで複数料理・全できばえ�
       results.some(result => (
         result.dishName === recipe.name &&
         result.successMultiplier === successMultiplier &&
-        result.finalEnergy === targetEnergy
+        result.finalEnergy === targetEnergy &&
+        result.recipeLevel >= 1 &&
+        result.recipeLevel <= 70
       )),
       message
     );

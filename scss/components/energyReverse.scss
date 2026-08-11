@@ -97,6 +97,12 @@
         outline: none;
         box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.14);
       }
+
+      &:disabled {
+        background-color: #f4f4f4;
+        color: #777;
+        opacity: 1;
+      }
     }
 
     input {

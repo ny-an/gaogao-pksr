@@ -1,7 +1,9 @@
 (function() {
-  const ALL_DISHES_VALUE = '__all__';
-  const NO_DISH_VALUE = '__none__';
+  const ALL_DISH_CATEGORIES_VALUE = '__all_categories__';
+  const NO_DISH_CATEGORY_VALUE = '__no_dish__';
+  const ALL_DISHES_VALUE = '__all_dishes__';
   const ALL_SUCCESS_VALUE = 'all';
+  const ALL_RECIPE_LEVELS_VALUE = 'all';
 
   function copySelectOptions(sourceId, target) {
     const source = document.getElementById(sourceId);
@@ -18,16 +20,18 @@
     );
   }
 
-  function getRecipeCandidates(selectedDish) {
-    if (selectedDish === NO_DISH_VALUE) {
-      return [{ name: '', category: '', energy: 0, foodCount: 0 }];
-    }
-
+  function getRecipeEntries(selectedCategory) {
     const candidates = [];
     for (const [categoryName, categoryDishes] of Object.entries(org_dishes)) {
+      if (
+        selectedCategory !== ALL_DISH_CATEGORIES_VALUE &&
+        selectedCategory !== categoryName
+      ) {
+        continue;
+      }
+
       for (const [dishName, dishFoods] of Object.entries(categoryDishes)) {
         if (!Object.prototype.hasOwnProperty.call(dishesEnergyList, dishName)) continue;
-        if (selectedDish !== ALL_DISHES_VALUE && selectedDish !== dishName) continue;
 
         candidates.push({
           name: dishName,
@@ -38,11 +42,53 @@
       }
     }
 
-    return candidates;
+    return candidates.sort((left, right) => {
+      if (right.energy !== left.energy) return right.energy - left.energy;
+      return left.name.localeCompare(right.name, 'ja');
+    });
+  }
+
+  function getRecipeCandidates(selectedCategory, selectedDish) {
+    if (selectedCategory === NO_DISH_CATEGORY_VALUE) {
+      return [{ name: '', category: '', energy: 0, foodCount: 0 }];
+    }
+
+    return getRecipeEntries(selectedCategory).filter(recipe => (
+      selectedDish === ALL_DISHES_VALUE || selectedDish === recipe.name
+    ));
+  }
+
+  function getDishCategory(dishName) {
+    for (const [categoryName, categoryDishes] of Object.entries(org_dishes)) {
+      if (Object.prototype.hasOwnProperty.call(categoryDishes, dishName)) {
+        return categoryName;
+      }
+    }
+
+    return ALL_DISH_CATEGORIES_VALUE;
   }
 
   function getSuccessMultipliers(value) {
     return value === ALL_SUCCESS_VALUE ? [1, 2, 3] : [Number(value)];
+  }
+
+  function getRecipeLevels(value) {
+    if (value !== ALL_RECIPE_LEVELS_VALUE) return [Number(value)];
+
+    return Object.keys(recipeLevelBonusList)
+      .map(Number)
+      .filter(level => Number.isInteger(level) && level >= 1)
+      .sort((left, right) => left - right);
+  }
+
+  function populateRecipeLevelOptions(select) {
+    copySelectOptions('recipeLevel', select);
+
+    const allLevelsOption = document.createElement('option');
+    allLevelsOption.value = ALL_RECIPE_LEVELS_VALUE;
+    allLevelsOption.textContent = '指定なし（全Lv計算）';
+    select.prepend(allLevelsOption);
+    select.value = ALL_RECIPE_LEVELS_VALUE;
   }
 
   function getCurrentSuccessMultiplier() {
@@ -58,34 +104,55 @@
     return '通常';
   }
 
-  function populateDishOptions(select) {
-    select.innerHTML = '';
+  function populateDishCategoryOptions(select) {
+    select.replaceChildren();
 
+    const categories = [
+      [ALL_DISH_CATEGORIES_VALUE, '選択なし（全料理）'],
+      [NO_DISH_CATEGORY_VALUE, '料理なし（追加食材のみ）'],
+      ...['サラダ', 'カレー', 'デザート']
+        .filter(categoryName => Object.prototype.hasOwnProperty.call(org_dishes, categoryName))
+        .map(categoryName => [categoryName, categoryName]),
+    ];
+
+    for (const [value, label] of categories) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    }
+  }
+
+  function populateDishOptions(select, selectedCategory, preferredDish = ALL_DISHES_VALUE) {
+    select.replaceChildren();
+
+    if (selectedCategory === NO_DISH_CATEGORY_VALUE) {
+      const noDishOption = document.createElement('option');
+      noDishOption.value = ALL_DISHES_VALUE;
+      noDishOption.textContent = '料理なし（追加食材のみ）';
+      select.appendChild(noDishOption);
+      select.disabled = true;
+      return;
+    }
+
+    select.disabled = false;
     const allDishesOption = document.createElement('option');
     allDishesOption.value = ALL_DISHES_VALUE;
-    allDishesOption.textContent = '指定なし（全料理から計算）';
+    allDishesOption.textContent = selectedCategory === ALL_DISH_CATEGORIES_VALUE
+      ? '指定なし（全料理から計算）'
+      : `指定なし（${selectedCategory}から計算）`;
     select.appendChild(allDishesOption);
 
-    const noDishOption = document.createElement('option');
-    noDishOption.value = NO_DISH_VALUE;
-    noDishOption.textContent = '料理なし（追加食材のみ）';
-    select.appendChild(noDishOption);
-
-    for (const [categoryName, categoryDishes] of Object.entries(org_dishes)) {
-      const group = document.createElement('optgroup');
-      group.label = categoryName;
-
-      for (const dishName of Object.keys(categoryDishes)) {
-        if (!Object.prototype.hasOwnProperty.call(dishesEnergyList, dishName)) continue;
-
-        const option = document.createElement('option');
-        option.value = dishName;
-        option.textContent = dishName;
-        group.appendChild(option);
-      }
-
-      if (group.children.length > 0) select.appendChild(group);
+    for (const recipe of getRecipeEntries(selectedCategory)) {
+      const option = document.createElement('option');
+      option.value = recipe.name;
+      option.textContent = recipe.name;
+      select.appendChild(option);
     }
+
+    select.value = Array.from(select.options).some(option => option.value === preferredDish)
+      ? preferredDish
+      : ALL_DISHES_VALUE;
   }
 
   function clearResult(resultElement) {
@@ -172,7 +239,8 @@
     dishName.textContent = result.dishName || '料理なし（追加食材のみ）';
 
     const foodCount = document.createElement('span');
-    foodCount.textContent = `料理 ${result.recipeFoodCount}個 ＋ 追加 ${result.extraFoodCount}個`;
+    const levelText = result.dishName ? `Lv${result.recipeLevel} ／ ` : '';
+    foodCount.textContent = `${levelText}料理 ${result.recipeFoodCount}個 ＋ 追加 ${result.extraFoodCount}個`;
     summaryMain.append(dishName, foodCount);
 
     const success = document.createElement('span');
@@ -195,7 +263,7 @@
     appendCondition(
       conditionList,
       'レシピレベル',
-      result.dishName ? `Lv${conditions.recipeLevel}` : '対象外'
+      result.dishName ? `Lv${result.recipeLevel}` : '対象外'
     );
     appendCondition(conditionList, 'イベント', conditions.eventBonusLabel);
     appendCondition(conditionList, 'できばえ', getSuccessLabel(result.successMultiplier));
@@ -250,19 +318,22 @@
     const recipeLevelSelect = document.getElementById('energyReverseRecipeLevel');
     const eventBonusSelect = document.getElementById('energyReverseEventBonus');
     const successSelect = document.getElementById('energyReverseSuccess');
+    const dishCategorySelect = document.getElementById('energyReverseDishCategory');
     const dishSelect = document.getElementById('energyReverseDish');
     const potCapacityValue = document.getElementById('energyReversePotCapacity');
     const resultElement = document.getElementById('energyReverseResult');
 
     if (
       !trigger || !modal || !dialog || !closeButton || !form || !targetInput ||
-      !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect || !dishSelect ||
+      !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect ||
+      !dishCategorySelect || !dishSelect ||
       !potCapacityValue || !resultElement
     ) {
       return;
     }
 
-    populateDishOptions(dishSelect);
+    populateDishCategoryOptions(dishCategorySelect);
+    populateDishOptions(dishSelect, ALL_DISH_CATEGORIES_VALUE);
 
     function closeModal() {
       modal.classList.remove('open');
@@ -272,14 +343,19 @@
 
     function openModal() {
       copySelectOptions('fbBonus', fbBonusSelect);
-      copySelectOptions('recipeLevel', recipeLevelSelect);
+      populateRecipeLevelOptions(recipeLevelSelect);
       copySelectOptions('eventBonus', eventBonusSelect);
       successSelect.value = getCurrentSuccessMultiplier();
 
       const currentDish = document.getElementById('foodSelect')?.value || '';
-      dishSelect.value = Array.from(dishSelect.options).some(option => option.value === currentDish)
-        ? currentDish
-        : ALL_DISHES_VALUE;
+      dishCategorySelect.value = currentDish
+        ? getDishCategory(currentDish)
+        : ALL_DISH_CATEGORIES_VALUE;
+      populateDishOptions(
+        dishSelect,
+        dishCategorySelect.value,
+        currentDish || ALL_DISHES_VALUE
+      );
 
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
@@ -313,6 +389,9 @@
 
     form.addEventListener('input', () => clearResult(resultElement));
     form.addEventListener('change', () => clearResult(resultElement));
+    dishCategorySelect.addEventListener('change', () => {
+      populateDishOptions(dishSelect, dishCategorySelect.value);
+    });
 
     form.addEventListener('submit', event => {
       event.preventDefault();
@@ -325,26 +404,25 @@
       }
       targetInput.setCustomValidity('');
 
-      const recipeLevel = Number(recipeLevelSelect.value);
       const potCapacity = typeof calculatePotCapacity === 'function'
         ? calculatePotCapacity()
         : 0;
 
       const results = energyReverse.solveExactEnergyCandidates({
         targetEnergy,
-        recipeBonusPercent: Number(recipeLevelBonusList[recipeLevel] || 0),
+        recipeLevels: getRecipeLevels(recipeLevelSelect.value),
+        recipeBonusPercentMap: recipeLevelBonusList,
         fbBonusPercent: Number(fbBonusSelect.value),
         eventBonus: eventBonusSelect.value,
         successMultipliers: getSuccessMultipliers(successSelect.value),
         potCapacity,
-        recipes: getRecipeCandidates(dishSelect.value),
+        recipes: getRecipeCandidates(dishCategorySelect.value, dishSelect.value),
         foodEnergyMap,
       });
 
       if (results.length > 0) {
         renderResults(resultElement, results, {
           fbBonusPercent: Number(fbBonusSelect.value),
-          recipeLevel,
           eventBonusLabel: eventBonusSelect.selectedOptions[0]?.textContent || '通常',
         });
       } else {
