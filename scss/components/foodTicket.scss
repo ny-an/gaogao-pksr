@@ -399,6 +399,11 @@
     gap: 5px;
   }
 
+  .food-ticket-target-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
   .food-ticket-target-option,
   .food-ticket-available-option {
     display: flex;
@@ -432,6 +437,10 @@
   }
 
   .food-ticket-target-option {
+    gap: 3px;
+    padding-right: 3px;
+    padding-left: 3px;
+
     img {
       flex: 0 0 auto;
       width: 25px;
@@ -439,7 +448,6 @@
     }
   }
 
-  .food-ticket-target-name,
   .food-ticket-available-option span {
     min-width: 0;
     overflow: hidden;
@@ -450,7 +458,7 @@
   .food-ticket-target-quantity {
     width: 43px;
     height: 27px;
-    margin-left: auto;
+    margin-left: 0;
     padding: 2px 3px;
     box-sizing: border-box;
     border: 1px solid #d8d8d8;
@@ -509,6 +517,11 @@
     font-weight: bold;
   }
 
+  .food-ticket-target-ticket-label {
+    color: #d85b68;
+    font-weight: bold;
+  }
+
   .food-ticket-target-stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -535,6 +548,22 @@
       color: #4f6570;
       font-family: 'Montserrat', sans-serif;
       font-size: 14px;
+    }
+  }
+
+  .food-ticket-target-stat-average {
+    grid-column: 1 / -1;
+    gap: 3px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    span {
+      font-size: 11px;
+    }
+
+    strong {
+      font-size: 20px;
+      line-height: 1.1;
     }
   }
 
