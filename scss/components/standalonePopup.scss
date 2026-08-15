@@ -20,6 +20,28 @@
     margin: 0 auto 12px;
   }
 
+  .standalone-popup-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .standalone-help-button {
+    padding: 4px 8px;
+    border: 1px solid #d8e5d8;
+    border-radius: 999px;
+    background: #fff;
+    color: $primary-color;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+
+    &:hover,
+    &.active {
+      background: #f2f8f2;
+    }
+  }
+
   .standalone-popup-back {
     color: $primary-color;
     font-size: 13px;

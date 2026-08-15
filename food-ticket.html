@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>食材チケットシミュレーション | ポケスリ献立表</title>
-    <meta name="description" content="ポケモンスリープの食材チケットで、食材がどれぐらい出るか、目当ての食材まで何枚必要かをシミュレーションするツールです。">
+    <title>ポケスリ食材チケットシミュレーション｜必要枚数を計算｜がおがおぷーん</title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）の食材チケットS・M・Lで出る食材量と、目当ての食材に必要なチケット枚数をシミュレーションできます。">
+    <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/food-ticket.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+    <meta property="og:title" content="ポケスリ食材チケットシミュレーション｜必要枚数を計算" />
+    <meta property="og:description" content="食材チケットS・M・Lで出る量と、目当ての食材に届くまでの必要枚数を計算できます。" />
+    <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/food-ticket.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ポケスリ食材チケットシミュレーション｜必要枚数を計算" />
+    <meta name="twitter:description" content="ポケモンスリープの食材チケットで出る量と必要枚数をシミュレーションできます。" />
+    <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
     <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -13,7 +24,10 @@
 <main class="standalone-popup-shell">
     <header class="standalone-popup-header">
         <a class="standalone-popup-back" href="index.html">← 献立表へ戻る</a>
-        <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+        <div class="standalone-popup-header-meta">
+            <button type="button" class="standalone-help-button" data-guide-toggle aria-expanded="false" aria-controls="food-ticket-guide">使い方</button>
+            <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+        </div>
     </header>
 
     <div id="foodTicketModal" class="modal food-ticket-modal" aria-hidden="false">
@@ -102,11 +116,28 @@
             <p class="food-ticket-note">ゲーム内の抽選確率は公開されていないため、登録食材を均等に抽選する前提です。1枚の中では種類が重複しないものとして計算します。</p>
         </div>
     </div>
+
+    <section id="food-ticket-guide" class="usage-guide" aria-labelledby="food-ticket-guide-title">
+        <h2 id="food-ticket-guide-title">ポケスリ食材チケットシミュレーションとは</h2>
+        <div class="guide-content">
+            <p class="guide-description">
+                食材チケットS・M・Lを使ったときに出る食材の量と、目当ての食材を必要数そろえるまでのチケット枚数を計算できます。
+                抽選確率は公開されていないため、登録した食材を均等に抽選する前提でシミュレーションします。
+            </p>
+            <h3>使い方</h3>
+            <ol class="guide-steps">
+                <li>「出る量」または「必要枚数」を選びます。</li>
+                <li>食材チケットの種類と、必要な食材・数量を指定します。</li>
+                <li>シミュレーション結果を確認し、<a href="index.html">ポケスリ献立表</a>の料理計画に活用できます。</li>
+            </ol>
+        </div>
+    </section>
 </main>
 
 <script src="js/data/foods.js"></script>
 <script src="js/standalone_popup.js"></script>
 <script src="js/food_ticket.js"></script>
 <script src="js/food_ticket_ui.js"></script>
+<script src="js/guide_toggle.js"></script>
 </body>
 </html>

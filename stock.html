@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ポケスリ食材積立表 | がおがおぷーん </title>
-    <meta name="description" content="ポケモンスリープ（ポケスリ）におけるレシピ・食材エネルギーに特化した計算ツールです。カレー・サラダ・デザートなどの種類にも対応し、シンプル簡単に表示！大成功(2倍)や日曜大成功（3倍）時のエネルギー計算や追加食材のエネルギー計算、もちろんFBボーナスやイベントボーナスの計算にも対応しています！！">
+    <title>ポケスリ食材積立表｜必要な食材数を計算｜がおがおぷーん</title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）で作りたい料理を選び、翌週に必要な食材の数をまとめて計算できる食材積立表です。">
 
-    <meta name="keywords" content="ポケスリ、ポケモンスリープ、カレンダー, イベント, エネルギー管理, エネルギー計算, 自動OCR" />
     <meta name="author" content="@GaoGaoPuuun" />
-    <meta property="og:title" content="ポケスリ食材積立表 | がおがおぷーん" />
-    <meta property="og:description" content="ポケモンスリープのカレンダー作成・イベント管理が簡単に行える便利なツール。"/>
+    <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/stock.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+    <meta property="og:title" content="ポケスリ食材積立表｜必要な食材数を計算" />
+    <meta property="og:description" content="作りたい料理を選ぶだけで、翌週に必要なポケスリ食材の数をまとめて計算できます。"/>
     <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
-    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/stock.html" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="ポケスリ食材積立表 | お食事管理ツール" />
-    <meta name="twitter:description" content="カレンダー作成・イベント管理が簡単に行えるツールです！！" />
+    <meta name="twitter:title" content="ポケスリ食材積立表｜必要な食材数を計算" />
+    <meta name="twitter:description" content="翌週の料理に必要な食材をまとめて計算できるポケスリ積立表です。" />
     <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
 
     <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
@@ -97,7 +99,7 @@
 
 
         <!-- 使い方 -->
-        <div class="usage-guide">
+        <div id="stock-usage-guide" class="usage-guide">
             <h2>積立表について</h2>
             <div class="guide-content">
                 <p class="guide-description">
@@ -167,12 +169,10 @@
                 <a href="food-ticket.html">食材チケット</a>
             </div>
 
-            <div id="usage-display-button">
-                <p>
-                    使い方
-                    <span class="question-icon">?</span>
-                </p>
-            </div>
+            <button type="button" id="usage-display-button" class="usage-display-button" data-guide-toggle aria-expanded="false" aria-controls="stock-usage-guide">
+                <span>使い方</span>
+                <span class="question-icon" aria-hidden="true">?</span>
+            </button>
 
         </div>
     </div>
@@ -215,6 +215,7 @@
 <script src="js/data/foods.js"></script>
 <script src="js/lib/confetti.mini.js"></script>
 <script src="js/footer.js"></script>
+<script src="js/guide_toggle.js"></script>
 
 <!-- logic -->
 <script src="js/common.js"></script>
@@ -256,12 +257,6 @@
         // 食材テーブルを更新
         updateFoodTable();
       }
-    });
-
-    // 使い方表示
-    const usageButton = document.querySelector('#usage-display-button');
-    usageButton.addEventListener('click', function() {
-      document.querySelector('.usage-guide').classList.toggle('display');
     });
 
   });

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ny-an.github.io/gaogao-pksr/sitemap.xml

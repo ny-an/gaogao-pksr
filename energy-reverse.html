@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>エナジー逆算 | ポケスリ献立表</title>
-    <meta name="description" content="ポケモンスリープの目標エナジーから、料理と追加食材の組み合わせを逆算するツールです。">
+    <title>ポケスリ エナジー逆算｜目標エナジー計算ツール｜がおがおぷーん</title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）の目標エナジーから、料理・追加食材の組み合わせを逆算。レシピレベル、FBボーナス、イベント、鍋容量を指定して候補を計算できます。">
+    <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/energy-reverse.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+    <meta property="og:title" content="ポケスリ エナジー逆算｜目標エナジー計算ツール" />
+    <meta property="og:description" content="目標エナジーに届く料理と追加食材の組み合わせを逆算できます。" />
+    <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/energy-reverse.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ポケスリ エナジー逆算｜目標エナジー計算ツール" />
+    <meta name="twitter:description" content="ポケモンスリープの目標エナジーから料理を逆算するツールです。" />
+    <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
     <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -13,7 +24,10 @@
 <main class="standalone-popup-shell">
     <header class="standalone-popup-header">
         <a class="standalone-popup-back" href="index.html">← 献立表へ戻る</a>
-        <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+        <div class="standalone-popup-header-meta">
+            <button type="button" class="standalone-help-button" data-guide-toggle aria-expanded="false" aria-controls="energy-reverse-guide">使い方</button>
+            <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+        </div>
     </header>
 
     <div id="energyReverseModal" class="modal energy-reverse-modal" aria-hidden="false">
@@ -81,6 +95,22 @@
             <div id="energyReverseResult" class="energy-reverse-result" aria-live="polite"></div>
         </div>
     </div>
+
+    <section id="energy-reverse-guide" class="usage-guide" aria-labelledby="energy-reverse-guide-title">
+        <h2 id="energy-reverse-guide-title">ポケスリのエナジー逆算とは</h2>
+        <div class="guide-content">
+            <p class="guide-description">
+                目標エナジーに届く料理と追加食材の組み合わせを探すための計算ツールです。
+                レシピレベル、FBボーナス、イベント倍率、鍋容量、料理のできばえを指定して候補を計算できます。
+            </p>
+            <h3>使い方</h3>
+            <ol class="guide-steps">
+                <li>目標エナジーと料理条件を入力します。</li>
+                <li>「逆算する」を押すと、条件に合う料理と追加食材が表示されます。</li>
+                <li>料理の献立や食材の準備は<a href="index.html">ポケスリ献立表</a>で続けて確認できます。</li>
+            </ol>
+        </div>
+    </section>
 </main>
 
 <!-- 単独ページでも、献立表で保存した鍋設定を使うためのデータ領域 -->
@@ -106,5 +136,6 @@
 <script src="js/pot_capacity.js"></script>
 <script src="js/energy_reverse.js"></script>
 <script src="js/energy_reverse_ui.js"></script>
+<script src="js/guide_toggle.js"></script>
 </body>
 </html>
