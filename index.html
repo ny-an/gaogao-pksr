@@ -279,6 +279,94 @@
     </div>
 </div>
 
+<!-- 食材チケットシミュレーションモーダル（食材アイコンのダブルタップで起動） -->
+<div id="foodTicketModal" class="modal food-ticket-modal" aria-hidden="true">
+    <div class="modal-content food-ticket-content" role="dialog" aria-modal="true" aria-labelledby="foodTicketTitle">
+        <button type="button" class="food-ticket-close" aria-label="閉じる">&times;</button>
+        <h2 id="foodTicketTitle">食材チケットシミュレーション</h2>
+        <p class="food-ticket-trigger-note">食材アイコンをダブルタップすると開きます</p>
+
+        <div class="food-ticket-mode-options" role="radiogroup" aria-label="シミュレーション種類">
+            <label class="food-ticket-mode-option">
+                <input type="radio" name="foodTicketMode" value="simulation" checked>
+                <span>
+                    <strong>出る量</strong>
+                    <small>何がどれぐらい？</small>
+                </span>
+            </label>
+            <label class="food-ticket-mode-option">
+                <input type="radio" name="foodTicketMode" value="target">
+                <span>
+                    <strong>必要枚数</strong>
+                    <small>目当ての食材に届くまで</small>
+                </span>
+            </label>
+        </div>
+
+        <div class="food-ticket-type-options" role="radiogroup" aria-label="チケット種類">
+            <label class="food-ticket-type-option">
+                <input type="radio" name="foodTicketType" value="S" checked>
+                <span>
+                    <strong>食材チケットS</strong>
+                    <small>2種 × 5個（計10個）</small>
+                </span>
+            </label>
+            <label class="food-ticket-type-option">
+                <input type="radio" name="foodTicketType" value="M">
+                <span>
+                    <strong>食材チケットM</strong>
+                    <small>3種 × 10個（計30個）</small>
+                </span>
+            </label>
+            <label class="food-ticket-type-option">
+                <input type="radio" name="foodTicketType" value="L">
+                <span>
+                    <strong>食材チケットL</strong>
+                    <small>4種 × 25個（計100個）</small>
+                </span>
+            </label>
+        </div>
+
+        <section id="foodTicketSimulationMode" class="food-ticket-mode-panel">
+            <form id="foodTicketSimulationForm">
+                <label class="food-ticket-count-field" for="foodTicketCount">
+                    <span>回す枚数</span>
+                    <input type="number" id="foodTicketCount" min="1" max="1000" step="1" value="10" inputmode="numeric">
+                </label>
+                <button type="submit" class="food-ticket-submit">シミュレーションする</button>
+                <div id="foodTicketSimulationCalculating" class="food-ticket-calculating" role="status" aria-live="polite" hidden>計算中...</div>
+            </form>
+
+            <div id="foodTicketSimulationResult" class="food-ticket-result" aria-live="polite"></div>
+        </section>
+
+        <section id="foodTicketTargetMode" class="food-ticket-mode-panel" hidden>
+            <details class="food-ticket-target-panel" open>
+                <summary>
+                    <span>目当ての食材と数を指定</span>
+                    <strong>何枚で届く？</strong>
+                </summary>
+                <p class="food-ticket-section-note">指定した食材をすべて目標数以上にするまでを、10,000回シミュレーションします。</p>
+                <div id="foodTicketTargetOptions" class="food-ticket-target-options"></div>
+                <button type="button" id="foodTicketTargetSubmit" class="food-ticket-target-submit">必要枚数をシミュレーション</button>
+                <div id="foodTicketTargetCalculating" class="food-ticket-calculating" role="status" aria-live="polite" hidden>計算中...</div>
+                <div id="foodTicketTargetResult" class="food-ticket-target-result" aria-live="polite"></div>
+            </details>
+        </section>
+
+        <details class="food-ticket-available-panel">
+            <summary>
+                <span>抽選対象の食材</span>
+                <strong id="foodTicketAvailableCount">19種</strong>
+            </summary>
+            <p class="food-ticket-section-note">リサーチノートに登録済みの食材だけをチェックしてください。</p>
+            <div id="foodTicketAvailableOptions" class="food-ticket-available-options"></div>
+        </details>
+
+        <p class="food-ticket-note">ゲーム内の抽選確率は公開されていないため、登録食材を均等に抽選する前提です。1枚の中では種類が重複しないものとして計算します。</p>
+    </div>
+</div>
+
 <!-- footer -->
 <footer class="app-footer">
     <div class="footer-container">
@@ -323,12 +411,14 @@
 <script src="js/dishes_setting.js"></script>
 <script src="js/pot_capacity.js"></script>
 <script src="js/energy_reverse.js"></script>
+<script src="js/food_ticket.js"></script>
 
 <!-- DOM event -->
 <script src="js/setting_icon.js"></script>
 <script src="js/dishes_energy.js"></script>
 <script src="js/extra_foods.js"></script>
 <script src="js/energy_reverse_ui.js"></script>
+<script src="js/food_ticket_ui.js"></script>
 
 <!-- メイン -->
 <script src="js/app.js"></script>

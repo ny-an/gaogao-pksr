@@ -212,7 +212,7 @@ function updateFoods() {
 
       // 画像のHTMLコードを生成
       const imgPath = getFoodImagePath(food);
-      const imgTag = `<img src="${imgPath}" alt="${food}" style="width: 30px; height: 30px;">`;
+      const imgTag = `<img class="food-ticket-trigger" src="${imgPath}" alt="${food}" style="width: 30px; height: 30px;">`;
 
       // 各行のHTMLを生成し、rowsHtmlに追加
       rowsHtml += `
