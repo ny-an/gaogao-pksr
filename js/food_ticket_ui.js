@@ -196,6 +196,7 @@
     list.className = 'food-ticket-food-list';
     const sortedFoods = availableFoodNames
       .map(foodName => [foodName, result.foods[foodName] || 0])
+      .filter(([, quantity]) => quantity > 0)
       .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0], 'ja'));
     list.append(
       ...sortedFoods.map(([foodName, quantity]) => (
