@@ -598,7 +598,9 @@
       setCalculating(false);
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('energy-reverse-open');
+      if (!standalone) {
+        document.body.classList.remove('energy-reverse-open');
+      }
     }
 
     function setCalculating(isCalculating) {
@@ -629,7 +631,10 @@
 
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('energy-reverse-open');
+      // 単独ページでは本文スクロールを維持するため overflow ロックしない
+      if (!standalone) {
+        document.body.classList.add('energy-reverse-open');
+      }
       targetInput.focus({ preventScroll: true });
       targetInput.select();
     }
