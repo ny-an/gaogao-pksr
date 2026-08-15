@@ -11,9 +11,19 @@
   const MIN_CALCULATING_DISPLAY_MS = 400;
   const MAX_ALTERNATIVE_PATTERNS = 10;
 
-  function copySelectOptions(sourceId, target) {
+  function copySelectOptions(sourceId, target, fallbackOptions = []) {
     const source = document.getElementById(sourceId);
-    if (!source || !target) return;
+    if (!target) return;
+
+    if (!source || source.options.length === 0) {
+      target.replaceChildren(...fallbackOptions.map(([value, text]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = text;
+        return option;
+      }));
+      return;
+    }
 
     target.innerHTML = source.innerHTML;
     target.value = source.value;
@@ -81,17 +91,23 @@
   function getEventBonuses(value) {
     if (value !== ALL_EVENT_BONUSES_VALUE) return [value];
 
-    return Array.from(document.getElementById('eventBonus')?.options || [])
+    const eventBonuses = Array.from(document.getElementById('eventBonus')?.options || [])
       .map(option => option.value)
       .filter(Boolean);
+
+    return eventBonuses.length > 0 ? eventBonuses : ['1', '1.1', '1.25', '1.5'];
   }
 
   function getFbBonusPercents(value) {
     if (value !== ALL_FB_BONUSES_VALUE) return [Number(value)];
 
-    return Array.from(document.getElementById('fbBonus')?.options || [])
+    const fbBonuses = Array.from(document.getElementById('fbBonus')?.options || [])
       .map(option => Number(option.value))
       .filter(percent => Number.isInteger(percent) && percent >= 0);
+
+    return fbBonuses.length > 0
+      ? fbBonuses
+      : Array.from({ length: 86 }, (_, percent) => percent);
   }
 
   function getRecipeLevels(value) {
@@ -104,7 +120,11 @@
   }
 
   function populateRecipeLevelOptions(select) {
-    copySelectOptions('recipeLevel', select);
+    const fallbackOptions = Object.keys(recipeLevelBonusList)
+      .map(Number)
+      .filter(level => level >= 1)
+      .map(level => [String(level), String(level)]);
+    copySelectOptions('recipeLevel', select, fallbackOptions);
 
     const allLevelsOption = document.createElement('option');
     allLevelsOption.value = ALL_RECIPE_LEVELS_VALUE;
@@ -114,7 +134,11 @@
   }
 
   function populateFbBonusOptions(select) {
-    copySelectOptions('fbBonus', select);
+    const fallbackOptions = Array.from({ length: 86 }, (_, percent) => [
+      String(percent),
+      String(percent),
+    ]);
+    copySelectOptions('fbBonus', select, fallbackOptions);
     const inheritedValue = select.value;
 
     const allBonusesOption = document.createElement('option');
@@ -125,7 +149,12 @@
   }
 
   function populateEventBonusOptions(select) {
-    copySelectOptions('eventBonus', select);
+    copySelectOptions('eventBonus', select, [
+      ['1', '通常'],
+      ['1.1', '1.1倍'],
+      ['1.25', '1.25倍'],
+      ['1.5', '1.5倍'],
+    ]);
 
     const allBonusesOption = document.createElement('option');
     allBonusesOption.value = ALL_EVENT_BONUSES_VALUE;
@@ -139,7 +168,7 @@
       return getEnergyReversePotCapacity(mode);
     }
 
-    return typeof calculatePotCapacity === 'function' ? calculatePotCapacity() : 0;
+    return typeof calculatePotCapacity === 'function' ? calculatePotCapacity() : 81;
   }
 
   function populatePotCapacityOptions(select) {
@@ -526,7 +555,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const standalone = document.body.dataset.standalone === 'energy-reverse';
     const trigger = document.getElementById('total21');
+    const openButton = document.getElementById('energyReverseOpenButton');
     const modal = document.getElementById('energyReverseModal');
     const dialog = modal?.querySelector('.energy-reverse-content');
     const closeButton = modal?.querySelector('.energy-reverse-close');
@@ -547,7 +578,7 @@
     const resultElement = document.getElementById('energyReverseResult');
 
     if (
-      !trigger || !modal || !dialog || !closeButton || !form || !targetInput ||
+      (!trigger && !openButton && !standalone) || !modal || !dialog || !closeButton || !form || !targetInput ||
       !fbBonusSelect || !recipeLevelSelect || !eventBonusSelect || !successSelect ||
       !dishCategorySelect || !dishSelect || !excludedOptions || !excludedSelected ||
       !excludedCount || !submitButton || !calculatingElement ||
@@ -603,10 +634,13 @@
       targetInput.select();
     }
 
-    trigger.addEventListener('dblclick', event => {
-      event.preventDefault();
-      openModal();
-    });
+    if (trigger) {
+      trigger.addEventListener('dblclick', event => {
+        event.preventDefault();
+        openModal();
+      });
+    }
+    if (openButton) openButton.addEventListener('click', openModal);
 
     closeButton.addEventListener('click', closeModal);
     modal.addEventListener('click', event => {
@@ -711,5 +745,7 @@
         }, 0);
       });
     });
+
+    if (standalone) openModal();
   });
 })();

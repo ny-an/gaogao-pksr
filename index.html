@@ -108,6 +108,15 @@
             <button id="toggleSettings">料理設定 ▼</button>
             <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
         </div>
+        <!-- ポップアップ起動ボタン -->
+        <div class="settings-toggle-row popup-tools-row">
+            <button type="button" id="energyReverseOpenButton" class="popup-tool-btn popup-tool-btn--energy" aria-label="エナジー逆算を開く" title="エナジー逆算">
+                <img src="img/fire_energy_white.svg" alt="" aria-hidden="true">
+            </button>
+            <button type="button" id="foodTicketOpenButton" class="popup-tool-btn popup-tool-btn--ticket" aria-label="食材チケットシミュレーションを開く" title="食材チケットシミュレーション">
+                <img src="img/icons/food_ticket.svg" alt="" aria-hidden="true">
+            </button>
+        </div>
     </div>
 
     <div class="hidden-area">
@@ -205,14 +214,18 @@
                 <a href="index.html">献立表</a>
                 　
                 <a href="calendar.html">日記帳</a>
-                　
+               　
                 <a href="stock.html">積立表</a>
+                <br>
+                <a href="energy-reverse.html">エナジー逆算</a>
+                　
+                <a href="food-ticket.html">食材チケット</a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- 目標エナジー逆算モーダル（1週合計セルのダブルクリックで起動） -->
+<!-- 目標エナジー逆算モーダル -->
 <div id="energyReverseModal" class="modal energy-reverse-modal" aria-hidden="true">
     <div class="modal-content energy-reverse-content" role="dialog" aria-modal="true" aria-labelledby="energyReverseTitle">
         <button type="button" class="energy-reverse-close" aria-label="閉じる">&times;</button>
@@ -279,12 +292,12 @@
     </div>
 </div>
 
-<!-- 食材チケットシミュレーションモーダル（食材アイコンのダブルタップで起動） -->
+<!-- 食材チケットシミュレーションモーダル -->
 <div id="foodTicketModal" class="modal food-ticket-modal" aria-hidden="true">
     <div class="modal-content food-ticket-content" role="dialog" aria-modal="true" aria-labelledby="foodTicketTitle">
         <button type="button" class="food-ticket-close" aria-label="閉じる">&times;</button>
         <h2 id="foodTicketTitle">食材チケットシミュレーション</h2>
-        <p class="food-ticket-trigger-note">食材アイコンをダブルタップすると開きます</p>
+        <p class="food-ticket-trigger-note">画面下の食材チケットボタンから開けます</p>
 
         <div class="food-ticket-mode-options" role="radiogroup" aria-label="シミュレーション種類">
             <label class="food-ticket-mode-option">

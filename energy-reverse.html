@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>エナジー逆算 | ポケスリ献立表</title>
+    <meta name="description" content="ポケモンスリープの目標エナジーから、料理と追加食材の組み合わせを逆算するツールです。">
+    <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="standalone-popup-page" data-standalone="energy-reverse">
+<main class="standalone-popup-shell">
+    <header class="standalone-popup-header">
+        <a class="standalone-popup-back" href="index.html">← 献立表へ戻る</a>
+        <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+    </header>
+
+    <div id="energyReverseModal" class="modal energy-reverse-modal" aria-hidden="false">
+        <div class="modal-content energy-reverse-content" role="dialog" aria-modal="true" aria-labelledby="energyReverseTitle">
+            <a class="energy-reverse-close" href="index.html" aria-label="献立表へ戻る">&times;</a>
+            <h2 id="energyReverseTitle">エナジー逆算</h2>
+            <label class="energy-reverse-pot-row" for="energyReversePotCapacityMode">
+                <span>なべ容量</span>
+                <select id="energyReversePotCapacityMode"></select>
+            </label>
+
+            <form id="energyReverseForm">
+                <label class="energy-reverse-field energy-reverse-target-field" for="energyReverseTarget">
+                    <span>目標エナジー</span>
+                    <input type="number" id="energyReverseTarget" min="1" max="99999999" step="1" inputmode="numeric" placeholder="目標数値を入力" required>
+                </label>
+
+                <div class="energy-reverse-settings">
+                    <label class="energy-reverse-field" for="energyReverseFbBonus">
+                        <span>FBボーナス</span>
+                        <select id="energyReverseFbBonus"></select>
+                    </label>
+                    <label class="energy-reverse-field" for="energyReverseRecipeLevel">
+                        <span>レシピレベル</span>
+                        <select id="energyReverseRecipeLevel"></select>
+                    </label>
+                    <label class="energy-reverse-field" for="energyReverseEventBonus">
+                        <span>イベント</span>
+                        <select id="energyReverseEventBonus"></select>
+                    </label>
+                    <label class="energy-reverse-field" for="energyReverseSuccess">
+                        <span>できばえ</span>
+                        <select id="energyReverseSuccess">
+                            <option value="all">指定なし（全計算）</option>
+                            <option value="1">通常</option>
+                            <option value="2">大成功（2倍）</option>
+                            <option value="3">超成功（3倍）</option>
+                        </select>
+                    </label>
+                </div>
+
+                <label class="energy-reverse-field" for="energyReverseDishCategory">
+                    <span>料理種類</span>
+                    <select id="energyReverseDishCategory"></select>
+                </label>
+
+                <label class="energy-reverse-field" for="energyReverseDish">
+                    <span>料理</span>
+                    <select id="energyReverseDish"></select>
+                </label>
+
+                <details class="energy-reverse-exclusions">
+                    <summary>
+                        <span>使わない追加食材</span>
+                        <strong id="energyReverseExcludedCount">なし</strong>
+                    </summary>
+                    <div id="energyReverseExcludedOptions" class="energy-reverse-exclusion-options"></div>
+                </details>
+                <div id="energyReverseExcludedSelected" class="energy-reverse-excluded-selected" aria-live="polite" hidden></div>
+
+                <button type="submit" class="energy-reverse-submit">逆算する</button>
+                <div id="energyReverseCalculating" class="energy-reverse-calculating" role="status" aria-live="polite" hidden>計算中...</div>
+            </form>
+
+            <div id="energyReverseResult" class="energy-reverse-result" aria-live="polite"></div>
+        </div>
+    </div>
+</main>
+
+<!-- 単独ページでも、献立表で保存した鍋設定を使うためのデータ領域 -->
+<div class="standalone-setting-source" aria-hidden="true">
+    <button type="button" id="togglePotCapacity">鍋容量設定</button>
+    <div id="potCapacityContainer"></div>
+    <input type="number" id="potCapacity" value="81">
+    <input type="number" id="cookingPowerUp" value="0">
+    <select id="potEventBonus">
+        <option value="1.0">1倍</option>
+        <option value="1.25">1.25倍</option>
+        <option value="1.5">1.5倍</option>
+        <option value="2.0">2倍</option>
+    </select>
+    <input type="checkbox" id="goodCampTicket">
+    <input type="checkbox" id="weekendBonus">
+</div>
+
+<script src="js/data/dishes.js"></script>
+<script src="js/data/foods.js"></script>
+<script src="js/standalone_popup.js"></script>
+<script src="js/dishes_setting.js"></script>
+<script src="js/pot_capacity.js"></script>
+<script src="js/energy_reverse.js"></script>
+<script src="js/energy_reverse_ui.js"></script>
+</body>
+</html>

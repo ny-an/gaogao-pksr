@@ -78,6 +78,10 @@
     justify-content: center;
   }
 
+  .popup-tools-row {
+    gap: 8px;
+  }
+
   button {
     background-color: $gray-color;
     color: white;
@@ -101,6 +105,25 @@
       background-color: $blue-color;
     }
 
+  }
+
+  .popup-tool-btn {
+    display: inline-flex;
+    flex: 0 0 52px;
+    align-items: center;
+    justify-content: center;
+    max-width: none;
+    padding: 6px;
+
+    img {
+      width: 24px;
+      height: 24px;
+      filter: brightness(0) invert(1);
+    }
+
+    &--energy img {
+      transform: rotate(180deg);
+    }
   }
 }
 

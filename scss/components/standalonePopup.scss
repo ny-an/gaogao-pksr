@@ -1,0 +1,86 @@
+.standalone-popup-page {
+  min-height: 100vh;
+  margin: 0;
+  background: #f7faf7;
+  color: #333;
+
+  .standalone-popup-shell {
+    min-height: 100vh;
+    padding: 16px 0 32px;
+    box-sizing: border-box;
+  }
+
+  .standalone-popup-header {
+    display: flex;
+    width: calc(100% - 32px);
+    max-width: 460px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 auto 12px;
+  }
+
+  .standalone-popup-back {
+    color: $primary-color;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover {
+      color: $primary-color-hover;
+      text-decoration: underline;
+    }
+  }
+
+  .standalone-popup-kicker {
+    margin: 0;
+    color: #8a968c;
+    font-size: 10px;
+  }
+
+  .energy-reverse-modal,
+  .food-ticket-modal {
+    display: block;
+    position: static;
+    z-index: auto;
+    width: auto;
+    height: auto;
+    background: transparent;
+  }
+
+  .energy-reverse-content,
+  .food-ticket-content {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 0 auto;
+    box-shadow: 0 3px 14px rgba(44, 82, 48, 0.1);
+  }
+
+  .energy-reverse-close,
+  .food-ticket-close {
+    text-decoration: none;
+  }
+
+  .energy-reverse-content {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .food-ticket-content {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .standalone-setting-source {
+    display: none !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .standalone-popup-page .food-ticket-content h2 {
+    margin-right: 28px;
+    font-size: 1.05rem;
+  }
+}
