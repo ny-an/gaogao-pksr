@@ -3,6 +3,13 @@
   margin: 0;
   background: #f7faf7;
   color: #333;
+  // モーダル用の body overflow:hidden が単独ページでも付く場合の保険
+  overflow: auto !important;
+
+  &.food-ticket-open,
+  &.energy-reverse-open {
+    overflow: auto !important;
+  }
 
   .standalone-popup-shell {
     min-height: 100vh;

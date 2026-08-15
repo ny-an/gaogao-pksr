@@ -318,14 +318,19 @@
       clearResults();
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('food-ticket-open');
+      if (!standalone) {
+        document.body.classList.remove('food-ticket-open');
+      }
     }
 
     function openModal() {
       clearResults();
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('food-ticket-open');
+      // 単独ページでは本文スクロールを維持するため overflow ロックしない
+      if (!standalone) {
+        document.body.classList.add('food-ticket-open');
+      }
       ticketCountInput.focus({ preventScroll: true });
       ticketCountInput.select();
     }
