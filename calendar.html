@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>お料理日記帳 | がおがおぷーん </title>
-  <meta name="description" content="ポケモンスリープ（ポケスリ）におけるレシピ・食材エネルギーの保存に特化した計算ツールです。毎食の写真からその食事のエネルギーをOCRで文字化・出力し、日記帳として保存する事ができます。">
+  <title>ポケスリお料理日記帳｜料理エナジー記録｜がおがおぷーん</title>
+  <meta name="description" content="ポケモンスリープ（ポケスリ）の料理エナジーを記録するお料理日記帳。食事画像のOCRや週間エナジーの集計に対応しています。">
 
-  <meta name="keywords" content="ポケスリ、ポケモンスリープ、カレンダー, イベント, エネルギー管理, エネルギー計算, 自動OCR" />
   <meta name="author" content="@GaoGaoPuuun" />
-  <meta property="og:title" content="ポケスリ献立表 | がおがおぷーん" />
-  <meta property="og:description" content="ポケモンスリープのカレンダー作成・イベント管理が簡単に行える便利なツール。"/>
+  <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/calendar.html" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+  <meta property="og:title" content="ポケスリお料理日記帳｜料理エナジー記録" />
+  <meta property="og:description" content="ポケモンスリープの料理エナジーを日ごとに記録し、週間合計を確認できるお料理日記帳です。"/>
   <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
-  <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr" />
+  <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/calendar.html" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="お料理日記帳 | ポケスリ所持管理ツール" />
-  <meta name="twitter:description" content="カレンダー作成・イベント管理が簡単に行えるツールです！！" />
+  <meta name="twitter:title" content="ポケスリお料理日記帳｜料理エナジー記録" />
+  <meta name="twitter:description" content="食事画像のOCRと週間エナジー集計に対応したポケスリ料理記録ツールです。" />
   <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
 
   <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
@@ -168,6 +170,21 @@
       </table>
 
     </div>
+
+    <section id="calendar-guide" class="usage-guide" aria-labelledby="calendar-guide-title">
+      <h2 id="calendar-guide-title">ポケスリお料理日記帳について</h2>
+      <div class="guide-content">
+        <p class="guide-description">
+          ポケモンスリープ（ポケスリ）で作った料理のエナジーを日ごとに記録できるカレンダーです。
+          食事画像のOCR入力や手入力に対応し、1週間の料理エナジーをまとめて確認できます。
+        </p>
+        <h3>関連するポケスリツール</h3>
+        <p class="guide-description">
+          <a href="index.html">献立表</a>で必要な食材を確認し、
+          <a href="stock.html">食材積立表</a>で翌週分の準備数を計算できます。
+        </p>
+      </div>
+    </section>
   </div>
 
   <!-- 画面全体を覆うローディングオーバーレイ -->
@@ -310,7 +327,16 @@
           <a href="calendar.html">日記帳</a>
           　
           <a href="stock.html">積立表</a>
+          <br>
+          <a href="energy-reverse.html">エナジー逆算</a>
+          　
+          <a href="food-ticket.html">食材チケット</a>
         </div>
+
+        <button type="button" id="usage-display-button" class="usage-display-button" data-guide-toggle aria-expanded="false" aria-controls="calendar-guide">
+          <span>使い方</span>
+          <span class="question-icon" aria-hidden="true">?</span>
+        </button>
 
         <!-- 設定セクションを追加 -->
         <div class="settings-section">
@@ -371,6 +397,7 @@
 <script src="js/calendar/db.js"></script>
 <script src="js/calendar/calendar.js" defer></script>
 <script src="js/footer.js"></script>
+<script src="js/guide_toggle.js"></script>
 
 <script src="js/setting_icon.js"></script>
 

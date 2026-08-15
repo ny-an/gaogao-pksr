@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ポケスリ食材チケットシミュレーション｜必要枚数を計算｜がおがおぷーん</title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）の食材チケットS・M・Lで出る食材量と、目当ての食材に必要なチケット枚数をシミュレーションできます。">
+    <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/food-ticket.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+    <meta property="og:title" content="ポケスリ食材チケットシミュレーション｜必要枚数を計算" />
+    <meta property="og:description" content="食材チケットS・M・Lで出る量と、目当ての食材に届くまでの必要枚数を計算できます。" />
+    <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/food-ticket.html" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="ポケスリ食材チケットシミュレーション｜必要枚数を計算" />
+    <meta name="twitter:description" content="ポケモンスリープの食材チケットで出る量と必要枚数をシミュレーションできます。" />
+    <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
+    <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body class="standalone-popup-page" data-standalone="food-ticket">
+<main class="standalone-popup-shell">
+    <header class="standalone-popup-header">
+        <a class="standalone-popup-back" href="index.html">← 献立表へ戻る</a>
+        <div class="standalone-popup-header-meta">
+            <button type="button" class="standalone-help-button" data-guide-toggle aria-expanded="false" aria-controls="food-ticket-guide">使い方</button>
+            <p class="standalone-popup-kicker">ポケスリ計算ツール</p>
+        </div>
+    </header>
+
+    <div id="foodTicketModal" class="modal food-ticket-modal" aria-hidden="false">
+        <div class="modal-content food-ticket-content" role="dialog" aria-modal="true" aria-labelledby="foodTicketTitle">
+            <a class="food-ticket-close" href="index.html" aria-label="献立表へ戻る">&times;</a>
+            <h2 id="foodTicketTitle">食材チケットシミュレーション</h2>
+            <p class="food-ticket-trigger-note">必要な食材とチケットの種類を選んで計算します</p>
+
+            <div class="food-ticket-mode-options" role="radiogroup" aria-label="シミュレーション種類">
+                <label class="food-ticket-mode-option">
+                    <input type="radio" name="foodTicketMode" value="simulation" checked>
+                    <span>
+                        <strong>出る量</strong>
+                        <small>何がどれぐらい？</small>
+                    </span>
+                </label>
+                <label class="food-ticket-mode-option">
+                    <input type="radio" name="foodTicketMode" value="target">
+                    <span>
+                        <strong>必要枚数</strong>
+                        <small>目当ての食材に届くまで</small>
+                    </span>
+                </label>
+            </div>
+
+            <div class="food-ticket-type-options" role="radiogroup" aria-label="チケット種類">
+                <label class="food-ticket-type-option">
+                    <input type="radio" name="foodTicketType" value="S" checked>
+                    <span>
+                        <strong>食材チケットS</strong>
+                        <small>2種 × 5個（計10個）</small>
+                    </span>
+                </label>
+                <label class="food-ticket-type-option">
+                    <input type="radio" name="foodTicketType" value="M">
+                    <span>
+                        <strong>食材チケットM</strong>
+                        <small>3種 × 10個（計30個）</small>
+                    </span>
+                </label>
+                <label class="food-ticket-type-option">
+                    <input type="radio" name="foodTicketType" value="L">
+                    <span>
+                        <strong>食材チケットL</strong>
+                        <small>4種 × 25個（計100個）</small>
+                    </span>
+                </label>
+            </div>
+
+            <section id="foodTicketSimulationMode" class="food-ticket-mode-panel">
+                <form id="foodTicketSimulationForm">
+                    <label class="food-ticket-count-field" for="foodTicketCount">
+                        <span>回す枚数</span>
+                        <input type="number" id="foodTicketCount" min="1" max="1000" step="1" value="10" inputmode="numeric">
+                    </label>
+                    <button type="submit" class="food-ticket-submit">シミュレーションする</button>
+                    <div id="foodTicketSimulationCalculating" class="food-ticket-calculating" role="status" aria-live="polite" hidden>計算中...</div>
+                </form>
+
+                <div id="foodTicketSimulationResult" class="food-ticket-result" aria-live="polite"></div>
+            </section>
+
+            <section id="foodTicketTargetMode" class="food-ticket-mode-panel" hidden>
+                <details class="food-ticket-target-panel" open>
+                    <summary>
+                        <span>目当ての食材と数を指定</span>
+                        <strong>何枚で届く？</strong>
+                    </summary>
+                    <p class="food-ticket-section-note">指定した食材をすべて目標数以上にするまでを、10,000回シミュレーションします。</p>
+                    <div id="foodTicketTargetOptions" class="food-ticket-target-options"></div>
+                    <button type="button" id="foodTicketTargetSubmit" class="food-ticket-target-submit">必要枚数をシミュレーション</button>
+                    <div id="foodTicketTargetCalculating" class="food-ticket-calculating" role="status" aria-live="polite" hidden>計算中...</div>
+                    <div id="foodTicketTargetResult" class="food-ticket-target-result" aria-live="polite"></div>
+                </details>
+            </section>
+
+            <details class="food-ticket-available-panel">
+                <summary>
+                    <span>抽選対象の食材</span>
+                    <strong id="foodTicketAvailableCount">19種</strong>
+                </summary>
+                <p class="food-ticket-section-note">リサーチノートに登録済みの食材だけをチェックしてください。</p>
+                <div id="foodTicketAvailableOptions" class="food-ticket-available-options"></div>
+            </details>
+
+            <p class="food-ticket-note">ゲーム内の抽選確率は公開されていないため、登録食材を均等に抽選する前提です。1枚の中では種類が重複しないものとして計算します。</p>
+        </div>
+    </div>
+
+    <section id="food-ticket-guide" class="usage-guide" aria-labelledby="food-ticket-guide-title">
+        <h2 id="food-ticket-guide-title">ポケスリ食材チケットシミュレーションとは</h2>
+        <div class="guide-content">
+            <p class="guide-description">
+                食材チケットS・M・Lを使ったときに出る食材の量と、目当ての食材を必要数そろえるまでのチケット枚数を計算できます。
+                抽選確率は公開されていないため、登録した食材を均等に抽選する前提でシミュレーションします。
+            </p>
+            <h3>使い方</h3>
+            <ol class="guide-steps">
+                <li>「出る量」または「必要枚数」を選びます。</li>
+                <li>食材チケットの種類と、必要な食材・数量を指定します。</li>
+                <li>シミュレーション結果を確認し、<a href="index.html">ポケスリ献立表</a>の料理計画に活用できます。</li>
+            </ol>
+        </div>
+    </section>
+</main>
+
+<script src="js/data/foods.js"></script>
+<script src="js/standalone_popup.js"></script>
+<script src="js/food_ticket.js"></script>
+<script src="js/food_ticket_ui.js"></script>
+<script src="js/guide_toggle.js"></script>
+</body>
+</html>

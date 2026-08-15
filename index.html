@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ポケスリ献立表 | がおがおぷーん </title>
-    <meta name="description" content="ポケモンスリープ（ポケスリ）におけるレシピ・食材エネルギーに特化した計算ツールです。カレー・サラダ・デザートなどの種類にも対応し、シンプル簡単に表示！大成功(2倍)や日曜大成功（3倍）時のエネルギー計算や追加食材のエネルギー計算、もちろんFBボーナスやイベントボーナスの計算にも対応しています！！">
+    <title>ポケスリ献立表｜料理・食材・エナジー計算ツール｜がおがおぷーん</title>
+    <meta name="description" content="ポケモンスリープ（ポケスリ）の料理レシピと食材数を計算できる献立表。カレー・サラダ・デザートの1食・3食・5日・1週間分の食材と料理エナジーを確認できます。">
 
-    <meta name="keywords" content="ポケスリ、ポケモンスリープ、カレンダー, イベント, エネルギー管理, エネルギー計算, 自動OCR" />
     <meta name="author" content="@GaoGaoPuuun" />
-    <meta property="og:title" content="ポケスリ献立表 | がおがおぷーん" />
-    <meta property="og:description" content="ポケモンスリープのカレンダー作成・イベント管理が簡単に行える便利なツール。"/>
+    <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="がおがおぷーん ポケスリツール" />
+    <meta property="og:title" content="ポケスリ献立表｜料理・食材・エナジー計算ツール" />
+    <meta property="og:description" content="ポケモンスリープの料理レシピ、必要な食材数、料理エナジーを計算できる献立表です。"/>
     <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
-    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr" />
+    <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="ポケスリ献立表 | お食事管理ツール" />
-    <meta name="twitter:description" content="カレンダー作成・イベント管理が簡単に行えるツールです！！" />
+    <meta name="twitter:title" content="ポケスリ献立表｜料理・食材・エナジー計算ツール" />
+    <meta name="twitter:description" content="ポケモンスリープの料理レシピと食材数、料理エナジーを確認できるツールです。" />
     <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/icons/icon-apple.webp" />
 
     <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
@@ -108,6 +110,15 @@
             <button id="toggleSettings">料理設定 ▼</button>
             <button id="toggleExtraFoods" class="toggle-extra-btn">追加食材 ▶</button>
         </div>
+        <!-- ポップアップ起動ボタン -->
+        <div class="settings-toggle-row popup-tools-row">
+            <button type="button" id="energyReverseOpenButton" class="popup-tool-btn popup-tool-btn--energy" aria-label="エナジー逆算を開く" title="エナジー逆算">
+                <img src="img/fire_energy_white.svg" alt="" aria-hidden="true">
+            </button>
+            <button type="button" id="foodTicketOpenButton" class="popup-tool-btn popup-tool-btn--ticket" aria-label="食材チケットシミュレーションを開く" title="食材チケットシミュレーション">
+                <img src="img/icons/food_ticket.svg" alt="" aria-hidden="true">
+            </button>
+        </div>
     </div>
 
     <div class="hidden-area">
@@ -182,6 +193,24 @@
 
     </div>
 
+    <section id="seo-home-guide" class="usage-guide" aria-labelledby="seo-home-title">
+        <h2 id="seo-home-title">ポケスリの料理・食材計算ツール</h2>
+        <div class="guide-content">
+            <p class="guide-description">
+                ポケモンスリープ（ポケスリ）の料理レシピを選ぶと、必要な食材数と料理エナジーを確認できます。
+                カレー・サラダ・デザートに対応し、1食・3食・5日・1週間分の食材をまとめて計算できます。
+            </p>
+
+            <h3>関連するポケスリツール</h3>
+            <ul class="guide-steps">
+                <li><a href="stock.html">食材積立表</a>：翌週の料理に必要な食材数をまとめて計算します。</li>
+                <li><a href="calendar.html">お料理日記帳</a>：毎食の料理エナジーを記録し、週間合計を確認します。</li>
+                <li><a href="energy-reverse.html">エナジー逆算</a>：目標エナジーから料理と追加食材の組み合わせを探します。</li>
+                <li><a href="food-ticket.html">食材チケットシミュレーション</a>：チケットで出る食材量と必要枚数を計算します。</li>
+            </ul>
+        </div>
+    </section>
+
 </div>
 </div>
 
@@ -205,14 +234,22 @@
                 <a href="index.html">献立表</a>
                 　
                 <a href="calendar.html">日記帳</a>
-                　
+               　
                 <a href="stock.html">積立表</a>
+                <br>
+                <a href="energy-reverse.html">エナジー逆算</a>
+                　
+                <a href="food-ticket.html">食材チケット</a>
             </div>
+            <button type="button" id="usage-display-button" class="usage-display-button" data-guide-toggle aria-expanded="false" aria-controls="seo-home-guide">
+                <span>使い方</span>
+                <span class="question-icon" aria-hidden="true">?</span>
+            </button>
         </div>
     </div>
 </div>
 
-<!-- 目標エナジー逆算モーダル（1週合計セルのダブルクリックで起動） -->
+<!-- 目標エナジー逆算モーダル -->
 <div id="energyReverseModal" class="modal energy-reverse-modal" aria-hidden="true">
     <div class="modal-content energy-reverse-content" role="dialog" aria-modal="true" aria-labelledby="energyReverseTitle">
         <button type="button" class="energy-reverse-close" aria-label="閉じる">&times;</button>
@@ -279,12 +316,12 @@
     </div>
 </div>
 
-<!-- 食材チケットシミュレーションモーダル（食材アイコンのダブルタップで起動） -->
+<!-- 食材チケットシミュレーションモーダル -->
 <div id="foodTicketModal" class="modal food-ticket-modal" aria-hidden="true">
     <div class="modal-content food-ticket-content" role="dialog" aria-modal="true" aria-labelledby="foodTicketTitle">
         <button type="button" class="food-ticket-close" aria-label="閉じる">&times;</button>
         <h2 id="foodTicketTitle">食材チケットシミュレーション</h2>
-        <p class="food-ticket-trigger-note">食材アイコンをダブルタップすると開きます</p>
+        <p class="food-ticket-trigger-note">画面下の食材チケットボタンから開けます</p>
 
         <div class="food-ticket-mode-options" role="radiogroup" aria-label="シミュレーション種類">
             <label class="food-ticket-mode-option">
@@ -404,6 +441,7 @@
 <script src="js/lib/confetti.mini.js"></script>
 <script src="js/extra_tasty.js"></script>
 <script src="js/footer.js"></script>
+<script src="js/guide_toggle.js"></script>
 
 <!-- logic -->
 <script src="js/common.js"></script>

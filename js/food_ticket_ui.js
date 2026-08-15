@@ -260,7 +260,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const standalone = document.body.dataset.standalone === 'food-ticket';
     const foodTable = document.getElementById('foodTable');
+    const openButton = document.getElementById('foodTicketOpenButton');
     const modal = document.getElementById('foodTicketModal');
     const dialog = modal?.querySelector('.food-ticket-content');
     const closeButton = modal?.querySelector('.food-ticket-close');
@@ -279,7 +281,7 @@
     const availableCount = document.getElementById('foodTicketAvailableCount');
 
     if (
-      !foodTable || !modal || !dialog || !closeButton || !simulationForm ||
+      (!foodTable && !openButton && !standalone) || !modal || !dialog || !closeButton || !simulationForm ||
       !modeOptions || !simulationMode || !targetMode ||
       !ticketCountInput || !simulationResult || !simulationCalculating ||
       !targetOptions || !targetSubmit || !targetCalculating || !targetResult ||
@@ -328,36 +330,39 @@
       ticketCountInput.select();
     }
 
-    foodTable.addEventListener('dblclick', event => {
-      const foodIcon = event.target.closest('.food-ticket-trigger');
-      if (!foodIcon) return;
-
-      event.preventDefault();
-      openModal();
-    });
-
     let lastFoodIcon = null;
     let lastFoodTapAt = 0;
-    foodTable.addEventListener('touchend', event => {
-      const foodIcon = event.target.closest('.food-ticket-trigger');
-      if (!foodIcon) {
-        lastFoodIcon = null;
-        lastFoodTapAt = 0;
-        return;
-      }
+    if (foodTable) {
+      foodTable.addEventListener('dblclick', event => {
+        const foodIcon = event.target.closest('.food-ticket-trigger');
+        if (!foodIcon) return;
 
-      const now = Date.now();
-      if (foodIcon === lastFoodIcon && now - lastFoodTapAt <= 400) {
         event.preventDefault();
-        lastFoodIcon = null;
-        lastFoodTapAt = 0;
         openModal();
-        return;
-      }
+      });
 
-      lastFoodIcon = foodIcon;
-      lastFoodTapAt = now;
-    }, { passive: false });
+      foodTable.addEventListener('touchend', event => {
+        const foodIcon = event.target.closest('.food-ticket-trigger');
+        if (!foodIcon) {
+          lastFoodIcon = null;
+          lastFoodTapAt = 0;
+          return;
+        }
+
+        const now = Date.now();
+        if (foodIcon === lastFoodIcon && now - lastFoodTapAt <= 400) {
+          event.preventDefault();
+          lastFoodIcon = null;
+          lastFoodTapAt = 0;
+          openModal();
+          return;
+        }
+
+        lastFoodIcon = foodIcon;
+        lastFoodTapAt = now;
+      }, { passive: false });
+    }
+    if (openButton) openButton.addEventListener('click', openModal);
     closeButton.addEventListener('click', closeModal);
     modal.addEventListener('click', event => {
       if (event.target === modal) closeModal();
@@ -494,5 +499,7 @@
         }, 0);
       });
     });
+
+    if (standalone) openModal();
   });
 })();

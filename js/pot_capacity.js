@@ -565,7 +565,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 初期化後に料理リストを更新（チェックボックスの状態を反映）
   // app.jsの初期化を待つため、少し遅延させる
   setTimeout(() => {
-    updateFoodOptionsIfNeeded();
+    if (typeof updateFoodOptionsIfNeeded === 'function') {
+      updateFoodOptionsIfNeeded();
+    }
     // 制限表示も初期化
     const hideUncookableCheckbox = document.getElementById('hideUncookableDishes');
     if (hideUncookableCheckbox && typeof updateFoodFilterIndicator === 'function') {
