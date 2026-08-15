@@ -7,10 +7,6 @@
     return Number(value).toLocaleString('ja-JP', { maximumFractionDigits });
   }
 
-  function formatPercent(value) {
-    return `${formatNumber(value * 100, 1)}%`;
-  }
-
   function getSelectedTicketType(container) {
     return container.querySelector('input[name="foodTicketType"]:checked')?.value || 'S';
   }
@@ -78,9 +74,7 @@
     checkbox.className = 'food-ticket-target-checkbox';
 
     const image = createFoodImage(foodName);
-    const name = document.createElement('span');
-    name.className = 'food-ticket-target-name';
-    name.textContent = foodName;
+    image.title = foodName;
 
     const quantity = document.createElement('input');
     quantity.type = 'number';
@@ -93,7 +87,7 @@
     quantity.disabled = true;
     quantity.setAttribute('aria-label', `${foodName}の目標数`);
 
-    label.append(checkbox, image, name, quantity);
+    label.append(checkbox, image, quantity);
     return label;
   }
 
@@ -207,9 +201,9 @@
     resultElement.replaceChildren(summary, note, list);
   }
 
-  function createTargetStat(label, value) {
+  function createTargetStat(label, value, modifier = '') {
     const item = document.createElement('div');
-    item.className = 'food-ticket-target-stat';
+    item.className = ['food-ticket-target-stat', modifier].filter(Boolean).join(' ');
 
     const name = document.createElement('span');
     name.textContent = label;
@@ -236,15 +230,19 @@
 
     const summary = document.createElement('p');
     summary.className = 'food-ticket-target-summary';
-    summary.textContent = `${config.label}で、指定した食材をすべて目標数以上にするまで`;
+    const ticketLabel = document.createElement('strong');
+    ticketLabel.className = 'food-ticket-target-ticket-label';
+    ticketLabel.textContent = `${config.label}で`;
+    const summaryDetail = document.createElement('span');
+    summaryDetail.textContent = '、指定した食材をすべて目標数以上にするまで';
+    summary.append(ticketLabel, summaryDetail);
 
     const stats = document.createElement('div');
     stats.className = 'food-ticket-target-stats';
     stats.append(
-      createTargetStat('50%達成', formatTicketValue(result.medianTickets)),
-      createTargetStat('90%達成', formatTicketValue(result.p90Tickets)),
-      createTargetStat('平均', formatTicketValue(result.averageTickets)),
-      createTargetStat(`最大${formatNumber(result.maxTickets)}枚`, formatPercent(result.completionRate))
+      createTargetStat('平均', formatTicketValue(result.averageTickets), 'food-ticket-target-stat-average'),
+      createTargetStat('運が良ければ(50%)', formatTicketValue(result.medianTickets)),
+      createTargetStat('余裕をみるなら(90%)', formatTicketValue(result.p90Tickets))
     );
 
     const note = document.createElement('p');
