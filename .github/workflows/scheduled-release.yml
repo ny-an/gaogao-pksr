@@ -1,0 +1,60 @@
+name: Scheduled release
+
+on:
+  schedule:
+    # 2026-08-16 00:00 JST
+    - cron: '0 15 15 8 *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scheduled-release-2026-08-16
+  cancel-in-progress: false
+
+env:
+  RELEASE_BRANCH: agent/food-ticket-ui-polish
+  RELEASE_DATE_JST: '2026-08-16'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify release date
+        run: |
+          set -euo pipefail
+          current_date_jst="$(TZ=Asia/Tokyo date +%F)"
+          if [ "$current_date_jst" != "$RELEASE_DATE_JST" ]; then
+            echo "Skipping scheduled release outside $RELEASE_DATE_JST (JST): $current_date_jst"
+            exit 0
+          fi
+
+      - name: Verify release branch
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin \
+            "+refs/heads/$RELEASE_BRANCH:refs/remotes/origin/$RELEASE_BRANCH"
+          git diff --check "origin/main...origin/$RELEASE_BRANCH"
+          git switch --detach "origin/$RELEASE_BRANCH"
+          node --test test/*.test.cjs
+          git switch main
+
+      - name: Publish release branch to main
+        run: |
+          set -euo pipefail
+          if git merge-base --is-ancestor "origin/$RELEASE_BRANCH" HEAD; then
+            echo "The release branch is already included in main."
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git merge --no-edit --no-ff "origin/$RELEASE_BRANCH" \
+            -m "Publish scheduled release: $RELEASE_DATE_JST"
+          git push origin HEAD:main
