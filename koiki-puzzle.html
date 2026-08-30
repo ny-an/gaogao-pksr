@@ -8,16 +8,16 @@
   <meta name="description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
   <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="お料理できるかな">
+  <meta property="og:title" content="お料理できるかな！！">
   <meta property="og:description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
   <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
   <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png?v=20260830-simple">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="お料理できるかなの食材パズル盤">
+  <meta property="og:image:alt" content="お料理できるかな！！の食材パズル盤">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png?v=20260830-simple">
-  <title>お料理できるかな｜ミニ版</title>
+  <title>お料理できるかな！！</title>
   <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
   <style>
     :root {
@@ -1181,7 +1181,7 @@
   <header class="title">
     <div class="title-mascot" aria-hidden="true"></div>
     <div>
-      <h1>お料理できるかな</h1>
+      <h1>お料理できるかな！！</h1>
     </div>
   </header>
 
@@ -1196,8 +1196,8 @@
         <strong class="stat-value" id="scoreValue">0</strong>
       </div>
       <div class="stat">
-        <span class="stat-label">できた料理</span>
-        <strong class="stat-value" id="dishesValue">0</strong>
+        <span class="stat-label">レシピレベル</span>
+        <strong class="stat-value" id="recipeLevelValue">Lv1</strong>
       </div>
     </section>
     <button class="best-record" id="bestRecordButton" type="button" aria-haspopup="dialog" aria-label="自己ベストを開く">
@@ -1259,6 +1259,7 @@
         <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
         <li>料理の必要数を超えて消した食材は、追加食材エナジーとしてたまります。</li>
         <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
+        <li>料理を作るたびにレシピレベルが上がり、次の料理からレシピレベルボーナスが加わります。</li>
       </ol>
     </section>
     <section class="rules-section">
@@ -1282,7 +1283,7 @@
       <div class="records-row"><span>1度の最大エナジー</span><strong id="recordTotalEnergy">0 エナジー</strong></div>
       <div class="records-row"><span>最大料理エナジー</span><strong id="recordCookingEnergy">0 エナジー</strong></div>
       <div class="records-row"><span>最大連鎖数</span><strong id="recordMaxChain">0連鎖</strong></div>
-      <div class="records-row"><span>最大料理数</span><strong id="recordMaxDishes">0品</strong></div>
+      <div class="records-row"><span>最大レシピレベル</span><strong id="recordMaxRecipeLevel">Lv1</strong></div>
     </div>
     <div class="records-ingredients">
       <span class="records-ingredients-label">最大追加食材数 <strong id="recordAdditionalTotal">0個</strong></span>
@@ -1338,6 +1339,7 @@
   const COOKING_CHANCE_BONUS_STEP = 0.1;
   const MAX_COOKING_CHANCE_BONUS = 0.7;
   const RARE_RECIPE_WEIGHT = 0.12;
+  const RECIPE_LEVEL_MAX = Math.max(...Object.keys(recipeLevelBonusList).map(Number));
   const FOOD_GET_REWARDS = Object.freeze([6, 8, 11, 14, 17, 21, 24]);
   const IDLE_SWAP_INTERVAL = 1450;
   const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
@@ -1363,6 +1365,16 @@
 
   function recipeAtDifficulty(recipe, completedDishes) {
     return { ...recipe, needs: increaseRecipeNeeds(recipe.needs, completedDishes) };
+  }
+
+  function recipeLevelForCompletedDishes(completedDishes) {
+    return Math.min(RECIPE_LEVEL_MAX, Math.max(0, completedDishes) + 1);
+  }
+
+  function recipeEnergyAtLevel(baseEnergy, recipeLevel) {
+    const bonusPercent = Number(recipeLevelBonusList[recipeLevel] || 0);
+    const bonusEnergy = Math.round(baseEnergy * (bonusPercent / 100));
+    return { bonusPercent, bonusEnergy, totalEnergy: baseEnergy + bonusEnergy };
   }
 
   function foodGetReward(activationCount) {
@@ -1391,7 +1403,7 @@
   const boardEl = $('board');
   const movesEl = $('movesValue');
   const scoreEl = $('scoreValue');
-  const dishesEl = $('dishesValue');
+  const recipeLevelEl = $('recipeLevelValue');
   const bestEl = $('bestValue');
   const foodGetLevelEl = $('foodGetLevel');
   const cookingChanceValueEl = $('cookingChanceValue');
@@ -1687,7 +1699,7 @@
     const recipe = currentRecipe();
     movesEl.textContent = String(moves);
     scoreEl.textContent = score.toLocaleString('ja-JP');
-    dishesEl.textContent = String(dishes);
+    recipeLevelEl.textContent = `Lv${recipeLevelForCompletedDishes(dishes)}`;
     bestEl.textContent = readRecords().totalEnergy.toLocaleString('ja-JP');
     foodGetLevelEl.textContent = `Lv${Math.min(foodGetActivations, FOOD_GET_REWARDS.length)}`;
     cookingChanceValueEl.textContent = `+${Math.round(extraTastyBonus * 100)}%`;
@@ -1814,14 +1826,14 @@
     }).join('');
   }
 
-  async function showCookCelebration(recipe, finalEnergy, isExtraTasty, additionalIngredients) {
+  async function showCookCelebration(recipe, recipeEnergy, finalEnergy, isExtraTasty, additionalIngredients) {
     cookRecipeNameEl.textContent = recipe.name;
     cookExtraTastyEl.hidden = !isExtraTasty;
     cookCelebrationEl.classList.toggle('extra-tasty', isExtraTasty);
-    cookFinalEnergyEl.textContent = recipe.energy.toLocaleString('ja-JP');
+    cookFinalEnergyEl.textContent = recipeEnergy.toLocaleString('ja-JP');
     renderCookAdditionalIngredients(additionalIngredients);
     cookCelebrationEl.hidden = false;
-    await animateCookEnergy(recipe.energy, finalEnergy);
+    await animateCookEnergy(recipeEnergy, finalEnergy);
     await sleep(1800);
     cookCelebrationEl.hidden = true;
   }
@@ -1908,17 +1920,19 @@
     );
     const usedAdditionalIngredients = cookingAdditionalIngredients();
     const extraEnergy = additionalIngredientEnergy(usedAdditionalIngredients);
+    const recipeLevel = recipeLevelForCompletedDishes(dishes);
+    const recipeLevelEnergy = recipeEnergyAtLevel(cooked.energy, recipeLevel);
     const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE + extraTastyBonus;
     if (isExtraTasty) extraTastyBonus = 0;
-    const baseCookingEnergy = cooked.energy + extraEnergy;
+    const baseCookingEnergy = recipeLevelEnergy.totalEnergy + extraEnergy;
     const cookingEnergy = baseCookingEnergy * (isExtraTasty ? EXTRA_TASTY_MULTIPLIER : 1);
     maxCookingEnergy = Math.max(maxCookingEnergy, cookingEnergy);
     dishes++;
-    // 必要数を超えた食材だけを追加食材として加え、大成功なら最後に2倍する。
+    // 料理基礎エナジーへレシピLvボーナスを加え、追加食材、大成功の順で計算する。
     score += cookingEnergy;
     moves = Math.min(MAX_MOVES, moves + COOK_BONUS_MOVES);
     renderStatus();
-    await showCookCelebration(cooked, cookingEnergy, isExtraTasty, usedAdditionalIngredients);
+    await showCookCelebration(cooked, recipeLevelEnergy.totalEnergy, cookingEnergy, isExtraTasty, usedAdditionalIngredients);
 
     activeRecipe = recipeAtDifficulty(chooseRecipe(cooked.name), dishes);
     activePalette = choosePalette(activeRecipe);
@@ -2056,7 +2070,7 @@
     $('recordTotalEnergy').textContent = `${records.totalEnergy.toLocaleString('ja-JP')} エナジー`;
     $('recordCookingEnergy').textContent = `${records.cookingEnergy.toLocaleString('ja-JP')} エナジー`;
     $('recordMaxChain').textContent = `${records.chain}連鎖`;
-    $('recordMaxDishes').textContent = `${records.dishes}品`;
+    $('recordMaxRecipeLevel').textContent = `Lv${recipeLevelForCompletedDishes(records.dishes)}`;
     $('recordAdditionalTotal').textContent = `${records.additionalTotal}個`;
     $('recordAdditionalIngredients').innerHTML = ALL_FOOD_IDS
       .filter(id => (records.additionalIngredients[id] || 0) > 0)
@@ -2086,8 +2100,8 @@
     };
     writeRecords(records);
     const scoreText = score.toLocaleString('ja-JP');
-    const shareHeadline = `お料理できるかなで${scoreText}エナジー！`;
-    const shareStats = `${dishes}品完成・最大${maxChain}連鎖`;
+    const shareHeadline = `お料理できるかな！！で${scoreText}エナジー！`;
+    const shareStats = `レシピLv${recipeLevelForCompletedDishes(dishes)}・最大${maxChain}連鎖`;
     const resultBestStatusEl = $('resultBestStatus');
     resultBestStatusEl.textContent = isBest
       ? '自己ベスト更新！'
