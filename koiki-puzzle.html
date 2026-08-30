@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#fff7e5">
-  <title>お料理パズル｜ミニ版</title>
+  <title>お料理できるかな｜ミニ版</title>
   <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
   <style>
     :root {
@@ -788,6 +788,15 @@
 
     .rules-content h2 { margin: 0 0 12px; font-size: 1.2rem; text-align: center; }
 
+    .rules-section + .rules-section { margin-top: 15px; }
+
+    .rules-section h3 {
+      margin: 0 0 8px;
+      color: var(--orange-dark);
+      font-size: .9rem;
+      font-weight: 1000;
+    }
+
     .rules-list {
       display: grid;
       gap: 10px;
@@ -820,6 +829,15 @@
       font-weight: 900;
     }
 
+    .tips-list { counter-reset: none; }
+
+    .tips-list li::before {
+      counter-increment: none;
+      content: "★";
+      background: var(--green);
+      font-size: .75rem;
+    }
+
     .rules-close { width: 100%; }
 
     @media (max-width: 360px) {
@@ -847,7 +865,7 @@
   <header class="title">
     <div class="title-mascot" aria-hidden="true"></div>
     <div>
-      <h1>お料理パズル</h1>
+      <h1>お料理できるかな</h1>
     </div>
   </header>
 
@@ -908,15 +926,23 @@
 <dialog id="rulesDialog">
   <div class="rules-content">
     <h2>あそびかた</h2>
-    <ol class="rules-list">
-      <li>食材を1つタップすると、盤面の操作アイコンと場所が入れかわります。</li>
-      <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
-      <li>消した食材のエナジーは、料理完成まで追加食材エナジーとしてたまります。</li>
-      <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
-      <li>まぜまぜは手動だけ。初回は手数を使わず、2回目からは1手使います。</li>
-      <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
-      <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
-    </ol>
+    <section class="rules-section">
+      <h3>基本ルール</h3>
+      <ol class="rules-list">
+        <li>食材を1つタップすると、盤面の操作アイコンと場所が入れかわります。</li>
+        <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
+        <li>消した食材のエナジーは、料理完成まで追加食材エナジーとしてたまります。</li>
+        <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
+      </ol>
+    </section>
+    <section class="rules-section">
+      <h3>Tips</h3>
+      <ul class="rules-list tips-list">
+        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
+        <li>まぜまぜは手動だけ。初回は手数を使わず、2回目からは1手使います。</li>
+        <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
+      </ul>
+    </section>
     <button class="primary rules-close" id="rulesClose" type="button">わかった！</button>
   </div>
 </dialog>
@@ -1455,7 +1481,7 @@
     if (isBest) writeBest(score);
     $('resultScore').textContent = `${score.toLocaleString('ja-JP')} エナジー`;
     $('resultMeta').textContent = `${dishes}品完成・最大${maxChain}連鎖${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
-    const shareText = `お料理パズルで${score.toLocaleString('ja-JP')}エナジー！\n${dishes}品完成・最大${maxChain}連鎖\n#お料理パズル`;
+    const shareText = `お料理できるかなで${score.toLocaleString('ja-JP')}エナジー！\n${dishes}品完成・最大${maxChain}連鎖\n#お料理できるかな`;
     resultShareCopyEl.textContent = shareText;
     xShareButton.href = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n${SHARE_URL}`)}`;
     resultEl.hidden = false;
