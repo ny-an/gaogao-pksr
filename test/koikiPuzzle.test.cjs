@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const projectRoot = path.join(__dirname, '..');
 const source = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
@@ -19,6 +20,18 @@ test('食材ゲットは盤面候補ではなく全食材から3種類を抽選�
   assert.match(body, /const candidates = \[\.\.\.ALL_FOOD_IDS\]/);
   assert.doesNotMatch(body, /activePalette/);
   assert.match(body, /const selectedFoods = candidates\.slice\(0, 3\)/);
+});
+
+test('食材ゲットの取得数を3種類へ差1個以内で配分する', () => {
+  const distributeFoodGet = vm.runInNewContext(`(${functionSource('distributeFoodGet')})`);
+  const foods = ['a', 'b', 'c'];
+
+  for (const total of [6, 8, 11, 14, 17, 21, 24]) {
+    const counts = Object.values(distributeFoodGet(total, foods));
+    assert.equal(counts.length, 3);
+    assert.equal(counts.reduce((sum, count) => sum + count, 0), total);
+    assert.ok(Math.max(...counts) - Math.min(...counts) <= 1);
+  }
 });
 
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {

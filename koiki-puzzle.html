@@ -1773,6 +1773,15 @@
     return Object.entries(currentRecipe().needs).every(([id, need]) => (recipeProgress[id] || 0) >= need);
   }
 
+  function distributeFoodGet(total, selectedFoods) {
+    const baseCount = Math.floor(total / selectedFoods.length);
+    const remainder = total % selectedFoods.length;
+    return Object.fromEntries(selectedFoods.map((id, index) => [
+      id,
+      baseCount + (index < remainder ? 1 : 0)
+    ]));
+  }
+
   function activateFoodGet() {
     foodGetActivations++;
     const level = Math.min(foodGetActivations, FOOD_GET_REWARDS.length);
@@ -1783,16 +1792,8 @@
       [candidates[index], candidates[target]] = [candidates[target], candidates[index]];
     }
     const selectedFoods = candidates.slice(0, 3);
-    const foods = {};
-    selectedFoods.forEach(id => {
-      addIngredient(id);
-      foods[id] = 1;
-    });
-    for (let count = selectedFoods.length; count < bonusCount; count++) {
-      const id = randomFrom(selectedFoods);
-      addIngredient(id);
-      foods[id]++;
-    }
+    const foods = distributeFoodGet(bonusCount, selectedFoods);
+    Object.entries(foods).forEach(([id, count]) => addIngredient(id, count));
     return { level, total: bonusCount, foods };
   }
 
