@@ -1046,14 +1046,14 @@
       <ol class="rules-list">
         <li>食材を1つタップすると、盤面の操作アイコンと場所が入れかわります。</li>
         <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
-        <li>消した食材のエナジーは、料理完成まで追加食材エナジーとしてたまります。</li>
+        <li>料理の必要数を超えて消した食材は、追加食材エナジーとしてたまります。</li>
         <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
       </ol>
     </section>
     <section class="rules-section">
       <h3>Tips</h3>
       <ul class="rules-list tips-list">
-        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
+        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな食材も手に入ります。</li>
         <li>まぜまぜは手動だけ。初回は手数を使わず、2回目からは1手使います。</li>
         <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
       </ul>
@@ -1176,6 +1176,7 @@
   let maxChain = 0;
   let activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
   let activePalette = choosePalette(activeRecipe);
+  let recipeProgress = {};
   let pot = {};
   let totalAdditionalIngredients = {};
   let shuffleCount = 0;
@@ -1238,7 +1239,7 @@
     const palette = paletteForRecipe(recipe);
     const requiredIds = Object.keys(recipe.needs);
     const remainingTotal = requiredIds.reduce(
-      (sum, id) => sum + Math.max(0, recipe.needs[id] - (pot[id] || 0)),
+      (sum, id) => sum + Math.max(0, recipe.needs[id] - (recipeProgress[id] || 0)),
       0
     ) || 1;
     const pool = [];
@@ -1247,7 +1248,7 @@
         pool.push(id);
         return;
       }
-      const remaining = Math.max(0, recipe.needs[id] - (pot[id] || 0));
+      const remaining = Math.max(0, recipe.needs[id] - (recipeProgress[id] || 0));
       const weight = Math.max(1, Math.ceil((remaining / remainingTotal) * 8));
       for (let count = 0; count < weight; count++) pool.push(id);
     });
@@ -1375,7 +1376,7 @@
     const recipe = currentRecipe();
     requirementsEl.innerHTML = Object.entries(recipe.needs).map(([id, need]) => {
       const food = FOODS[id];
-      const collected = pot[id] || 0;
+      const collected = recipeProgress[id] || 0;
       const current = Math.min(collected, need);
       const done = collected >= need;
       return `<div class="requirement${done ? ' done' : ''}" aria-label="${food.name} ${current}/${need}"><img src="${foodImage(food)}" alt=""><span class="requirement-count">${current}/${need}</span></div>`;
@@ -1404,8 +1405,16 @@
   }
 
   function addIngredient(id, count = 1) {
-    pot[id] = (pot[id] || 0) + count;
-    totalAdditionalIngredients[id] = (totalAdditionalIngredients[id] || 0) + count;
+    const needed = currentRecipe().needs[id] || 0;
+    const collected = recipeProgress[id] || 0;
+    const usedForRecipe = Math.min(count, Math.max(0, needed - collected));
+    const extraCount = count - usedForRecipe;
+
+    if (usedForRecipe > 0) recipeProgress[id] = collected + usedForRecipe;
+    if (extraCount > 0) {
+      pot[id] = (pot[id] || 0) + extraCount;
+      totalAdditionalIngredients[id] = (totalAdditionalIngredients[id] || 0) + extraCount;
+    }
   }
 
   function additionalIngredientEnergy() {
@@ -1559,7 +1568,7 @@
   }
 
   function recipeComplete() {
-    return Object.entries(currentRecipe().needs).every(([id, need]) => (pot[id] || 0) >= need);
+    return Object.entries(currentRecipe().needs).every(([id, need]) => (recipeProgress[id] || 0) >= need);
   }
 
   function activateFoodGet() {
@@ -1593,7 +1602,7 @@
     const baseCookingEnergy = cooked.energy + extraEnergy;
     const cookingEnergy = baseCookingEnergy * (isExtraTasty ? EXTRA_TASTY_MULTIPLIER : 1);
     dishes++;
-    // 料理完成までに消した全食材を追加食材として加え、大成功なら最後に2倍する。
+    // 必要数を超えた食材だけを追加食材として加え、大成功なら最後に2倍する。
     score += cookingEnergy;
     moves = Math.min(MAX_MOVES, moves + COOK_BONUS_MOVES);
     renderStatus();
@@ -1601,6 +1610,7 @@
 
     activeRecipe = recipeAtDifficulty(chooseRecipe(cooked.name), dishes);
     activePalette = choosePalette(activeRecipe);
+    recipeProgress = {};
     pot = {};
     cells = buildBoard();
     renderAll();
@@ -1704,6 +1714,7 @@
     maxChain = 0;
     activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
     activePalette = choosePalette(activeRecipe);
+    recipeProgress = {};
     pot = {};
     totalAdditionalIngredients = {};
     shuffleCount = 0;
