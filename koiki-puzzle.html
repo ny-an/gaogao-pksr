@@ -168,14 +168,21 @@
 
     .best-record {
       display: flex;
+      width: max-content;
       gap: 5px;
       align-items: baseline;
       justify-content: flex-end;
-      margin: -2px 4px 9px;
+      margin: -2px 4px 9px auto;
+      padding: 0;
+      border: 0;
       color: var(--muted);
+      background: transparent;
       font-size: .7rem;
       font-weight: 800;
+      cursor: pointer;
     }
+
+    .best-record::after { content: "›"; color: var(--orange-dark); font-size: .9rem; }
 
     .best-record strong {
       color: var(--orange-dark);
@@ -289,10 +296,31 @@
       display: inline-grid;
       width: 22px;
       height: 22px;
+      padding: 0;
       place-items: center;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .additional-item:disabled { cursor: default; }
+
+    .additional-item.locked {
+      background: #fff2bc;
+      box-shadow: 0 0 0 1.5px #e8a844;
     }
 
     .additional-item img { width: 20px; height: 20px; object-fit: contain; }
+
+    .additional-lock {
+      position: absolute;
+      left: -5px;
+      bottom: -6px;
+      font-size: .54rem;
+      line-height: 1;
+      filter: drop-shadow(0 1px 0 #fff);
+    }
 
     .additional-count {
       position: absolute;
@@ -771,6 +799,14 @@
       white-space: nowrap;
     }
 
+    .result-cook-max {
+      margin: 5px 0 0;
+      color: #67584d;
+      font-size: clamp(.68rem, 2.8vw, .82rem);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .result-ingredients {
       margin: 12px 0 0;
       padding: 8px 10px;
@@ -948,6 +984,71 @@
 
     .rules-close { width: 100%; }
 
+    .records-content {
+      max-height: calc(100dvh - 30px);
+      padding: 22px 20px 19px;
+      overflow-y: auto;
+    }
+
+    .records-content h2 { margin: 0 0 14px; font-size: 1.2rem; text-align: center; }
+
+    .records-list {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    .records-row {
+      display: flex;
+      min-height: 42px;
+      padding: 8px 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .records-row span {
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 850;
+    }
+
+    .records-row strong {
+      color: var(--orange-dark);
+      font-size: .92rem;
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .records-ingredients {
+      margin-bottom: 14px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .records-ingredients-label {
+      display: block;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .records-ingredient-list {
+      display: flex;
+      min-height: 28px;
+      margin-top: 8px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
     @media (max-width: 360px) {
       .page { padding-inline: 9px; }
       .game-card { padding: 10px; border-radius: 20px; }
@@ -990,9 +1091,9 @@
         <strong class="stat-value" id="dishesValue">0</strong>
       </div>
     </section>
-    <div class="best-record" aria-label="自己最高記録">
+    <button class="best-record" id="bestRecordButton" type="button" aria-haspopup="dialog" aria-label="自己ベストを開く">
       <span>自己ベスト</span><strong id="bestValue">0</strong><span>エナジー</span>
-    </div>
+    </button>
 
     <section class="order" aria-label="現在の料理">
       <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
@@ -1019,6 +1120,7 @@
         <h2 class="result-title" id="resultTitle">お料理おしまい！</h2>
         <p class="result-score" id="resultScore">0</p>
         <p class="result-meta" id="resultMeta"></p>
+        <p class="result-cook-max" id="resultCookMax">最大料理エナジー 0</p>
         <div class="result-ingredients" aria-label="累計追加食材">
           <span class="result-ingredients-label">累計追加食材 <strong id="resultIngredientTotal">0個</strong></span>
           <div class="result-ingredient-list" id="resultIngredients"></div>
@@ -1053,12 +1155,30 @@
     <section class="rules-section">
       <h3>Tips</h3>
       <ul class="rules-list tips-list">
-        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな食材も手に入ります。</li>
-        <li>まぜまぜは手動だけ。初回は手数を使わず、2回目からは1手使います。</li>
+        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな3種類の食材が手に入ります。</li>
+        <li>追加食材をタップしてロックすると、料理に使わず次へ持ち越せます。</li>
+        <li>まぜまぜは手動だけ。料理ごとに初回は0手、2回目からは1手使います。</li>
         <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
       </ul>
     </section>
     <button class="primary rules-close" id="rulesClose" type="button">わかった！</button>
+  </div>
+</dialog>
+
+<dialog id="recordsDialog" aria-labelledby="recordsTitle">
+  <div class="records-content">
+    <h2 id="recordsTitle">自己ベスト</h2>
+    <div class="records-list">
+      <div class="records-row"><span>1度の最大エナジー</span><strong id="recordTotalEnergy">0 エナジー</strong></div>
+      <div class="records-row"><span>最大料理エナジー</span><strong id="recordCookingEnergy">0 エナジー</strong></div>
+      <div class="records-row"><span>最大連鎖数</span><strong id="recordMaxChain">0連鎖</strong></div>
+      <div class="records-row"><span>最大料理数</span><strong id="recordMaxDishes">0品</strong></div>
+    </div>
+    <div class="records-ingredients">
+      <span class="records-ingredients-label">最大追加食材数 <strong id="recordAdditionalTotal">0個</strong></span>
+      <div class="records-ingredient-list" id="recordAdditionalIngredients" aria-label="最大追加食材時の食材内訳"></div>
+    </div>
+    <button class="primary rules-close" id="recordsClose" type="button">とじる</button>
   </div>
 </dialog>
 
@@ -1100,6 +1220,7 @@
   const FOOD_GET_REWARDS = Object.freeze([6, 8, 11, 14, 17, 21, 24]);
   const IDLE_SWAP_INTERVAL = 1450;
   const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
+  const RECORDS_KEY = 'gaogao-pksr.koiki-puzzle.records.v1';
   const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
 
   function miniNeeds(needs) {
@@ -1151,6 +1272,7 @@
   const scoreEl = $('scoreValue');
   const dishesEl = $('dishesValue');
   const bestEl = $('bestValue');
+  const bestRecordButton = $('bestRecordButton');
   const recipeNameEl = $('recipeName');
   const requirementsEl = $('requirements');
   const additionalIngredientsEl = $('additionalIngredients');
@@ -1164,6 +1286,7 @@
   const resultShareStatsEl = $('resultShareStats');
   const xShareButton = $('xShareButton');
   const rulesDialog = $('rulesDialog');
+  const recordsDialog = $('recordsDialog');
   const cookCelebrationEl = $('cookCelebration');
   const cookExtraTastyEl = $('cookExtraTasty');
   const cookRecipeNameEl = $('cookRecipeName');
@@ -1174,14 +1297,17 @@
   let score = 0;
   let dishes = 0;
   let maxChain = 0;
+  let maxCookingEnergy = 0;
   let activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
   let activePalette = choosePalette(activeRecipe);
   let recipeProgress = {};
   let pot = {};
+  let lockedIngredients = new Set();
   let totalAdditionalIngredients = {};
   let shuffleCount = 0;
   let foodGetActivations = 0;
   let busy = false;
+  let cooking = false;
   let started = false;
   let ended = false;
   let clearing = new Set();
@@ -1384,11 +1510,14 @@
   }
 
   function renderAdditionalIngredients() {
-    additionalIngredientsEl.innerHTML = activePalette
+    const disabled = !started || ended || cooking;
+    additionalIngredientsEl.innerHTML = ALL_FOOD_IDS
       .filter(id => (pot[id] || 0) > 0)
       .map(id => {
         const food = FOODS[id];
-        return `<span class="additional-item" title="${food.name}" aria-label="${food.name} ${pot[id]}個"><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span></span>`;
+        const locked = lockedIngredients.has(id);
+        const action = locked ? 'ロック中。タップで解除' : 'タップでロック';
+        return `<button class="additional-item${locked ? ' locked' : ''}" type="button" data-lock-food="${id}" aria-pressed="${locked}" aria-label="${food.name} ${pot[id]}個 ${action}" ${disabled ? 'disabled' : ''}><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span>${locked ? '<span class="additional-lock" aria-hidden="true">🔒</span>' : ''}</button>`;
       }).join('');
   }
 
@@ -1419,7 +1548,7 @@
 
   function additionalIngredientEnergy() {
     return Object.entries(pot).reduce(
-      (sum, [id, count]) => sum + (FOODS[id]?.energy || 0) * count,
+      (sum, [id, count]) => sum + (lockedIngredients.has(id) ? 0 : (FOODS[id]?.energy || 0) * count),
       0
     );
   }
@@ -1429,7 +1558,7 @@
     movesEl.textContent = String(moves);
     scoreEl.textContent = score.toLocaleString('ja-JP');
     dishesEl.textContent = String(dishes);
-    bestEl.textContent = readBest().toLocaleString('ja-JP');
+    bestEl.textContent = readRecords().totalEnergy.toLocaleString('ja-JP');
     recipeNameEl.textContent = recipe.name;
     shuffleButton.textContent = `まぜまぜ ${shuffleCount ? '−1' : '0'}`;
     renderRequirements();
@@ -1492,7 +1621,7 @@
   function showFoodGetMessage(foodGet) {
     clearTimeout(messageTimer);
     messageEl.innerHTML = `
-      <div class="food-get-title">食材ゲット発動！ ＋${foodGet.total}個</div>
+      <div class="food-get-title">食材ゲットLv${foodGet.level} 発動！ + ${foodGet.total}個</div>
       <div class="food-get-items">
         ${Object.entries(foodGet.foods).map(([id, count]) => {
           const food = FOODS[id];
@@ -1573,14 +1702,25 @@
 
   function activateFoodGet() {
     foodGetActivations++;
+    const level = Math.min(foodGetActivations, FOOD_GET_REWARDS.length);
     const bonusCount = foodGetReward(foodGetActivations);
-    const foods = {};
-    for (let count = 0; count < bonusCount; count++) {
-      const id = randomFrom(activePalette);
-      addIngredient(id);
-      foods[id] = (foods[id] || 0) + 1;
+    const candidates = [...activePalette];
+    for (let index = candidates.length - 1; index > 0; index--) {
+      const target = Math.floor(Math.random() * (index + 1));
+      [candidates[index], candidates[target]] = [candidates[target], candidates[index]];
     }
-    return { total: bonusCount, foods };
+    const selectedFoods = candidates.slice(0, 3);
+    const foods = {};
+    selectedFoods.forEach(id => {
+      addIngredient(id);
+      foods[id] = 1;
+    });
+    for (let count = selectedFoods.length; count < bonusCount; count++) {
+      const id = randomFrom(selectedFoods);
+      addIngredient(id);
+      foods[id]++;
+    }
+    return { level, total: bonusCount, foods };
   }
 
   async function performShuffle() {
@@ -1596,11 +1736,19 @@
   }
 
   async function cookRecipe() {
+    cooking = true;
+    renderAdditionalIngredients();
     const cooked = currentRecipe();
+    const carriedIngredients = Object.fromEntries(
+      [...lockedIngredients]
+        .filter(id => (pot[id] || 0) > 0)
+        .map(id => [id, pot[id]])
+    );
     const extraEnergy = additionalIngredientEnergy();
     const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE;
     const baseCookingEnergy = cooked.energy + extraEnergy;
     const cookingEnergy = baseCookingEnergy * (isExtraTasty ? EXTRA_TASTY_MULTIPLIER : 1);
+    maxCookingEnergy = Math.max(maxCookingEnergy, cookingEnergy);
     dishes++;
     // 必要数を超えた食材だけを追加食材として加え、大成功なら最後に2倍する。
     score += cookingEnergy;
@@ -1611,7 +1759,10 @@
     activeRecipe = recipeAtDifficulty(chooseRecipe(cooked.name), dishes);
     activePalette = choosePalette(activeRecipe);
     recipeProgress = {};
-    pot = {};
+    pot = carriedIngredients;
+    lockedIngredients = new Set(Object.keys(carriedIngredients));
+    shuffleCount = 0;
+    cooking = false;
     cells = buildBoard();
     renderAll();
     showMessage(`＋${COOK_BONUS_MOVES}手`, 'cook');
@@ -1683,17 +1834,83 @@
     try { localStorage.setItem(BEST_KEY, String(value)); } catch (_) {}
   }
 
+  function readRecords() {
+    const fallback = {
+      totalEnergy: readBest(),
+      cookingEnergy: 0,
+      chain: 0,
+      dishes: 0,
+      additionalTotal: 0,
+      additionalIngredients: {}
+    };
+    try {
+      const saved = JSON.parse(localStorage.getItem(RECORDS_KEY) || 'null');
+      if (!saved || typeof saved !== 'object') return fallback;
+      const additionalIngredients = Object.fromEntries(
+        ALL_FOOD_IDS
+          .filter(id => Number(saved.additionalIngredients?.[id]) > 0)
+          .map(id => [id, Math.floor(Number(saved.additionalIngredients[id]))])
+      );
+      return {
+        totalEnergy: Math.max(fallback.totalEnergy, Number(saved.totalEnergy) || 0),
+        cookingEnergy: Math.max(0, Number(saved.cookingEnergy) || 0),
+        chain: Math.max(0, Number(saved.chain) || 0),
+        dishes: Math.max(0, Number(saved.dishes) || 0),
+        additionalTotal: Math.max(0, Number(saved.additionalTotal) || 0),
+        additionalIngredients
+      };
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function writeRecords(records) {
+    try {
+      localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+      writeBest(records.totalEnergy);
+    } catch (_) {}
+  }
+
+  function renderRecordsDialog() {
+    const records = readRecords();
+    $('recordTotalEnergy').textContent = `${records.totalEnergy.toLocaleString('ja-JP')} エナジー`;
+    $('recordCookingEnergy').textContent = `${records.cookingEnergy.toLocaleString('ja-JP')} エナジー`;
+    $('recordMaxChain').textContent = `${records.chain}連鎖`;
+    $('recordMaxDishes').textContent = `${records.dishes}品`;
+    $('recordAdditionalTotal').textContent = `${records.additionalTotal}個`;
+    $('recordAdditionalIngredients').innerHTML = ALL_FOOD_IDS
+      .filter(id => (records.additionalIngredients[id] || 0) > 0)
+      .map(id => {
+        const food = FOODS[id];
+        const count = records.additionalIngredients[id];
+        return `<span class="result-ingredient-item" title="${food.name}" aria-label="${food.name} ${count}個"><img src="${foodImage(food)}" alt=""><span class="result-ingredient-count">${count}</span></span>`;
+      }).join('');
+  }
+
   function endGame() {
     ended = true;
     busy = false;
-    const oldBest = readBest();
-    const isBest = score > oldBest;
-    if (isBest) writeBest(score);
+    cooking = false;
+    const oldRecords = readRecords();
+    const additionalTotal = Object.values(totalAdditionalIngredients).reduce((sum, count) => sum + count, 0);
+    const isBest = score > oldRecords.totalEnergy;
+    const records = {
+      totalEnergy: Math.max(oldRecords.totalEnergy, score),
+      cookingEnergy: Math.max(oldRecords.cookingEnergy, maxCookingEnergy),
+      chain: Math.max(oldRecords.chain, maxChain),
+      dishes: Math.max(oldRecords.dishes, dishes),
+      additionalTotal: Math.max(oldRecords.additionalTotal, additionalTotal),
+      additionalIngredients: additionalTotal > oldRecords.additionalTotal
+        ? { ...totalAdditionalIngredients }
+        : oldRecords.additionalIngredients
+    };
+    writeRecords(records);
     const scoreText = score.toLocaleString('ja-JP');
     const shareHeadline = `お料理できるかなで${scoreText}エナジー！`;
     const shareStats = `${dishes}品完成・最大${maxChain}連鎖`;
     $('resultScore').textContent = `${scoreText} エナジー`;
-    $('resultMeta').textContent = `${shareStats}${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
+    $('resultMeta').textContent = `${shareStats}${isBest ? '・ベスト更新！' : `・ベスト ${oldRecords.totalEnergy.toLocaleString('ja-JP')}`}`;
+    $('resultCookMax').textContent = `最大料理エナジー ${maxCookingEnergy.toLocaleString('ja-JP')}`;
     renderResultIngredients();
     resultShareHeadlineEl.textContent = shareHeadline;
     resultShareStatsEl.textContent = shareStats;
@@ -1712,14 +1929,17 @@
     score = 0;
     dishes = 0;
     maxChain = 0;
+    maxCookingEnergy = 0;
     activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
     activePalette = choosePalette(activeRecipe);
     recipeProgress = {};
     pot = {};
+    lockedIngredients = new Set();
     totalAdditionalIngredients = {};
     shuffleCount = 0;
     foodGetActivations = 0;
     busy = false;
+    cooking = false;
     started = true;
     ended = false;
     clearing = new Set();
@@ -1735,6 +1955,16 @@
     const tile = event.target.closest('[data-index]');
     if (!tile) return;
     playMove(Number(tile.dataset.index));
+  });
+
+  additionalIngredientsEl.addEventListener('click', event => {
+    const item = event.target.closest('[data-lock-food]');
+    if (!item || !started || ended || cooking) return;
+    const id = item.dataset.lockFood;
+    if (!(pot[id] > 0)) return;
+    if (lockedIngredients.has(id)) lockedIngredients.delete(id);
+    else lockedIngredients.add(id);
+    renderAdditionalIngredients();
   });
 
   startButton.addEventListener('click', startGame);
@@ -1754,6 +1984,12 @@
     if (typeof rulesDialog.showModal === 'function') rulesDialog.showModal();
   });
   $('rulesClose').addEventListener('click', () => rulesDialog.close());
+
+  bestRecordButton.addEventListener('click', () => {
+    renderRecordsDialog();
+    if (typeof recordsDialog.showModal === 'function') recordsDialog.showModal();
+  });
+  $('recordsClose').addEventListener('click', () => recordsDialog.close());
 
   cells = buildBoard();
   renderAll();
