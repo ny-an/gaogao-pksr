@@ -185,17 +185,15 @@
 
     .order {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 7px;
+      align-items: stretch;
       margin-bottom: 10px;
       padding: 10px 11px;
       border: 2px solid #f2c984;
       border-radius: 17px;
       background: linear-gradient(135deg, #fff8df, #fffdf5);
     }
-
-    .order-copy { min-width: 0; }
 
     .order-title {
       display: flex;
@@ -225,7 +223,8 @@
     .requirements {
       display: flex;
       gap: 5px;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      flex-wrap: wrap;
     }
 
     .requirement {
@@ -262,10 +261,24 @@
       text-align: center;
     }
 
+    .additional-row {
+      display: flex;
+      min-height: 24px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .additional-label {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 900;
+    }
+
     .additional-ingredients {
       display: flex;
+      flex: 1;
       min-height: 23px;
-      margin-top: 3px;
       gap: 2px;
       align-items: center;
       flex-wrap: wrap;
@@ -885,8 +898,6 @@
       .game-card { padding: 10px; border-radius: 20px; }
       .board { gap: 3px; padding: 5px; }
       .tile { border-radius: 11px; }
-      .order { grid-template-columns: 1fr; }
-      .requirements { justify-content: flex-start; }
       .requirement { width: 42px; min-width: 42px; }
     }
 
@@ -929,11 +940,12 @@
     </div>
 
     <section class="order" aria-label="現在の料理">
-      <div class="order-copy">
-        <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
+      <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
+      <div class="requirements" id="requirements" aria-label="必要な食材"></div>
+      <div class="additional-row">
+        <span class="additional-label">追加食材</span>
         <div class="additional-ingredients" id="additionalIngredients" aria-label="追加食材"></div>
       </div>
-      <div class="requirements" id="requirements"></div>
     </section>
 
     <div class="board-wrap">
