@@ -83,6 +83,12 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.match(renderIngredients, /class="cook-additional-count"/);
 });
 
+test('操作アイコンは提供されたGaoGaoPuuun画像を表示する', () => {
+  assert.match(source, /--koiki-icon: url\("img\/icons\/gaogaopuuun-koiki\.png"\)/);
+  assert.doesNotMatch(source, /--koiki-icon: url\("data:image\//);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'img/icons/gaogaopuuun-koiki.png')), true);
+});
+
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {
   assert.match(source, /id="foodGetLevel">Lv0</);
   assert.match(source, /id="cookingChanceValue">\+0%</);
