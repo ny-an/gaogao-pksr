@@ -34,6 +34,21 @@ test('食材ゲットの取得数を3種類へ差1個以内で配分する', () 
   }
 });
 
+test('食材ゲットと料理チャンスの発動ごとに1手回復する', () => {
+  const context = { moves: 9, MAX_MOVES: 12, ACTIVATION_BONUS_MOVES: 1 };
+  const addMoveSource = functionSource('addActivationMove');
+  vm.runInNewContext(`${addMoveSource}; addActivationMove(); addActivationMove();`, context);
+  assert.equal(context.moves, 11);
+
+  context.moves = 11;
+  vm.runInNewContext(`${addMoveSource}; addActivationMove(); addActivationMove();`, context);
+  assert.equal(context.moves, 12);
+  assert.match(functionSource('activateFoodGet'), /addActivationMove\(\)/);
+  assert.match(functionSource('activateCookingChance'), /addActivationMove\(\)/);
+  assert.match(source, /食材ゲットLv\$\{foodGet\.level\} 発動！ \+ \$\{foodGet\.total\}個・＋\$\{ACTIVATION_BONUS_MOVES\}手/);
+  assert.match(source, /料理チャンス発動！ 大成功＋\$\{bonusPercent\}%・＋\$\{ACTIVATION_BONUS_MOVES\}手/);
+});
+
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {
   assert.match(source, /id="foodGetLevel">Lv0</);
   assert.match(source, /id="cookingChanceValue">\+0%</);

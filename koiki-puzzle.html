@@ -1213,10 +1213,10 @@
     <section class="rules-section">
       <h3>Tips</h3>
       <ul class="rules-list tips-list">
-        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな3種類の食材が手に入ります。</li>
+        <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな3種類の食材を獲得して1手回復します。</li>
         <li>追加食材をタップしてロックすると、料理に使わず次へ持ち越せます。</li>
         <li>まぜまぜは手動だけ。料理ごとに初回は0手、2回目からは1手使います。</li>
-        <li>3連鎖以上で「料理チャンス」が発動し、大成功しやすくなります。</li>
+        <li>3連鎖以上で「料理チャンス」が発動し、大成功しやすくなって1手回復します。</li>
         <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
       </ul>
     </section>
@@ -1273,6 +1273,7 @@
   const START_MOVES = 12;
   const MAX_MOVES = 12;
   const COOK_BONUS_MOVES = 5;
+  const ACTIVATION_BONUS_MOVES = 1;
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const COOKING_CHANCE_BONUS_STEP = 0.1;
@@ -1682,19 +1683,24 @@
     }, duration);
   }
 
+  function addActivationMove() {
+    moves = Math.min(MAX_MOVES, moves + ACTIVATION_BONUS_MOVES);
+  }
+
   function activateCookingChance() {
+    addActivationMove();
     extraTastyBonus = Math.min(MAX_COOKING_CHANCE_BONUS, extraTastyBonus + COOKING_CHANCE_BONUS_STEP);
     return Math.round(extraTastyBonus * 100);
   }
 
   function showCookingChanceMessage(bonusPercent) {
-    showMessage(`料理チャンス発動！ 大成功＋${bonusPercent}%`, 'chance', 2300);
+    showMessage(`料理チャンス発動！ 大成功＋${bonusPercent}%・＋${ACTIVATION_BONUS_MOVES}手`, 'chance', 2300);
   }
 
   function showFoodGetMessage(foodGet) {
     clearTimeout(messageTimer);
     messageEl.innerHTML = `
-      <div class="food-get-title">食材ゲットLv${foodGet.level} 発動！ + ${foodGet.total}個</div>
+      <div class="food-get-title">食材ゲットLv${foodGet.level} 発動！ + ${foodGet.total}個・＋${ACTIVATION_BONUS_MOVES}手</div>
       <div class="food-get-items">
         ${Object.entries(foodGet.foods).map(([id, count]) => {
           const food = FOODS[id];
@@ -1783,6 +1789,7 @@
   }
 
   function activateFoodGet() {
+    addActivationMove();
     foodGetActivations++;
     const level = Math.min(foodGetActivations, FOOD_GET_REWARDS.length);
     const bonusCount = foodGetReward(foodGetActivations);
