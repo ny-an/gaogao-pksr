@@ -615,18 +615,10 @@
       line-height: 1.35;
     }
 
-    .cook-final-label {
-      display: block;
-      margin-top: 6px;
-      color: #d26e2d;
-      font-size: .7rem;
-      font-weight: 900;
-      letter-spacing: .08em;
-    }
-
     .cook-final-energy {
       display: inline-flex;
       max-width: 100%;
+      margin-top: 8px;
       align-items: baseline;
       justify-content: center;
       gap: .22em;
@@ -640,6 +632,63 @@
     }
 
     .cook-final-unit { font-size: .56em; letter-spacing: 0; }
+
+    .cook-additional {
+      width: fit-content;
+      max-width: 100%;
+      margin: 12px auto 0;
+      padding: 7px 10px 8px;
+      border: 1px solid rgba(224, 177, 99, .6);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .7);
+    }
+
+    .cook-additional[hidden] { display: none; }
+
+    .cook-additional-label {
+      display: block;
+      color: #766453;
+      font-size: .65rem;
+      font-weight: 1000;
+    }
+
+    .cook-additional-items {
+      display: flex;
+      min-height: 30px;
+      margin-top: 5px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .cook-additional-item {
+      position: relative;
+      display: grid;
+      width: 29px;
+      height: 29px;
+      place-items: center;
+      border: 1px solid #eadac2;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .cook-additional-item img { width: 23px; height: 23px; object-fit: contain; }
+
+    .cook-additional-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 16px;
+      padding: 1px 4px;
+      border: 2px solid #fff8df;
+      border-radius: 999px;
+      color: #fff;
+      background: #e97838;
+      font-size: .56rem;
+      font-weight: 1000;
+      line-height: 1.15;
+    }
 
     @keyframes celebration-fade {
       from { opacity: 0; }
@@ -1258,8 +1307,11 @@
     <div class="cook-dish" aria-hidden="true"><img src="img/fire_energy_white.svg" alt=""></div>
     <div class="cook-extra-tasty" id="cookExtraTasty" hidden><img src="img/extra_tasty_red.svg" alt=""><strong>大成功！</strong></div>
     <strong class="cook-recipe-name" id="cookRecipeName"></strong>
-    <span class="cook-final-label">エナジー</span>
     <strong class="cook-final-energy"><span id="cookFinalEnergy">0</span><span class="cook-final-unit">エナジー</span></strong>
+    <div class="cook-additional" id="cookAdditional" hidden>
+      <span class="cook-additional-label">追加食材</span>
+      <div class="cook-additional-items" id="cookAdditionalItems" aria-label="この料理に使った追加食材"></div>
+    </div>
   </div>
 </section>
 
@@ -1360,6 +1412,8 @@
   const cookExtraTastyEl = $('cookExtraTasty');
   const cookRecipeNameEl = $('cookRecipeName');
   const cookFinalEnergyEl = $('cookFinalEnergy');
+  const cookAdditionalEl = $('cookAdditional');
+  const cookAdditionalItemsEl = $('cookAdditionalItems');
 
   let cells = [];
   let moves = START_MOVES;
@@ -1616,9 +1670,15 @@
     }
   }
 
-  function additionalIngredientEnergy() {
-    return Object.entries(pot).reduce(
-      (sum, [id, count]) => sum + (lockedIngredients.has(id) ? 0 : (FOODS[id]?.energy || 0) * count),
+  function cookingAdditionalIngredients() {
+    return Object.fromEntries(
+      Object.entries(pot).filter(([id, count]) => count > 0 && !lockedIngredients.has(id))
+    );
+  }
+
+  function additionalIngredientEnergy(ingredients = cookingAdditionalIngredients()) {
+    return Object.entries(ingredients).reduce(
+      (sum, [id, count]) => sum + (FOODS[id]?.energy || 0) * count,
       0
     );
   }
@@ -1745,11 +1805,21 @@
     });
   }
 
-  async function showCookCelebration(recipe, finalEnergy, isExtraTasty) {
+  function renderCookAdditionalIngredients(ingredients) {
+    const entries = Object.entries(ingredients);
+    cookAdditionalEl.hidden = entries.length === 0;
+    cookAdditionalItemsEl.innerHTML = entries.map(([id, count]) => {
+      const food = FOODS[id];
+      return `<span class="cook-additional-item" aria-label="${food.name} ${count}個"><img src="${foodImage(food)}" alt=""><span class="cook-additional-count">${count}</span></span>`;
+    }).join('');
+  }
+
+  async function showCookCelebration(recipe, finalEnergy, isExtraTasty, additionalIngredients) {
     cookRecipeNameEl.textContent = recipe.name;
     cookExtraTastyEl.hidden = !isExtraTasty;
     cookCelebrationEl.classList.toggle('extra-tasty', isExtraTasty);
     cookFinalEnergyEl.textContent = recipe.energy.toLocaleString('ja-JP');
+    renderCookAdditionalIngredients(additionalIngredients);
     cookCelebrationEl.hidden = false;
     await animateCookEnergy(recipe.energy, finalEnergy);
     await sleep(1800);
@@ -1836,7 +1906,8 @@
         .filter(id => (pot[id] || 0) > 0)
         .map(id => [id, pot[id]])
     );
-    const extraEnergy = additionalIngredientEnergy();
+    const usedAdditionalIngredients = cookingAdditionalIngredients();
+    const extraEnergy = additionalIngredientEnergy(usedAdditionalIngredients);
     const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE + extraTastyBonus;
     if (isExtraTasty) extraTastyBonus = 0;
     const baseCookingEnergy = cooked.energy + extraEnergy;
@@ -1847,7 +1918,7 @@
     score += cookingEnergy;
     moves = Math.min(MAX_MOVES, moves + COOK_BONUS_MOVES);
     renderStatus();
-    await showCookCelebration(cooked, cookingEnergy, isExtraTasty);
+    await showCookCelebration(cooked, cookingEnergy, isExtraTasty, usedAdditionalIngredients);
 
     activeRecipe = recipeAtDifficulty(chooseRecipe(cooked.name), dishes);
     activePalette = choosePalette(activeRecipe);

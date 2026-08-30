@@ -61,6 +61,28 @@ test('各スキル表示の終了後に独立した手数回復を表示する',
   assert.equal((resolveBoard.match(/showActivationMoveMessage\(\);/g) || []).length, 2);
 });
 
+test('料理完成時に実際に消費した追加食材だけをアイコン表示する', () => {
+  const context = {
+    pot: { apple: 3, milk: 2, honey: 0 },
+    lockedIngredients: new Set(['milk'])
+  };
+  const cookingIngredients = vm.runInNewContext(`(${functionSource('cookingAdditionalIngredients')})`, context);
+  assert.deepEqual(JSON.parse(JSON.stringify(cookingIngredients())), { apple: 3 });
+
+  const cookRecipe = functionSource('cookRecipe');
+  const celebration = functionSource('showCookCelebration');
+  const renderIngredients = functionSource('renderCookAdditionalIngredients');
+  assert.match(source, /id="cookAdditional" hidden/);
+  assert.match(source, /id="cookAdditionalItems"/);
+  assert.doesNotMatch(source, /class="cook-final-label"/);
+  assert.equal((source.match(/class="cook-final-unit">エナジー</g) || []).length, 1);
+  assert.match(cookRecipe, /const usedAdditionalIngredients = cookingAdditionalIngredients\(\)/);
+  assert.match(cookRecipe, /showCookCelebration\(cooked, cookingEnergy, isExtraTasty, usedAdditionalIngredients\)/);
+  assert.match(celebration, /renderCookAdditionalIngredients\(additionalIngredients\)/);
+  assert.match(renderIngredients, /cookAdditionalEl\.hidden = entries\.length === 0/);
+  assert.match(renderIngredients, /class="cook-additional-count"/);
+});
+
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {
   assert.match(source, /id="foodGetLevel">Lv0</);
   assert.match(source, /id="cookingChanceValue">\+0%</);
