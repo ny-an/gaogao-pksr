@@ -45,8 +45,20 @@ test('食材ゲットと料理チャンスの発動ごとに1手回復する', (
   assert.equal(context.moves, 12);
   assert.match(functionSource('activateFoodGet'), /addActivationMove\(\)/);
   assert.match(functionSource('activateCookingChance'), /addActivationMove\(\)/);
-  assert.match(source, /食材ゲットLv\$\{foodGet\.level\} 発動！ \+ \$\{foodGet\.total\}個・＋\$\{ACTIVATION_BONUS_MOVES\}手/);
-  assert.match(source, /料理チャンス発動！ 大成功＋\$\{bonusPercent\}%・＋\$\{ACTIVATION_BONUS_MOVES\}手/);
+});
+
+test('各スキル表示の終了後に独立した手数回復を表示する', () => {
+  const foodGetMessage = functionSource('showFoodGetMessage');
+  const cookingChanceMessage = functionSource('showCookingChanceMessage');
+  const moveMessage = functionSource('showActivationMoveMessage');
+  const resolveBoard = functionSource('resolveBoard');
+
+  assert.doesNotMatch(foodGetMessage, /ACTIVATION_BONUS_MOVES/);
+  assert.doesNotMatch(cookingChanceMessage, /ACTIVATION_BONUS_MOVES/);
+  assert.match(moveMessage, /`＋\$\{ACTIVATION_BONUS_MOVES\}手`/);
+  assert.match(resolveBoard, /if \(foodGet\) \{[\s\S]*?showActivationMoveMessage\(\);/);
+  assert.match(resolveBoard, /if \(cookingChanceBonus\) \{[\s\S]*?showActivationMoveMessage\(\);/);
+  assert.equal((resolveBoard.match(/showActivationMoveMessage\(\);/g) || []).length, 2);
 });
 
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {

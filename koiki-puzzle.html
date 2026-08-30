@@ -709,6 +709,8 @@
 
     .message.cook { background: rgba(221, 105, 48, .96); }
 
+    .message.move { background: rgba(57, 117, 190, .97); }
+
     .message.chance {
       width: min(88%, 300px);
       padding: 13px 15px;
@@ -1274,6 +1276,11 @@
   const MAX_MOVES = 12;
   const COOK_BONUS_MOVES = 5;
   const ACTIVATION_BONUS_MOVES = 1;
+  const CLEAR_ANIMATION_DURATION = 720;
+  const DROP_ANIMATION_DURATION = 1100;
+  const FOOD_GET_MESSAGE_DURATION = 3000;
+  const COOKING_CHANCE_MESSAGE_DURATION = 2300;
+  const ACTIVATION_MOVE_MESSAGE_DURATION = 900;
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const COOKING_CHANCE_BONUS_STEP = 0.1;
@@ -1694,13 +1701,17 @@
   }
 
   function showCookingChanceMessage(bonusPercent) {
-    showMessage(`料理チャンス発動！ 大成功＋${bonusPercent}%・＋${ACTIVATION_BONUS_MOVES}手`, 'chance', 2300);
+    showMessage(`料理チャンス発動！ 大成功＋${bonusPercent}%`, 'chance', COOKING_CHANCE_MESSAGE_DURATION);
+  }
+
+  function showActivationMoveMessage() {
+    showMessage(`＋${ACTIVATION_BONUS_MOVES}手`, 'move', ACTIVATION_MOVE_MESSAGE_DURATION);
   }
 
   function showFoodGetMessage(foodGet) {
     clearTimeout(messageTimer);
     messageEl.innerHTML = `
-      <div class="food-get-title">食材ゲットLv${foodGet.level} 発動！ + ${foodGet.total}個・＋${ACTIVATION_BONUS_MOVES}手</div>
+      <div class="food-get-title">食材ゲットLv${foodGet.level} 発動！ + ${foodGet.total}個</div>
       <div class="food-get-items">
         ${Object.entries(foodGet.foods).map(([id, count]) => {
           const food = FOODS[id];
@@ -1710,7 +1721,7 @@
     messageEl.className = 'message show food-get';
     messageTimer = window.setTimeout(() => {
       messageEl.className = 'message';
-    }, 3000);
+    }, FOOD_GET_MESSAGE_DURATION);
   }
 
   function animateCookEnergy(from, to) {
@@ -1871,19 +1882,29 @@
       if (foodGet) showFoodGetMessage(foodGet);
       else if (cookingChanceBonus) showCookingChanceMessage(cookingChanceBonus);
       else if (chain > 1) showMessage(`${chain}れんさ！`);
-      await sleep(720);
+      await sleep(CLEAR_ANIMATION_DURATION);
 
       matches.forEach(index => { cells[index] = null; });
       clearing = new Set();
       dropping = applyGravity();
       renderBoard();
-      await sleep(1100);
+      await sleep(DROP_ANIMATION_DURATION);
       dropping = new Map();
       renderBoard();
-      if (foodGet) await sleep(1200);
-      if (foodGet && cookingChanceBonus) {
-        showCookingChanceMessage(cookingChanceBonus);
-        await sleep(1600);
+      if (foodGet) {
+        await sleep(Math.max(0, FOOD_GET_MESSAGE_DURATION - CLEAR_ANIMATION_DURATION - DROP_ANIMATION_DURATION));
+        showActivationMoveMessage();
+        await sleep(ACTIVATION_MOVE_MESSAGE_DURATION);
+      }
+      if (cookingChanceBonus) {
+        if (foodGet) {
+          showCookingChanceMessage(cookingChanceBonus);
+          await sleep(COOKING_CHANCE_MESSAGE_DURATION);
+        } else {
+          await sleep(Math.max(0, COOKING_CHANCE_MESSAGE_DURATION - CLEAR_ANIMATION_DURATION - DROP_ANIMATION_DURATION));
+        }
+        showActivationMoveMessage();
+        await sleep(ACTIVATION_MOVE_MESSAGE_DURATION);
       }
     }
 
