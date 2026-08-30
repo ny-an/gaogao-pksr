@@ -77,7 +77,7 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.doesNotMatch(source, /class="cook-final-label"/);
   assert.equal((source.match(/class="cook-final-unit">エナジー</g) || []).length, 1);
   assert.match(cookRecipe, /const usedAdditionalIngredients = cookingAdditionalIngredients\(\)/);
-  assert.match(cookRecipe, /showCookCelebration\(cooked, cookingEnergy, isExtraTasty, usedAdditionalIngredients\)/);
+  assert.match(cookRecipe, /showCookCelebration\(cooked, recipeLevelEnergy\.totalEnergy, cookingEnergy, isExtraTasty, usedAdditionalIngredients\)/);
   assert.match(celebration, /renderCookAdditionalIngredients\(additionalIngredients\)/);
   assert.match(renderIngredients, /cookAdditionalEl\.hidden = entries\.length === 0/);
   assert.match(renderIngredients, /class="cook-additional-count"/);
@@ -87,6 +87,35 @@ test('操作アイコンは提供されたGaoGaoPuuun画像を表示する', () 
   assert.match(source, /--koiki-icon: url\("img\/icons\/gaogaopuuun-koiki\.png"\)/);
   assert.doesNotMatch(source, /--koiki-icon: url\("data:image\//);
   assert.equal(fs.existsSync(path.join(projectRoot, 'img/icons/gaogaopuuun-koiki.png')), true);
+});
+
+test('完成数でレシピレベルを上げて料理基礎エナジーへボーナスを加える', () => {
+  const recipeLevelForCompletedDishes = vm.runInNewContext(
+    `(${functionSource('recipeLevelForCompletedDishes')})`,
+    { RECIPE_LEVEL_MAX: 70 }
+  );
+  assert.equal(recipeLevelForCompletedDishes(0), 1);
+  assert.equal(recipeLevelForCompletedDishes(1), 2);
+  assert.equal(recipeLevelForCompletedDishes(100), 70);
+
+  const recipeEnergyAtLevel = vm.runInNewContext(
+    `(${functionSource('recipeEnergyAtLevel')})`,
+    { recipeLevelBonusList: { 1: '0', 2: '2', 70: '258' } }
+  );
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(recipeEnergyAtLevel(1234, 2))),
+    { bonusPercent: 2, bonusEnergy: 25, totalEnergy: 1259 }
+  );
+
+  const cookRecipe = functionSource('cookRecipe');
+  assert.match(source, /<title>お料理できるかな！！<\/title>/);
+  assert.match(source, /<h1>お料理できるかな！！<\/h1>/);
+  assert.match(source, /<span class="stat-label">レシピレベル<\/span>/);
+  assert.match(source, /id="recipeLevelValue">Lv1</);
+  assert.doesNotMatch(source, /できた料理|最大料理数|品完成/);
+  assert.match(cookRecipe, /const recipeLevel = recipeLevelForCompletedDishes\(dishes\)/);
+  assert.match(cookRecipe, /const baseCookingEnergy = recipeLevelEnergy\.totalEnergy \+ extraEnergy/);
+  assert.match(cookRecipe, /const cookingEnergy = baseCookingEnergy \* \(isExtraTasty/);
 });
 
 test('食材ゲットLvと料理チャンス確率を常設表示する', () => {
