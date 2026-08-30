@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#fff7e5">
+  <meta name="description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
+  <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="お料理できるかな">
+  <meta property="og:description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
+  <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
+  <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="お料理できるかなの食材パズル盤">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png">
   <title>お料理できるかな｜ミニ版</title>
   <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
   <style>
@@ -362,6 +374,13 @@
       animation-delay: calc(var(--drop-row, 0) * 45ms);
     }
 
+    .tile.idle-swapping {
+      z-index: 3;
+      animation: idle-swap 1.05s cubic-bezier(.35, .05, .22, 1) both;
+    }
+
+    .tile.koiki.idle-swapping { z-index: 4; }
+
     .board.busy .tile:not(.clearing) { filter: saturate(.94); }
 
     @keyframes pop-out {
@@ -374,6 +393,12 @@
       0% { transform: translateY(var(--drop-y, -110%)) scale(.94); opacity: .25; }
       70% { transform: translateY(7%) scale(1.02); opacity: 1; }
       100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes idle-swap {
+      0% { transform: translate(var(--idle-x, 0), var(--idle-y, 0)) scale(.96); }
+      78% { transform: translate(0, 0) scale(1.03); }
+      100% { transform: translate(0, 0) scale(1); }
     }
 
     .cook-celebration {
@@ -693,7 +718,7 @@
     .result[hidden] { display: none; }
 
     .result-card {
-      width: min(100%, 390px);
+      width: min(calc(100vw - 28px), 420px);
       padding: 28px 22px 22px;
       border: 3px solid #fff;
       border-radius: 26px;
@@ -717,12 +742,19 @@
     .result-score {
       margin: 0;
       color: var(--orange-dark);
-      font-size: 2rem;
+      font-size: clamp(1.55rem, 7.2vw, 2.1rem);
       font-weight: 1000;
       line-height: 1.1;
+      white-space: nowrap;
     }
 
-    .result-meta { margin: 9px 0 0; color: var(--muted); font-size: .83rem; font-weight: 800; }
+    .result-meta {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: clamp(.65rem, 2.8vw, .83rem);
+      font-weight: 800;
+      white-space: nowrap;
+    }
 
     .result-share-copy {
       margin: 18px 0 12px;
@@ -731,11 +763,19 @@
       border-radius: 13px;
       color: #65584e;
       background: rgba(255, 255, 255, .72);
-      font-size: .78rem;
-      font-weight: 800;
+      font-size: clamp(.62rem, 2.65vw, .78rem);
       line-height: 1.55;
-      white-space: pre-line;
     }
+
+    .result-share-copy > * {
+      display: block;
+      overflow: hidden;
+      font-weight: 800;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .result-share-copy strong { color: #51463e; font-weight: 1000; }
 
     .result-actions {
       display: grid;
@@ -912,7 +952,11 @@
         <h2 class="result-title" id="resultTitle">お料理おしまい！</h2>
         <p class="result-score" id="resultScore">0</p>
         <p class="result-meta" id="resultMeta"></p>
-        <p class="result-share-copy" id="resultShareCopy"></p>
+        <div class="result-share-copy" aria-label="Xへの投稿内容">
+          <strong id="resultShareHeadline"></strong>
+          <span id="resultShareStats"></span>
+          <span id="resultShareTag">#お料理できるかな</span>
+        </div>
         <div class="result-actions">
           <a class="x-share" id="xShareButton" href="#" target="_blank" rel="noopener">Xでシェア</a>
           <button class="result-restart" id="resultRestart" type="button">もういちど</button>
@@ -982,6 +1026,7 @@
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const RARE_RECIPE_WEIGHT = 0.12;
+  const IDLE_SWAP_INTERVAL = 1450;
   const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
   const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
 
@@ -1023,7 +1068,8 @@
   const startButton = $('startButton');
   const shuffleButton = $('shuffleButton');
   const resultEl = $('result');
-  const resultShareCopyEl = $('resultShareCopy');
+  const resultShareHeadlineEl = $('resultShareHeadline');
+  const resultShareStatsEl = $('resultShareStats');
   const xShareButton = $('xShareButton');
   const rulesDialog = $('rulesDialog');
   const cookCelebrationEl = $('cookCelebration');
@@ -1046,7 +1092,10 @@
   let ended = false;
   let clearing = new Set();
   let dropping = new Map();
+  let idleSwapping = new Map();
   let messageTimer = 0;
+  let idleMotionTimer = 0;
+  let idleCleanupTimer = 0;
 
   function currentRecipe() {
     return activeRecipe;
@@ -1217,13 +1266,15 @@
       const row = Math.floor(index / COLS);
       const dropDistance = dropping.get(index) || 0;
       const dropClass = dropDistance ? ' dropping' : '';
-      const motionStyle = `--drop-row:${row};--drop-y:-${dropDistance * 110}%`;
+      const idleMotion = idleSwapping.get(index);
+      const idleClass = idleMotion ? ' idle-swapping' : '';
+      const motionStyle = `--drop-row:${row};--drop-y:-${dropDistance * 110}%;${idleMotion ? `--idle-x:${idleMotion.x}%;--idle-y:${idleMotion.y}%;` : ''}`;
       if (tile?.kind === 'koiki') {
-        return `<button class="tile koiki${dropClass}" type="button" role="gridcell" disabled style="${motionStyle}" aria-label="操作アイコン"><span class="koiki-avatar" aria-hidden="true"></span></button>`;
+        return `<button class="tile koiki${dropClass}${idleClass}" type="button" role="gridcell" disabled style="${motionStyle}" aria-label="操作アイコン"><span class="koiki-avatar" aria-hidden="true"></span></button>`;
       }
       if (!tile) return '<span class="tile" role="gridcell" aria-hidden="true"></span>';
       const clearClass = clearing.has(index) ? ' clearing' : '';
-      return `<button class="tile food${clearClass}${dropClass}" type="button" role="gridcell" data-index="${index}" style="--tile-bg:${tile.bg};${motionStyle}" ${disabled ? 'disabled' : ''} aria-label="${tile.name}を操作アイコンと入れ替える"><img src="${foodImage(tile)}" alt=""></button>`;
+      return `<button class="tile food${clearClass}${dropClass}${idleClass}" type="button" role="gridcell" data-index="${index}" style="--tile-bg:${tile.bg};${motionStyle}" ${disabled ? 'disabled' : ''} aria-label="${tile.name}を操作アイコンと入れ替える"><img src="${foodImage(tile)}" alt=""></button>`;
     }).join('');
   }
 
@@ -1269,6 +1320,45 @@
   function renderAll() {
     renderStatus();
     renderBoard();
+  }
+
+  function stopIdleMotion() {
+    clearTimeout(idleMotionTimer);
+    clearTimeout(idleCleanupTimer);
+    idleMotionTimer = 0;
+    idleCleanupTimer = 0;
+    idleSwapping = new Map();
+  }
+
+  function performIdleSwap() {
+    if (started || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const koikiIndex = cells.findIndex(tile => tile?.kind === 'koiki');
+    const candidates = cells
+      .map((tile, index) => tile?.kind === 'food' ? index : -1)
+      .filter(index => index >= 0);
+    const targetIndex = randomFrom(candidates);
+    const offset = (source, destination) => ({
+      x: ((source % COLS) - (destination % COLS)) * 108,
+      y: (Math.floor(source / COLS) - Math.floor(destination / COLS)) * 108
+    });
+
+    [cells[koikiIndex], cells[targetIndex]] = [cells[targetIndex], cells[koikiIndex]];
+    idleSwapping = new Map([
+      [targetIndex, offset(koikiIndex, targetIndex)],
+      [koikiIndex, offset(targetIndex, koikiIndex)]
+    ]);
+    renderBoard();
+
+    idleCleanupTimer = window.setTimeout(() => {
+      idleSwapping = new Map();
+      if (!started) renderBoard();
+    }, 1050);
+    idleMotionTimer = window.setTimeout(performIdleSwap, IDLE_SWAP_INTERVAL);
+  }
+
+  function startIdleMotion() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    idleMotionTimer = window.setTimeout(performIdleSwap, 650);
   }
 
   function showMessage(text, tone = '', duration = 1400) {
@@ -1479,10 +1569,14 @@
     const oldBest = readBest();
     const isBest = score > oldBest;
     if (isBest) writeBest(score);
-    $('resultScore').textContent = `${score.toLocaleString('ja-JP')} エナジー`;
-    $('resultMeta').textContent = `${dishes}品完成・最大${maxChain}連鎖${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
-    const shareText = `お料理できるかなで${score.toLocaleString('ja-JP')}エナジー！\n${dishes}品完成・最大${maxChain}連鎖\n#お料理できるかな`;
-    resultShareCopyEl.textContent = shareText;
+    const scoreText = score.toLocaleString('ja-JP');
+    const shareHeadline = `お料理できるかなで${scoreText}エナジー！`;
+    const shareStats = `${dishes}品完成・最大${maxChain}連鎖`;
+    $('resultScore').textContent = `${scoreText} エナジー`;
+    $('resultMeta').textContent = `${shareStats}${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
+    resultShareHeadlineEl.textContent = shareHeadline;
+    resultShareStatsEl.textContent = shareStats;
+    const shareText = `${shareHeadline}\n${shareStats}\n#お料理できるかな`;
     xShareButton.href = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n${SHARE_URL}`)}`;
     resultEl.hidden = false;
     startButton.textContent = 'もういちど';
@@ -1492,6 +1586,7 @@
 
   function startGame() {
     if (started && !ended && !window.confirm('いまのゲームをやめて、最初からあそびますか？')) return;
+    stopIdleMotion();
     moves = START_MOVES;
     score = 0;
     dishes = 0;
@@ -1539,6 +1634,7 @@
 
   cells = buildBoard();
   renderAll();
+  startIdleMotion();
 })();
 </script>
 </body>
