@@ -813,7 +813,7 @@
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const RARE_RECIPE_WEIGHT = 0.12;
-  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v6';
+  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
 
   function miniNeeds(needs) {
     const entries = Object.entries(needs);
@@ -863,7 +863,7 @@
   let score = 0;
   let dishes = 0;
   let maxChain = 0;
-  let activeRecipe = chooseRecipe();
+  let activeRecipe = chooseRecipe('', 1);
   let activePalette = choosePalette(activeRecipe);
   let pot = {};
   let shuffleCount = 0;
@@ -883,8 +883,11 @@
     return Boolean(recipe.needs['ずっしりカボチャ'] || recipe.needs['おいしいシッポ']);
   }
 
-  function chooseRecipe(excludedName = '') {
-    const candidates = RECIPES.filter(recipe => recipe.name !== excludedName);
+  function chooseRecipe(excludedName = '', requiredIngredientCount = 0) {
+    const candidates = RECIPES.filter(recipe =>
+      recipe.name !== excludedName &&
+      (!requiredIngredientCount || Object.keys(recipe.needs).length === requiredIngredientCount)
+    );
     const totalWeight = candidates.reduce((sum, recipe) => sum + (isRareRecipe(recipe) ? RARE_RECIPE_WEIGHT : 1), 0);
     let target = Math.random() * totalWeight;
     for (const recipe of candidates) {
@@ -1248,9 +1251,6 @@
       return;
     }
 
-    if (!hasScoringSwap()) {
-      showMessage('詰まり！', '', 1800);
-    }
   }
 
   async function playMove(index) {
@@ -1301,7 +1301,7 @@
     score = 0;
     dishes = 0;
     maxChain = 0;
-    activeRecipe = chooseRecipe();
+    activeRecipe = chooseRecipe('', 1);
     activePalette = choosePalette(activeRecipe);
     pot = {};
     shuffleCount = 0;
