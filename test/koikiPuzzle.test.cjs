@@ -83,6 +83,33 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.match(renderIngredients, /class="cook-additional-count"/);
 });
 
+test('持ち越した追加食材はロック解除時に現在料理の不足分へ充当する', () => {
+  const context = {
+    pot: { apple: 5, milk: 2 },
+    recipeProgress: { apple: 1 },
+    currentRecipe: () => ({ needs: { apple: 3 } })
+  };
+  const useUnlockedIngredientForRecipe = vm.runInNewContext(
+    `(${functionSource('useUnlockedIngredientForRecipe')})`,
+    context
+  );
+
+  assert.equal(useUnlockedIngredientForRecipe('apple'), 2);
+  assert.equal(context.recipeProgress.apple, 3);
+  assert.equal(context.pot.apple, 3);
+  assert.equal(useUnlockedIngredientForRecipe('milk'), 0);
+  assert.equal(context.pot.milk, 2);
+
+  context.recipeProgress.apple = 0;
+  context.pot.apple = 2;
+  assert.equal(useUnlockedIngredientForRecipe('apple'), 2);
+  assert.equal(context.recipeProgress.apple, 2);
+  assert.equal('apple' in context.pot, false);
+
+  assert.match(source, /const usedForRecipe = useUnlockedIngredientForRecipe\(id\)/);
+  assert.match(source, /if \(recipeComplete\(\)\) await cookRecipe\(\)/);
+});
+
 test('操作アイコンは提供されたGaoGaoPuuun画像を表示する', () => {
   assert.match(source, /--koiki-icon: url\("img\/icons\/gaogaopuuun-koiki\.png"\)/);
   assert.doesNotMatch(source, /--koiki-icon: url\("data:image\//);
