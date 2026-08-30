@@ -111,13 +111,6 @@
       font-size: .68em;
     }
 
-    .tagline {
-      margin: 5px 0 0;
-      color: var(--muted);
-      font-size: .78rem;
-      font-weight: 700;
-    }
-
     .game-card {
       position: relative;
       overflow: hidden;
@@ -173,14 +166,6 @@
       background: linear-gradient(135deg, #fff8df, #fffdf5);
     }
 
-    .order-kicker {
-      display: block;
-      color: var(--orange-dark);
-      font-size: .66rem;
-      font-weight: 900;
-      letter-spacing: .08em;
-    }
-
     .order-name {
       display: block;
       overflow: hidden;
@@ -189,15 +174,6 @@
       line-height: 1.35;
       text-overflow: ellipsis;
       white-space: nowrap;
-    }
-
-    .order-energy {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: .61rem;
-      font-weight: 800;
-      line-height: 1.35;
     }
 
     .requirements {
@@ -239,6 +215,30 @@
       font-weight: 900;
       text-align: center;
     }
+
+    .additional-ingredients {
+      display: flex;
+      min-height: 30px;
+      margin-top: 5px;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .additional-item {
+      display: inline-flex;
+      height: 28px;
+      padding: 2px 6px 2px 3px;
+      align-items: center;
+      gap: 1px;
+      border: 1px solid rgba(218, 199, 171, .8);
+      border-radius: 999px;
+      background: rgba(255,255,255,.82);
+      font-size: .68rem;
+      font-weight: 1000;
+    }
+
+    .additional-item img { width: 23px; height: 23px; object-fit: contain; }
 
     .board-wrap { position: relative; }
 
@@ -324,7 +324,7 @@
     }
 
     @keyframes drop-in {
-      0% { transform: translateY(-115%) scale(.92); opacity: .2; }
+      0% { transform: translateY(var(--drop-y, -110%)) scale(.94); opacity: .25; }
       70% { transform: translateY(7%) scale(1.02); opacity: 1; }
       100% { transform: translateY(0) scale(1); opacity: 1; }
     }
@@ -345,6 +345,28 @@
     }
 
     .cook-celebration[hidden] { display: none; }
+
+    .cook-celebration.extra-tasty {
+      background:
+        radial-gradient(circle at center, rgba(255,255,238,.98) 0 15%, rgba(255,184,112,.94) 39%, rgba(244,77,66,.9) 100%);
+    }
+
+    .cook-celebration.extra-tasty .cook-rays {
+      opacity: .72;
+      background: repeating-conic-gradient(from 9deg, rgba(255,255,255,.94) 0 5deg, transparent 5deg 13deg);
+      animation-duration: 3.8s;
+      animation-direction: reverse;
+    }
+
+    .cook-celebration.extra-tasty .cook-card {
+      border-color: #fff8cf;
+      box-shadow: 0 20px 70px rgba(151, 38, 29, .42), 0 0 0 10px rgba(255, 83, 67, .58);
+      animation: extra-tasty-card-in .7s cubic-bezier(.16,.9,.28,1.32) both;
+    }
+
+    .cook-celebration.extra-tasty .cook-dish {
+      animation: extra-tasty-dish 1s .12s cubic-bezier(.2,.86,.2,1.25) both;
+    }
 
     .cook-rays {
       position: absolute;
@@ -402,28 +424,38 @@
       margin: 6px auto 4px;
       place-items: center;
       border-radius: 50%;
-      background: radial-gradient(circle, #fff 0 44%, #ffe9a5 45% 59%, transparent 60%);
-      font-size: 4.9rem;
-      filter: drop-shadow(0 9px 8px rgba(116, 70, 22, .2));
+      background: radial-gradient(circle at 38% 28%, #ffc968 0 14%, #f0ab42 42%, #e67934 70%, #c94f2b 100%);
+      box-shadow: inset 0 0 0 6px rgba(255,255,255,.58), 0 9px 20px rgba(116, 70, 22, .24);
       animation: dish-pop .86s .15s cubic-bezier(.2,.86,.2,1.25) both;
     }
 
-    .steam {
-      position: absolute;
-      top: 6px;
-      width: 13px;
-      height: 42px;
-      border: 5px solid rgba(255,255,255,.88);
-      border-right: 0;
-      border-bottom: 0;
-      border-radius: 60% 0 0 0;
-      opacity: 0;
-      animation: steam-rise 1.25s ease-out infinite;
+    .cook-dish img {
+      width: 76px;
+      height: 76px;
+      filter: drop-shadow(0 4px 2px rgba(150, 57, 24, .25));
     }
 
-    .steam:nth-child(1) { left: 38px; animation-delay: .1s; }
-    .steam:nth-child(2) { left: 59px; height: 50px; animation-delay: .4s; }
-    .steam:nth-child(3) { left: 80px; animation-delay: .7s; }
+    .cook-extra-tasty {
+      display: inline-flex;
+      margin: 7px auto 0;
+      align-items: center;
+      gap: 5px;
+      color: #f04e3e;
+      font-size: 1.2rem;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      text-shadow: 0 2px 0 #fff, 0 0 12px #ffd16f;
+      animation: extra-tasty-pop .62s .25s cubic-bezier(.2,.86,.2,1.35) both;
+    }
+
+    .cook-extra-tasty[hidden] { display: none; }
+
+    .cook-extra-tasty img {
+      width: 25px;
+      height: 25px;
+      transform: rotate(15deg);
+      filter: drop-shadow(0 2px 0 #fff);
+    }
 
     .cook-recipe-name {
       display: block;
@@ -431,14 +463,6 @@
       font-size: 1.12rem;
       font-weight: 1000;
       line-height: 1.35;
-    }
-
-    .cook-energy-breakdown {
-      margin: 9px 0 2px;
-      color: var(--muted);
-      font-size: .72rem;
-      font-weight: 800;
-      line-height: 1.5;
     }
 
     .cook-final-label {
@@ -482,10 +506,21 @@
       to { transform: scale(1) rotate(0); opacity: 1; }
     }
 
-    @keyframes steam-rise {
-      0% { transform: translateY(18px) scale(.65); opacity: 0; }
-      30% { opacity: .92; }
-      100% { transform: translateY(-22px) translateX(7px) scale(1.08); opacity: 0; }
+    @keyframes extra-tasty-pop {
+      from { opacity: 0; transform: scale(.45) rotate(-7deg); }
+      to { opacity: 1; transform: scale(1) rotate(0); }
+    }
+
+    @keyframes extra-tasty-card-in {
+      0% { transform: translateY(45px) scale(.64) rotate(-3deg); opacity: 0; }
+      62% { transform: translateY(-5px) scale(1.06) rotate(2deg); opacity: 1; }
+      100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+    }
+
+    @keyframes extra-tasty-dish {
+      0% { transform: scale(.2) rotate(-20deg); opacity: 0; }
+      58% { transform: scale(1.22) rotate(10deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
     }
 
     .message {
@@ -517,20 +552,13 @@
 
     .message.cook { background: rgba(221, 105, 48, .96); }
 
-    .hint {
-      min-height: 2.5em;
-      margin: 10px 4px 8px;
-      color: var(--muted);
-      font-size: .76rem;
-      font-weight: 700;
-      line-height: 1.45;
-      text-align: center;
-    }
+    .message.food-get { background: rgba(49, 151, 91, .96); }
 
     .actions {
       display: grid;
       grid-template-columns: 1fr auto;
       gap: 9px;
+      margin-top: 10px;
     }
 
     .primary,
@@ -580,14 +608,6 @@
     }
 
     .result-meta { margin: 7px 0 0; color: var(--muted); font-size: .78rem; font-weight: 800; }
-
-    .mini-note {
-      margin: 13px 8px 0;
-      color: #887c70;
-      font-size: .68rem;
-      line-height: 1.55;
-      text-align: center;
-    }
 
     dialog {
       width: min(calc(100% - 30px), 430px);
@@ -666,7 +686,6 @@
     <div class="title-mascot" aria-hidden="true"></div>
     <div>
       <h1>お料理パズル</h1>
-      <p class="tagline">食材をいれかえて、4つそろえよう</p>
     </div>
   </header>
 
@@ -674,7 +693,7 @@
     <section class="hud" aria-label="ゲーム状況">
       <div class="stat">
         <span class="stat-label">のこり</span>
-        <strong class="stat-value" id="movesValue">20</strong>
+        <strong class="stat-value" id="movesValue">12</strong>
       </div>
       <div class="stat">
         <span class="stat-label">エナジー</span>
@@ -688,9 +707,8 @@
 
     <section class="order" aria-label="現在の料理">
       <div>
-        <span class="order-kicker">つぎにつくる料理</span>
         <strong class="order-name" id="recipeName">とくせんリンゴカレー</strong>
-        <span class="order-energy" id="recipeEnergy">料理 748 エナジー ＋ 追加食材 0 エナジー</span>
+        <div class="additional-ingredients" id="additionalIngredients" aria-label="追加食材"></div>
       </div>
       <div class="requirements" id="requirements"></div>
     </section>
@@ -700,11 +718,9 @@
       <div class="message" id="message" role="status" aria-live="polite"></div>
     </div>
 
-    <p class="hint" id="hint">「スタート」を押してね。食材をタップすると、中央のアイコンと場所が入れかわるよ。</p>
-
     <div class="actions">
       <button class="primary" id="startButton" type="button">スタート</button>
-      <button class="secondary" id="shuffleButton" type="button">まぜる −1</button>
+      <button class="secondary" id="shuffleButton" type="button">まぜまぜ 0</button>
     </div>
 
     <section class="result" id="result" hidden aria-live="polite">
@@ -714,7 +730,6 @@
     </section>
   </main>
 
-  <p class="mini-note">ミニ試作版です。エナジーはこのブラウザに保存されます。食材画像・料理データは献立表の既存データを利用しています。</p>
 </div>
 
 <dialog id="rulesDialog">
@@ -724,7 +739,10 @@
       <li>食材を1つタップすると、盤面の操作アイコンと場所が入れかわります。</li>
       <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
       <li>消した食材のエナジーは、料理完成まで追加食材エナジーとしてたまります。</li>
-      <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
+      <li>横に4つ以上そろえると「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
+      <li>まぜまぜの消費手数は、そのゲームの発動回数に応じて0、1、2…と増えます。</li>
+      <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も3回復します。</li>
+      <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
     </ol>
     <button class="primary rules-close" id="rulesClose" type="button">わかった！</button>
   </div>
@@ -742,49 +760,51 @@
   </div>
   <div class="cook-card">
     <p class="cook-kicker">料理完成！</p>
-    <div class="cook-dish" aria-hidden="true">🍲<span class="steam"></span><span class="steam"></span><span class="steam"></span></div>
+    <div class="cook-dish" aria-hidden="true"><img src="img/fire_energy_white.svg" alt=""></div>
+    <div class="cook-extra-tasty" id="cookExtraTasty" hidden><img src="img/extra_tasty_red.svg" alt=""><strong>大成功！</strong></div>
     <strong class="cook-recipe-name" id="cookRecipeName"></strong>
-    <p class="cook-energy-breakdown" id="cookEnergyBreakdown"></p>
-    <span class="cook-final-label">料理の最終エナジー</span>
+    <span class="cook-final-label">エナジー</span>
     <strong class="cook-final-energy" id="cookFinalEnergy">0 エナジー</strong>
   </div>
 </section>
 
+<script src="js/data/foods.js"></script>
+<script src="js/data/dishes.js"></script>
 <script>
 (() => {
   'use strict';
 
   const ROWS = 6;
   const COLS = 6;
-  const START_MOVES = 20;
-  const MAX_MOVES = 20;
-  const COOK_BONUS_MOVES = 5;
-  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v3';
+  const BOARD_FOOD_TYPES = 6;
+  const START_MOVES = 12;
+  const MAX_MOVES = 12;
+  const COOK_BONUS_MOVES = 3;
+  const EXTRA_TASTY_CHANCE = 0.1;
+  const EXTRA_TASTY_MULTIPLIER = 2;
+  const RARE_RECIPE_WEIGHT = 0.12;
+  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v5';
 
-  // js/data/foods.js の食材基礎エナジーと対応させたミニ版用データ。
-  const FOODS = {
-    apple:    { id: 'apple',    name: 'とくせんリンゴ',   energy: 90,  image: 'FancyApple',    bg: '#fff0ed' },
-    milk:     { id: 'milk',     name: 'モーモーミルク',   energy: 98,  image: 'MoomooMilk',    bg: '#edf2ff' },
-    honey:    { id: 'honey',    name: 'あまいミツ',       energy: 101, image: 'Honey',         bg: '#fff7d5' },
-    tomato:   { id: 'tomato',   name: 'あんみんトマト',   energy: 110, image: 'SnoozyTomato', bg: '#ffeded' },
-    mushroom: { id: 'mushroom', name: 'あじわいキノコ',   energy: 167, image: 'TastyMushroom', bg: '#f5e9df' },
-    potato:   { id: 'potato',   name: 'ほっこりポテト',   energy: 124, image: 'SoftPotato',    bg: '#fff2dc' },
-    herb:     { id: 'herb',     name: 'げきからハーブ',   energy: 130, image: 'FieryHerb',     bg: '#ffe8e6' },
-    meat:     { id: 'meat',     name: 'マメミート',       energy: 103, image: 'BeanSausage',   bg: '#fff0e6' },
-    ginger:   { id: 'ginger',   name: 'あったかジンジャー', energy: 109, image: 'WarmingGinger', bg: '#fff0d8' }
-  };
+  function miniNeeds(needs) {
+    const entries = Object.entries(needs);
+    const maxNeed = Math.max(...entries.map(([, count]) => count));
+    const cap = entries.length === 1 ? 7 : entries.length === 2 ? 7 : entries.length === 3 ? 6 : 5;
+    return Object.fromEntries(entries.map(([name, count]) => [name, Math.max(4, Math.round((count / maxNeed) * cap))]));
+  }
 
-  // js/data/dishes.js の必要食材数・料理基礎エナジーと対応。
-  const RECIPES = [
-    { name: 'とくせんリンゴカレー', energy: 748,  needs: { apple: 7 } },
-    { name: 'モーモーホットミルク', energy: 814,  needs: { milk: 7 } },
-    { name: 'ベイビィハニーカレー', energy: 839,  needs: { honey: 7 } },
-    { name: 'マイペースやさいジュース', energy: 1924, needs: { tomato: 9, apple: 7 } },
-    { name: 'サンパワートマトカレー', energy: 2078, needs: { tomato: 10, herb: 5 } },
-    { name: 'ほっこりホワイトシチュー', energy: 3181, needs: { milk: 10, potato: 8, mushroom: 4 } },
-    { name: '満腹チーズバーグカレー', energy: 1910, needs: { meat: 8, milk: 8 } },
-    { name: 'ひのこのジンジャーティー', energy: 1913, needs: { ginger: 9, apple: 7 } }
-  ];
+  const FOODS = Object.fromEntries(Object.entries(foodEnergyMap).map(([name, energy]) => [name, {
+    id: name,
+    name,
+    energy,
+    image: foodImageMap[name],
+    bg: `${foodColorMap[name]}22`
+  }]));
+
+  const RECIPES = Object.entries(org_dishes).flatMap(([category, recipes]) =>
+    Object.entries(recipes)
+      .filter(([name, needs]) => Object.keys(needs).length > 0 && dishesEnergyList[name])
+      .map(([name, needs]) => ({ category, name, energy: dishesEnergyList[name], needs: miniNeeds(needs) }))
+  );
 
   const KOIKI = Object.freeze({ id: 'koiki', kind: 'koiki', name: '操作アイコン' });
   const ALL_FOOD_IDS = Object.keys(FOODS);
@@ -796,17 +816,16 @@
   const scoreEl = $('scoreValue');
   const dishesEl = $('dishesValue');
   const recipeNameEl = $('recipeName');
-  const recipeEnergyEl = $('recipeEnergy');
   const requirementsEl = $('requirements');
-  const hintEl = $('hint');
+  const additionalIngredientsEl = $('additionalIngredients');
   const messageEl = $('message');
   const startButton = $('startButton');
   const shuffleButton = $('shuffleButton');
   const resultEl = $('result');
   const rulesDialog = $('rulesDialog');
   const cookCelebrationEl = $('cookCelebration');
+  const cookExtraTastyEl = $('cookExtraTasty');
   const cookRecipeNameEl = $('cookRecipeName');
-  const cookEnergyBreakdownEl = $('cookEnergyBreakdown');
   const cookFinalEnergyEl = $('cookFinalEnergy');
 
   let cells = [];
@@ -814,17 +833,45 @@
   let score = 0;
   let dishes = 0;
   let maxChain = 0;
-  let recipeIndex = 0;
+  let activeRecipe = chooseRecipe();
+  let activePalette = choosePalette(activeRecipe);
   let pot = {};
+  let shuffleCount = 0;
+  let foodGetActivations = 0;
   let busy = false;
   let started = false;
   let ended = false;
   let clearing = new Set();
-  let dropping = false;
+  let dropping = new Map();
   let messageTimer = 0;
 
   function currentRecipe() {
-    return RECIPES[recipeIndex % RECIPES.length];
+    return activeRecipe;
+  }
+
+  function isRareRecipe(recipe) {
+    return Boolean(recipe.needs['ずっしりカボチャ'] || recipe.needs['おいしいシッポ']);
+  }
+
+  function chooseRecipe(excludedName = '') {
+    const candidates = RECIPES.filter(recipe => recipe.name !== excludedName);
+    const totalWeight = candidates.reduce((sum, recipe) => sum + (isRareRecipe(recipe) ? RARE_RECIPE_WEIGHT : 1), 0);
+    let target = Math.random() * totalWeight;
+    for (const recipe of candidates) {
+      target -= isRareRecipe(recipe) ? RARE_RECIPE_WEIGHT : 1;
+      if (target <= 0) return recipe;
+    }
+    return candidates[candidates.length - 1];
+  }
+
+  function choosePalette(recipe) {
+    const required = Object.keys(recipe.needs);
+    const fillers = ALL_FOOD_IDS
+      .filter(id => !required.includes(id))
+      .map(id => ({ id, order: Math.random() }))
+      .sort((a, b) => a.order - b.order)
+      .map(item => item.id);
+    return [...required, ...fillers].slice(0, BOARD_FOOD_TYPES);
   }
 
   function foodImage(food) {
@@ -836,9 +883,7 @@
   }
 
   function paletteForRecipe(recipe) {
-    const required = Object.keys(recipe.needs);
-    const fillers = ALL_FOOD_IDS.filter(id => !required.includes(id));
-    return [...required, ...fillers].slice(0, 5);
+    return recipe === activeRecipe ? activePalette : choosePalette(recipe);
   }
 
   function spawnPool(recipe) {
@@ -901,7 +946,8 @@
         next[index] = makeFood(id);
       }
       lastBoard = next;
-      if (findMatches(next).size === 0 && hasScoringSwap(next)) return next;
+      const allPaletteFoodsPresent = activePalette.every(id => next.some(tile => tile?.id === id));
+      if (allPaletteFoodsPresent && findMatches(next).size === 0 && hasScoringSwap(next)) return next;
     }
     return lastBoard;
   }
@@ -946,6 +992,21 @@
     return found;
   }
 
+  function horizontalMatchCount(board = cells) {
+    let count = 0;
+    for (let row = 0; row < ROWS; row++) {
+      let start = 0;
+      while (start < COLS) {
+        const first = board[row * COLS + start];
+        let end = start + 1;
+        while (first?.kind === 'food' && end < COLS && board[row * COLS + end]?.id === first.id) end++;
+        if (first?.kind === 'food' && end - start >= 4) count++;
+        start = end;
+      }
+    }
+    return count;
+  }
+
   function hasScoringSwap(board = cells) {
     const koikiIndex = board.findIndex(tile => tile?.kind === 'koiki');
     if (koikiIndex < 0) return false;
@@ -963,8 +1024,9 @@
     boardEl.classList.toggle('busy', busy);
     boardEl.innerHTML = cells.map((tile, index) => {
       const row = Math.floor(index / COLS);
-      const dropClass = dropping ? ' dropping' : '';
-      const motionStyle = `--drop-row:${row}`;
+      const dropDistance = dropping.get(index) || 0;
+      const dropClass = dropDistance ? ' dropping' : '';
+      const motionStyle = `--drop-row:${row};--drop-y:-${dropDistance * 110}%`;
       if (tile?.kind === 'koiki') {
         return `<button class="tile koiki${dropClass}" type="button" role="gridcell" disabled style="${motionStyle}" aria-label="操作アイコン"><span class="koiki-avatar" aria-hidden="true"></span></button>`;
       }
@@ -981,10 +1043,17 @@
       const collected = pot[id] || 0;
       const current = Math.min(collected, need);
       const done = collected >= need;
-      const extra = Math.max(0, collected - need);
-      const extraText = extra ? `・追加 ${extra}個` : '';
-      return `<div class="requirement${done ? ' done' : ''}" title="${food.name} ${current}/${need}${extraText}・1個 ${food.energy} エナジー"><img src="${foodImage(food)}" alt="${food.name}"><span class="requirement-count">${current}/${need}</span></div>`;
+      return `<div class="requirement${done ? ' done' : ''}" aria-label="${food.name} ${current}/${need}"><img src="${foodImage(food)}" alt=""><span class="requirement-count">${current}/${need}</span></div>`;
     }).join('');
+  }
+
+  function renderAdditionalIngredients() {
+    additionalIngredientsEl.innerHTML = activePalette
+      .filter(id => (pot[id] || 0) > 0)
+      .map(id => {
+        const food = FOODS[id];
+        return `<span class="additional-item" title="${food.name}" aria-label="${food.name} ${pot[id]}個"><img src="${foodImage(food)}" alt=""><span>×${pot[id]}</span></span>`;
+      }).join('');
   }
 
   function additionalIngredientEnergy() {
@@ -996,14 +1065,13 @@
 
   function renderStatus() {
     const recipe = currentRecipe();
-    const extraEnergy = additionalIngredientEnergy();
-    const finalEnergy = recipe.energy + extraEnergy;
     movesEl.textContent = String(moves);
     scoreEl.textContent = score.toLocaleString('ja-JP');
     dishesEl.textContent = String(dishes);
     recipeNameEl.textContent = recipe.name;
-    recipeEnergyEl.textContent = `料理 ${recipe.energy.toLocaleString('ja-JP')} エナジー ＋ 追加食材 ${extraEnergy.toLocaleString('ja-JP')} エナジー ＝ ${finalEnergy.toLocaleString('ja-JP')} エナジー`;
+    shuffleButton.textContent = `まぜまぜ ${shuffleCount ? `−${shuffleCount}` : '0'}`;
     renderRequirements();
+    renderAdditionalIngredients();
   }
 
   function renderAll() {
@@ -1041,9 +1109,10 @@
     });
   }
 
-  async function showCookCelebration(recipe, extraEnergy, finalEnergy) {
+  async function showCookCelebration(recipe, finalEnergy, isExtraTasty) {
     cookRecipeNameEl.textContent = recipe.name;
-    cookEnergyBreakdownEl.textContent = `料理 ${recipe.energy.toLocaleString('ja-JP')} エナジー ＋ 追加食材 ${extraEnergy.toLocaleString('ja-JP')} エナジー`;
+    cookExtraTastyEl.hidden = !isExtraTasty;
+    cookCelebrationEl.classList.toggle('extra-tasty', isExtraTasty);
     cookFinalEnergyEl.textContent = `${recipe.energy.toLocaleString('ja-JP')} エナジー`;
     cookCelebrationEl.hidden = false;
     await animateCookEnergy(recipe.energy, finalEnergy);
@@ -1053,40 +1122,84 @@
 
   function applyGravity() {
     const pool = spawnPool(currentRecipe());
+    const falling = new Map();
     for (let col = 0; col < COLS; col++) {
       const kept = [];
       for (let row = ROWS - 1; row >= 0; row--) {
         const tile = cells[row * COLS + col];
-        if (tile) kept.push(tile);
+        if (tile) kept.push({ tile, sourceRow: row });
       }
-      for (let row = ROWS - 1, offset = 0; row >= 0; row--, offset++) {
-        cells[row * COLS + col] = kept[offset] || makeFood(randomFrom(pool));
+      for (let row = 0; row < ROWS; row++) cells[row * COLS + col] = null;
+
+      let destinationRow = ROWS - 1;
+      kept.forEach(({ tile, sourceRow }) => {
+        const destination = destinationRow * COLS + col;
+        cells[destination] = tile;
+        if (destinationRow !== sourceRow) falling.set(destination, destinationRow - sourceRow);
+        destinationRow--;
+      });
+
+      const missingCount = destinationRow + 1;
+      while (destinationRow >= 0) {
+        const destination = destinationRow * COLS + col;
+        cells[destination] = makeFood(randomFrom(pool));
+        falling.set(destination, missingCount);
+        destinationRow--;
       }
     }
+    return falling;
   }
 
   function recipeComplete() {
     return Object.entries(currentRecipe().needs).every(([id, need]) => (pot[id] || 0) >= need);
   }
 
+  function activateFoodGet(times) {
+    for (let activation = 0; activation < times; activation++) {
+      foodGetActivations++;
+      const bonusCount = foodGetActivations * 3 + 6;
+      for (let count = 0; count < bonusCount; count++) {
+        const id = randomFrom(activePalette);
+        pot[id] = (pot[id] || 0) + 1;
+      }
+    }
+  }
+
+  async function performShuffle(isAutomatic) {
+    const cost = shuffleCount;
+    moves = Math.max(0, moves - cost);
+    shuffleCount++;
+    renderStatus();
+    if (isAutomatic) {
+      showMessage('詰まり！');
+      await sleep(850);
+    }
+    showMessage('まぜまぜ！');
+    await sleep(520);
+    cells = buildBoard();
+    dropping = new Map();
+    renderAll();
+  }
+
   async function cookRecipe() {
     const cooked = currentRecipe();
     const extraEnergy = additionalIngredientEnergy();
-    const cookingEnergy = cooked.energy + extraEnergy;
+    const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE;
+    const baseCookingEnergy = cooked.energy + extraEnergy;
+    const cookingEnergy = baseCookingEnergy * (isExtraTasty ? EXTRA_TASTY_MULTIPLIER : 1);
     dishes++;
-    // 料理完成までに消した全食材を追加食材として、料理エナジーへまとめて加える。
+    // 料理完成までに消した全食材を追加食材として加え、大成功なら最後に2倍する。
     score += cookingEnergy;
     moves = Math.min(MAX_MOVES, moves + COOK_BONUS_MOVES);
     renderStatus();
-    hintEl.textContent = `料理 ${cooked.energy.toLocaleString('ja-JP')} エナジー ＋ 追加食材 ${extraEnergy.toLocaleString('ja-JP')} エナジー。手数も${COOK_BONUS_MOVES}回復！`;
-    await showCookCelebration(cooked, extraEnergy, cookingEnergy);
+    await showCookCelebration(cooked, cookingEnergy, isExtraTasty);
 
-    recipeIndex++;
+    activeRecipe = chooseRecipe(cooked.name);
+    activePalette = choosePalette(activeRecipe);
     pot = {};
     cells = buildBoard();
     renderAll();
-    hintEl.textContent = '食材をタップして、操作アイコンの場所へ運ぼう。縦・横4つで鍋に入るよ。';
-    showMessage(`手数が${COOK_BONUS_MOVES}回復！`, 'cook');
+    showMessage(`＋${COOK_BONUS_MOVES}手`, 'cook');
   }
 
   async function resolveBoard() {
@@ -1095,35 +1208,28 @@
     while (true) {
       const matches = findMatches();
       if (matches.size === 0) break;
+      const horizontalMatches = horizontalMatchCount();
 
       chain++;
       maxChain = Math.max(maxChain, chain);
-      let gained = 0;
-      const clearedFoods = {};
       matches.forEach(index => {
         const food = cells[index];
         if (!food || food.kind !== 'food') return;
-        gained += food.energy;
-        clearedFoods[food.id] = (clearedFoods[food.id] || 0) + 1;
         pot[food.id] = (pot[food.id] || 0) + 1;
       });
+      if (horizontalMatches > 0) activateFoodGet(horizontalMatches);
       clearing = matches;
       renderAll();
-      showMessage(chain > 1 ? `${chain}れんさ！ 追加食材 +${gained.toLocaleString('ja-JP')} エナジー` : `追加食材 +${gained.toLocaleString('ja-JP')} エナジー`);
-      const breakdown = Object.entries(clearedFoods).map(([id, count]) => {
-        const food = FOODS[id];
-        return `${food.name} ${count}個 × ${food.energy} エナジー`;
-      }).join(' ＋ ');
-      hintEl.textContent = `${breakdown} ＝ 追加食材 ${gained.toLocaleString('ja-JP')} エナジー`;
+      if (horizontalMatches > 0) showMessage('食材ゲット発動！', 'food-get');
+      else if (chain > 1) showMessage(`${chain}れんさ！`);
       await sleep(720);
 
       matches.forEach(index => { cells[index] = null; });
       clearing = new Set();
-      applyGravity();
-      dropping = true;
+      dropping = applyGravity();
       renderBoard();
       await sleep(1100);
-      dropping = false;
+      dropping = new Map();
       renderBoard();
     }
 
@@ -1133,11 +1239,7 @@
     }
 
     if (!hasScoringSwap()) {
-      showMessage('まぜまぜ…');
-      hintEl.textContent = `${hintEl.textContent}　盤面もまぜたよ。`;
-      await sleep(520);
-      cells = buildBoard();
-      renderBoard();
+      await performShuffle(true);
     }
   }
 
@@ -1179,7 +1281,6 @@
     $('resultMeta').textContent = `${dishes}品完成・最大${maxChain}連鎖${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
     resultEl.hidden = false;
     startButton.textContent = 'もういちど';
-    hintEl.textContent = '手数がなくなったよ。もう一度あそんで、料理をたくさん作ろう！';
     showMessage('お料理おしまい！', 'cook');
     renderAll();
   }
@@ -1190,16 +1291,19 @@
     score = 0;
     dishes = 0;
     maxChain = 0;
-    recipeIndex = 0;
+    activeRecipe = chooseRecipe();
+    activePalette = choosePalette(activeRecipe);
     pot = {};
+    shuffleCount = 0;
+    foodGetActivations = 0;
     busy = false;
     started = true;
     ended = false;
     clearing = new Set();
+    dropping = new Map();
     cells = buildBoard();
     resultEl.hidden = true;
     startButton.textContent = 'やりなおす';
-    hintEl.textContent = '食材をタップして、操作アイコンの場所へ運ぼう。縦・横4つで鍋に入るよ。';
     renderAll();
     showMessage('お料理スタート！');
   }
@@ -1212,13 +1316,13 @@
 
   startButton.addEventListener('click', startGame);
 
-  shuffleButton.addEventListener('click', () => {
+  shuffleButton.addEventListener('click', async () => {
     if (!started || ended || busy) return;
-    moves--;
-    cells = buildBoard();
-    hintEl.textContent = '1手つかって盤面をまぜたよ。';
+    busy = true;
     renderAll();
-    showMessage('まぜまぜ…');
+    await performShuffle(false);
+    busy = false;
+    renderAll();
     if (moves <= 0) endGame();
   });
 
