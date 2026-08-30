@@ -47,6 +47,29 @@ test('食材ゲットと料理チャンスの発動ごとに1手回復する', (
   assert.match(functionSource('activateCookingChance'), /addActivationMove\(\)/);
 });
 
+test('料理チャンスは3連鎖目以降の各連鎖で発動し上限到達後も表示する', () => {
+  const resolveBoard = functionSource('resolveBoard');
+  assert.match(resolveBoard, /const cookingChanceBonus = chain >= 3 \? activateCookingChance\(\) : 0;/);
+
+  const context = {
+    moves: 9,
+    MAX_MOVES: 12,
+    ACTIVATION_BONUS_MOVES: 1,
+    extraTastyBonus: 0.7,
+    MAX_COOKING_CHANCE_BONUS: 0.7,
+    COOKING_CHANCE_BONUS_STEP: 0.1
+  };
+  vm.runInNewContext(
+    `${functionSource('addActivationMove')}; ${functionSource('activateCookingChance')}; result = activateCookingChance();`,
+    context
+  );
+
+  assert.equal(context.result, 70);
+  assert.equal(context.extraTastyBonus, 0.7);
+  assert.equal(context.moves, 10);
+  assert.match(functionSource('showCookingChanceMessage'), /料理チャンス発動！ 大成功＋\$\{bonusPercent\}%/);
+});
+
 test('各スキル表示の終了後に独立した手数回復を表示する', () => {
   const foodGetMessage = functionSource('showFoodGetMessage');
   const cookingChanceMessage = functionSource('showCookingChanceMessage');
