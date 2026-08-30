@@ -665,6 +665,16 @@
 
     .message.cook { background: rgba(221, 105, 48, .96); }
 
+    .message.chance {
+      width: min(88%, 300px);
+      padding: 13px 15px;
+      border: 2px solid rgba(255, 246, 199, .9);
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(225, 97, 48, .98), rgba(240, 157, 52, .98));
+      box-shadow: 0 12px 30px rgba(145, 67, 23, .3);
+    }
+
     .message.food-get {
       width: min(88%, 300px);
       padding: 12px 14px 13px;
@@ -1158,6 +1168,7 @@
         <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな3種類の食材が手に入ります。</li>
         <li>追加食材をタップしてロックすると、料理に使わず次へ持ち越せます。</li>
         <li>まぜまぜは手動だけ。料理ごとに初回は0手、2回目からは1手使います。</li>
+        <li>3連鎖以上で「料理チャンス」が発動し、大成功しやすくなります。</li>
         <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
       </ul>
     </section>
@@ -1216,6 +1227,8 @@
   const COOK_BONUS_MOVES = 5;
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
+  const COOKING_CHANCE_BONUS_STEP = 0.1;
+  const MAX_COOKING_CHANCE_BONUS = 0.7;
   const RARE_RECIPE_WEIGHT = 0.12;
   const FOOD_GET_REWARDS = Object.freeze([6, 8, 11, 14, 17, 21, 24]);
   const IDLE_SWAP_INTERVAL = 1450;
@@ -1298,6 +1311,7 @@
   let dishes = 0;
   let maxChain = 0;
   let maxCookingEnergy = 0;
+  let extraTastyBonus = 0;
   let activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
   let activePalette = choosePalette(activeRecipe);
   let recipeProgress = {};
@@ -1618,6 +1632,15 @@
     }, duration);
   }
 
+  function activateCookingChance() {
+    extraTastyBonus = Math.min(MAX_COOKING_CHANCE_BONUS, extraTastyBonus + COOKING_CHANCE_BONUS_STEP);
+    return Math.round(extraTastyBonus * 100);
+  }
+
+  function showCookingChanceMessage(bonusPercent) {
+    showMessage(`料理チャンス発動！ 大成功＋${bonusPercent}%`, 'chance', 2300);
+  }
+
   function showFoodGetMessage(foodGet) {
     clearTimeout(messageTimer);
     messageEl.innerHTML = `
@@ -1745,7 +1768,8 @@
         .map(id => [id, pot[id]])
     );
     const extraEnergy = additionalIngredientEnergy();
-    const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE;
+    const isExtraTasty = Math.random() < EXTRA_TASTY_CHANCE + extraTastyBonus;
+    if (isExtraTasty) extraTastyBonus = 0;
     const baseCookingEnergy = cooked.energy + extraEnergy;
     const cookingEnergy = baseCookingEnergy * (isExtraTasty ? EXTRA_TASTY_MULTIPLIER : 1);
     maxCookingEnergy = Math.max(maxCookingEnergy, cookingEnergy);
@@ -1777,6 +1801,7 @@
       const foodGet = matches.size >= 6 ? activateFoodGet() : null;
 
       chain++;
+      const cookingChanceBonus = chain === 3 ? activateCookingChance() : 0;
       maxChain = Math.max(maxChain, chain);
       matches.forEach(index => {
         const food = cells[index];
@@ -1786,6 +1811,7 @@
       clearing = matches;
       renderAll();
       if (foodGet) showFoodGetMessage(foodGet);
+      else if (cookingChanceBonus) showCookingChanceMessage(cookingChanceBonus);
       else if (chain > 1) showMessage(`${chain}れんさ！`);
       await sleep(720);
 
@@ -1797,6 +1823,10 @@
       dropping = new Map();
       renderBoard();
       if (foodGet) await sleep(1200);
+      if (foodGet && cookingChanceBonus) {
+        showCookingChanceMessage(cookingChanceBonus);
+        await sleep(1600);
+      }
     }
 
     if (recipeComplete()) {
@@ -1930,6 +1960,7 @@
     dishes = 0;
     maxChain = 0;
     maxCookingEnergy = 0;
+    extraTastyBonus = 0;
     activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
     activePalette = choosePalette(activeRecipe);
     recipeProgress = {};
