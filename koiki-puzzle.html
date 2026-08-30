@@ -732,7 +732,9 @@
 
     .result-card {
       width: min(calc(100vw - 28px), 420px);
+      max-height: calc(100dvh - 28px);
       padding: 28px 22px 22px;
+      overflow-y: auto;
       border: 3px solid #fff;
       border-radius: 26px;
       background:
@@ -767,6 +769,59 @@
       font-size: clamp(.65rem, 2.8vw, .83rem);
       font-weight: 800;
       white-space: nowrap;
+    }
+
+    .result-ingredients {
+      margin: 12px 0 0;
+      padding: 8px 10px;
+      border: 1px solid rgba(223, 189, 128, .72);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .58);
+    }
+
+    .result-ingredients-label {
+      display: block;
+      color: var(--muted);
+      font-size: .68rem;
+      font-weight: 900;
+    }
+
+    .result-ingredient-list {
+      display: flex;
+      min-height: 28px;
+      margin-top: 5px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .result-ingredient-item {
+      position: relative;
+      display: grid;
+      width: 27px;
+      height: 27px;
+      place-items: center;
+      border: 1px solid #eadac2;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .result-ingredient-item img { width: 22px; height: 22px; object-fit: contain; }
+
+    .result-ingredient-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 16px;
+      padding: 1px 4px;
+      border: 2px solid #fff8df;
+      border-radius: 999px;
+      color: #fff;
+      background: #e97838;
+      font-size: .56rem;
+      font-weight: 1000;
+      line-height: 1.15;
     }
 
     .result-share-copy {
@@ -964,6 +1019,10 @@
         <h2 class="result-title" id="resultTitle">お料理おしまい！</h2>
         <p class="result-score" id="resultScore">0</p>
         <p class="result-meta" id="resultMeta"></p>
+        <div class="result-ingredients" aria-label="累計追加食材">
+          <span class="result-ingredients-label">累計追加食材 <strong id="resultIngredientTotal">0個</strong></span>
+          <div class="result-ingredient-list" id="resultIngredients"></div>
+        </div>
         <div class="result-share-copy" aria-label="Xへの投稿内容">
           <strong id="resultShareHeadline"></strong>
           <span id="resultShareStats"></span>
@@ -1038,6 +1097,7 @@
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const RARE_RECIPE_WEIGHT = 0.12;
+  const FOOD_GET_REWARDS = Object.freeze([6, 8, 11, 14, 17, 21, 24]);
   const IDLE_SWAP_INTERVAL = 1450;
   const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
   const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
@@ -1047,6 +1107,24 @@
     const maxNeed = Math.max(...entries.map(([, count]) => count));
     const cap = entries.length === 1 ? 7 : entries.length === 2 ? 7 : entries.length === 3 ? 6 : 5;
     return Object.fromEntries(entries.map(([name, count]) => [name, Math.max(4, Math.round((count / maxNeed) * cap))]));
+  }
+
+  function increaseRecipeNeeds(needs, extraTotal) {
+    const ids = Object.keys(needs);
+    const increased = { ...needs };
+    for (let index = 0; index < extraTotal; index++) {
+      const id = ids[index % ids.length];
+      increased[id]++;
+    }
+    return increased;
+  }
+
+  function recipeAtDifficulty(recipe, completedDishes) {
+    return { ...recipe, needs: increaseRecipeNeeds(recipe.needs, completedDishes) };
+  }
+
+  function foodGetReward(activationCount) {
+    return FOOD_GET_REWARDS[Math.min(Math.max(activationCount - 1, 0), FOOD_GET_REWARDS.length - 1)];
   }
 
   const FOODS = Object.fromEntries(Object.entries(foodEnergyMap).map(([name, energy]) => [name, {
@@ -1080,6 +1158,8 @@
   const startButton = $('startButton');
   const shuffleButton = $('shuffleButton');
   const resultEl = $('result');
+  const resultIngredientTotalEl = $('resultIngredientTotal');
+  const resultIngredientsEl = $('resultIngredients');
   const resultShareHeadlineEl = $('resultShareHeadline');
   const resultShareStatsEl = $('resultShareStats');
   const xShareButton = $('xShareButton');
@@ -1094,9 +1174,10 @@
   let score = 0;
   let dishes = 0;
   let maxChain = 0;
-  let activeRecipe = chooseRecipe('', 1);
+  let activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
   let activePalette = choosePalette(activeRecipe);
   let pot = {};
+  let totalAdditionalIngredients = {};
   let shuffleCount = 0;
   let foodGetActivations = 0;
   let busy = false;
@@ -1310,6 +1391,23 @@
       }).join('');
   }
 
+  function renderResultIngredients() {
+    const total = Object.values(totalAdditionalIngredients).reduce((sum, count) => sum + count, 0);
+    resultIngredientTotalEl.textContent = `${total}個`;
+    resultIngredientsEl.innerHTML = ALL_FOOD_IDS
+      .filter(id => (totalAdditionalIngredients[id] || 0) > 0)
+      .map(id => {
+        const food = FOODS[id];
+        const count = totalAdditionalIngredients[id];
+        return `<span class="result-ingredient-item" title="${food.name}" aria-label="${food.name} ${count}個"><img src="${foodImage(food)}" alt=""><span class="result-ingredient-count">${count}</span></span>`;
+      }).join('');
+  }
+
+  function addIngredient(id, count = 1) {
+    pot[id] = (pot[id] || 0) + count;
+    totalAdditionalIngredients[id] = (totalAdditionalIngredients[id] || 0) + count;
+  }
+
   function additionalIngredientEnergy() {
     return Object.entries(pot).reduce(
       (sum, [id, count]) => sum + (FOODS[id]?.energy || 0) * count,
@@ -1466,11 +1564,11 @@
 
   function activateFoodGet() {
     foodGetActivations++;
-    const bonusCount = foodGetActivations * 3 + 6;
+    const bonusCount = foodGetReward(foodGetActivations);
     const foods = {};
     for (let count = 0; count < bonusCount; count++) {
       const id = randomFrom(activePalette);
-      pot[id] = (pot[id] || 0) + 1;
+      addIngredient(id);
       foods[id] = (foods[id] || 0) + 1;
     }
     return { total: bonusCount, foods };
@@ -1501,7 +1599,7 @@
     renderStatus();
     await showCookCelebration(cooked, cookingEnergy, isExtraTasty);
 
-    activeRecipe = chooseRecipe(cooked.name);
+    activeRecipe = recipeAtDifficulty(chooseRecipe(cooked.name), dishes);
     activePalette = choosePalette(activeRecipe);
     pot = {};
     cells = buildBoard();
@@ -1522,7 +1620,7 @@
       matches.forEach(index => {
         const food = cells[index];
         if (!food || food.kind !== 'food') return;
-        pot[food.id] = (pot[food.id] || 0) + 1;
+        addIngredient(food.id);
       });
       clearing = matches;
       renderAll();
@@ -1586,6 +1684,7 @@
     const shareStats = `${dishes}品完成・最大${maxChain}連鎖`;
     $('resultScore').textContent = `${scoreText} エナジー`;
     $('resultMeta').textContent = `${shareStats}${isBest ? '・ベスト更新！' : `・ベスト ${oldBest.toLocaleString('ja-JP')}`}`;
+    renderResultIngredients();
     resultShareHeadlineEl.textContent = shareHeadline;
     resultShareStatsEl.textContent = shareStats;
     const shareText = `${shareHeadline}\n${shareStats}\n#お料理できるかな`;
@@ -1603,9 +1702,10 @@
     score = 0;
     dishes = 0;
     maxChain = 0;
-    activeRecipe = chooseRecipe('', 1);
+    activeRecipe = recipeAtDifficulty(chooseRecipe('', 1), 0);
     activePalette = choosePalette(activeRecipe);
     pot = {};
+    totalAdditionalIngredients = {};
     shuffleCount = 0;
     foodGetActivations = 0;
     busy = false;
