@@ -166,8 +166,25 @@
       background: linear-gradient(135deg, #fff8df, #fffdf5);
     }
 
+    .order-copy { min-width: 0; }
+
+    .order-title {
+      display: flex;
+      min-width: 0;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .order-prefix {
+      flex: 0 0 auto;
+      color: var(--orange-dark);
+      font-size: .65rem;
+      font-weight: 900;
+    }
+
     .order-name {
       display: block;
+      min-width: 0;
       overflow: hidden;
       font-size: .91rem;
       font-weight: 900;
@@ -218,27 +235,40 @@
 
     .additional-ingredients {
       display: flex;
-      min-height: 30px;
-      margin-top: 5px;
-      gap: 4px;
+      min-height: 23px;
+      margin-top: 3px;
+      gap: 2px;
       align-items: center;
       flex-wrap: wrap;
     }
 
     .additional-item {
-      display: inline-flex;
-      height: 28px;
-      padding: 2px 6px 2px 3px;
-      align-items: center;
-      gap: 1px;
-      border: 1px solid rgba(218, 199, 171, .8);
-      border-radius: 999px;
-      background: rgba(255,255,255,.82);
-      font-size: .68rem;
-      font-weight: 1000;
+      position: relative;
+      display: inline-grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
     }
 
-    .additional-item img { width: 23px; height: 23px; object-fit: contain; }
+    .additional-item img { width: 20px; height: 20px; object-fit: contain; }
+
+    .additional-count {
+      position: absolute;
+      top: -4px;
+      right: -5px;
+      display: grid;
+      min-width: 15px;
+      height: 15px;
+      padding: 0 3px;
+      place-items: center;
+      border: 1.5px solid #fff;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(64,55,47,.92);
+      font-size: .52rem;
+      font-weight: 1000;
+      line-height: 1;
+    }
 
     .board-wrap { position: relative; }
 
@@ -706,8 +736,8 @@
     </section>
 
     <section class="order" aria-label="現在の料理">
-      <div>
-        <strong class="order-name" id="recipeName">とくせんリンゴカレー</strong>
+      <div class="order-copy">
+        <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
         <div class="additional-ingredients" id="additionalIngredients" aria-label="追加食材"></div>
       </div>
       <div class="requirements" id="requirements"></div>
@@ -739,8 +769,8 @@
       <li>食材を1つタップすると、盤面の操作アイコンと場所が入れかわります。</li>
       <li>同じ食材を縦か横に4つ以上そろえると、鍋へ入ります。</li>
       <li>消した食材のエナジーは、料理完成まで追加食材エナジーとしてたまります。</li>
-      <li>横に4つ以上そろえると「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
-      <li>まぜまぜの消費手数は、そのゲームの発動回数に応じて0、1、2…と増えます。</li>
+      <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな追加食材も手に入ります。</li>
+      <li>手動まぜまぜの消費手数は、そのゲームの発動回数に応じて0、1、2…と増えます。</li>
       <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も3回復します。</li>
       <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
     </ol>
@@ -783,7 +813,7 @@
   const EXTRA_TASTY_CHANCE = 0.1;
   const EXTRA_TASTY_MULTIPLIER = 2;
   const RARE_RECIPE_WEIGHT = 0.12;
-  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v5';
+  const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v6';
 
   function miniNeeds(needs) {
     const entries = Object.entries(needs);
@@ -992,21 +1022,6 @@
     return found;
   }
 
-  function horizontalMatchCount(board = cells) {
-    let count = 0;
-    for (let row = 0; row < ROWS; row++) {
-      let start = 0;
-      while (start < COLS) {
-        const first = board[row * COLS + start];
-        let end = start + 1;
-        while (first?.kind === 'food' && end < COLS && board[row * COLS + end]?.id === first.id) end++;
-        if (first?.kind === 'food' && end - start >= 4) count++;
-        start = end;
-      }
-    }
-    return count;
-  }
-
   function hasScoringSwap(board = cells) {
     const koikiIndex = board.findIndex(tile => tile?.kind === 'koiki');
     if (koikiIndex < 0) return false;
@@ -1052,7 +1067,7 @@
       .filter(id => (pot[id] || 0) > 0)
       .map(id => {
         const food = FOODS[id];
-        return `<span class="additional-item" title="${food.name}" aria-label="${food.name} ${pot[id]}個"><img src="${foodImage(food)}" alt=""><span>×${pot[id]}</span></span>`;
+        return `<span class="additional-item" title="${food.name}" aria-label="${food.name} ${pot[id]}個"><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span></span>`;
       }).join('');
   }
 
@@ -1079,13 +1094,13 @@
     renderBoard();
   }
 
-  function showMessage(text, tone = '') {
+  function showMessage(text, tone = '', duration = 1400) {
     clearTimeout(messageTimer);
     messageEl.textContent = text;
     messageEl.className = `message show${tone ? ` ${tone}` : ''}`;
     messageTimer = window.setTimeout(() => {
       messageEl.className = 'message';
-    }, 1400);
+    }, duration);
   }
 
   function animateCookEnergy(from, to) {
@@ -1154,26 +1169,21 @@
     return Object.entries(currentRecipe().needs).every(([id, need]) => (pot[id] || 0) >= need);
   }
 
-  function activateFoodGet(times) {
-    for (let activation = 0; activation < times; activation++) {
-      foodGetActivations++;
-      const bonusCount = foodGetActivations * 3 + 6;
-      for (let count = 0; count < bonusCount; count++) {
-        const id = randomFrom(activePalette);
-        pot[id] = (pot[id] || 0) + 1;
-      }
+  function activateFoodGet() {
+    foodGetActivations++;
+    const bonusCount = foodGetActivations * 3 + 6;
+    for (let count = 0; count < bonusCount; count++) {
+      const id = randomFrom(activePalette);
+      pot[id] = (pot[id] || 0) + 1;
     }
+    return bonusCount;
   }
 
-  async function performShuffle(isAutomatic) {
+  async function performShuffle() {
     const cost = shuffleCount;
     moves = Math.max(0, moves - cost);
     shuffleCount++;
     renderStatus();
-    if (isAutomatic) {
-      showMessage('詰まり！');
-      await sleep(850);
-    }
     showMessage('まぜまぜ！');
     await sleep(520);
     cells = buildBoard();
@@ -1208,7 +1218,7 @@
     while (true) {
       const matches = findMatches();
       if (matches.size === 0) break;
-      const horizontalMatches = horizontalMatchCount();
+      const foodGetCount = matches.size >= 6 ? activateFoodGet() : 0;
 
       chain++;
       maxChain = Math.max(maxChain, chain);
@@ -1217,10 +1227,9 @@
         if (!food || food.kind !== 'food') return;
         pot[food.id] = (pot[food.id] || 0) + 1;
       });
-      if (horizontalMatches > 0) activateFoodGet(horizontalMatches);
       clearing = matches;
       renderAll();
-      if (horizontalMatches > 0) showMessage('食材ゲット発動！', 'food-get');
+      if (foodGetCount > 0) showMessage(`食材ゲット発動！ ＋${foodGetCount}個`, 'food-get', 2800);
       else if (chain > 1) showMessage(`${chain}れんさ！`);
       await sleep(720);
 
@@ -1231,6 +1240,7 @@
       await sleep(1100);
       dropping = new Map();
       renderBoard();
+      if (foodGetCount > 0) await sleep(650);
     }
 
     if (recipeComplete()) {
@@ -1239,7 +1249,7 @@
     }
 
     if (!hasScoringSwap()) {
-      await performShuffle(true);
+      showMessage('詰まり！', '', 1800);
     }
   }
 
@@ -1320,7 +1330,7 @@
     if (!started || ended || busy) return;
     busy = true;
     renderAll();
-    await performShuffle(false);
+    await performShuffle();
     busy = false;
     renderAll();
     if (moves <= 0) endGame();
