@@ -11,12 +11,12 @@
   <meta property="og:title" content="お料理できるかな">
   <meta property="og:description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
   <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
-  <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png">
+  <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png?v=20260830-simple">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="お料理できるかなの食材パズル盤">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png">
+  <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/koiki-puzzle-ogp.png?v=20260830-simple">
   <title>お料理できるかな｜ミニ版</title>
   <link rel="icon" href="img/icons/favicon-apple.webp" type="image/webp">
   <style>
@@ -135,7 +135,7 @@
 
     .hud {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: minmax(0, .82fr) minmax(0, 1.36fr) minmax(0, .82fr);
       gap: 8px;
       margin-bottom: 10px;
     }
@@ -162,8 +162,14 @@
       margin-top: 1px;
       font-size: 1.22rem;
       font-weight: 900;
+      font-variant-numeric: tabular-nums;
       line-height: 1.15;
       text-overflow: ellipsis;
+    }
+
+    .stat:nth-child(2) .stat-value {
+      font-size: clamp(1rem, 5.1vw, 1.22rem);
+      letter-spacing: -.025em;
     }
 
     .best-record {
@@ -187,6 +193,37 @@
     .best-record strong {
       color: var(--orange-dark);
       font-size: .9rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bonus-status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: -2px 0 9px;
+    }
+
+    .bonus-status-item {
+      display: flex;
+      min-width: 0;
+      padding: 5px 8px;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 5px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .76);
+      font-size: .62rem;
+      font-weight: 850;
+    }
+
+    .bonus-status-item strong {
+      flex: 0 0 auto;
+      color: var(--orange-dark);
+      font-size: .77rem;
+      font-variant-numeric: tabular-nums;
       font-weight: 1000;
     }
 
@@ -588,14 +625,21 @@
     }
 
     .cook-final-energy {
-      display: block;
+      display: inline-flex;
+      max-width: 100%;
+      align-items: baseline;
+      justify-content: center;
+      gap: .22em;
       color: #d8543d;
-      font-size: clamp(1.75rem, 8vw, 2.25rem);
+      font-size: clamp(1.45rem, 7vw, 2.25rem);
+      font-variant-numeric: tabular-nums;
       font-weight: 1000;
       line-height: 1.08;
       white-space: nowrap;
       text-shadow: 0 3px 0 #fff, 0 0 18px rgba(255, 177, 53, .45);
     }
+
+    .cook-final-unit { font-size: .56em; letter-spacing: 0; }
 
     @keyframes celebration-fade {
       from { opacity: 0; }
@@ -792,14 +836,38 @@
 
     .result-title { margin: 0 0 10px; font-size: 1.28rem; }
 
+    .result-best-status {
+      width: fit-content;
+      margin: 0 auto 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: #65584e;
+      background: #eee7dd;
+      font-size: clamp(.64rem, 2.8vw, .78rem);
+      font-weight: 1000;
+    }
+
+    .result-best-status.updated {
+      color: #fff;
+      background: var(--orange-dark);
+    }
+
     .result-score {
+      display: flex;
+      max-width: 100%;
       margin: 0;
+      align-items: baseline;
+      justify-content: center;
+      gap: .25em;
       color: var(--orange-dark);
-      font-size: clamp(1.55rem, 7.2vw, 2.1rem);
+      font-size: clamp(1.38rem, 6.4vw, 2.1rem);
+      font-variant-numeric: tabular-nums;
       font-weight: 1000;
       line-height: 1.1;
       white-space: nowrap;
     }
+
+    .result-score-unit { font-size: .58em; }
 
     .result-meta {
       margin: 9px 0 0;
@@ -870,31 +938,11 @@
       line-height: 1.15;
     }
 
-    .result-share-copy {
-      margin: 18px 0 12px;
-      padding: 11px 12px;
-      border: 1px dashed #dfbd80;
-      border-radius: 13px;
-      color: #65584e;
-      background: rgba(255, 255, 255, .72);
-      font-size: clamp(.62rem, 2.65vw, .78rem);
-      line-height: 1.55;
-    }
-
-    .result-share-copy > * {
-      display: block;
-      overflow: hidden;
-      font-weight: 800;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .result-share-copy strong { color: #51463e; font-weight: 1000; }
-
     .result-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 9px;
+      margin-top: 16px;
     }
 
     .x-share,
@@ -1104,6 +1152,10 @@
     <button class="best-record" id="bestRecordButton" type="button" aria-haspopup="dialog" aria-label="自己ベストを開く">
       <span>自己ベスト</span><strong id="bestValue">0</strong><span>エナジー</span>
     </button>
+    <section class="bonus-status" aria-label="発動状況">
+      <span class="bonus-status-item"><span>食材ゲット</span><strong id="foodGetLevel">Lv0</strong></span>
+      <span class="bonus-status-item"><span>料理チャンス</span><strong id="cookingChanceValue">+0%</strong></span>
+    </section>
 
     <section class="order" aria-label="現在の料理">
       <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
@@ -1128,17 +1180,13 @@
       <div class="result-card">
         <p class="result-kicker">RESULT</p>
         <h2 class="result-title" id="resultTitle">お料理おしまい！</h2>
-        <p class="result-score" id="resultScore">0</p>
+        <p class="result-best-status" id="resultBestStatus"></p>
+        <p class="result-score"><span id="resultScore">0</span><span class="result-score-unit">エナジー</span></p>
         <p class="result-meta" id="resultMeta"></p>
         <p class="result-cook-max" id="resultCookMax">最大料理エナジー 0</p>
         <div class="result-ingredients" aria-label="累計追加食材">
           <span class="result-ingredients-label">累計追加食材 <strong id="resultIngredientTotal">0個</strong></span>
           <div class="result-ingredient-list" id="resultIngredients"></div>
-        </div>
-        <div class="result-share-copy" aria-label="Xへの投稿内容">
-          <strong id="resultShareHeadline"></strong>
-          <span id="resultShareStats"></span>
-          <span id="resultShareTag">#お料理できるかな</span>
         </div>
         <div class="result-actions">
           <a class="x-share" id="xShareButton" href="#" target="_blank" rel="noopener">Xでシェア</a>
@@ -1209,7 +1257,7 @@
     <div class="cook-extra-tasty" id="cookExtraTasty" hidden><img src="img/extra_tasty_red.svg" alt=""><strong>大成功！</strong></div>
     <strong class="cook-recipe-name" id="cookRecipeName"></strong>
     <span class="cook-final-label">エナジー</span>
-    <strong class="cook-final-energy" id="cookFinalEnergy">0 エナジー</strong>
+    <strong class="cook-final-energy"><span id="cookFinalEnergy">0</span><span class="cook-final-unit">エナジー</span></strong>
   </div>
 </section>
 
@@ -1285,6 +1333,8 @@
   const scoreEl = $('scoreValue');
   const dishesEl = $('dishesValue');
   const bestEl = $('bestValue');
+  const foodGetLevelEl = $('foodGetLevel');
+  const cookingChanceValueEl = $('cookingChanceValue');
   const bestRecordButton = $('bestRecordButton');
   const recipeNameEl = $('recipeName');
   const requirementsEl = $('requirements');
@@ -1295,8 +1345,6 @@
   const resultEl = $('result');
   const resultIngredientTotalEl = $('resultIngredientTotal');
   const resultIngredientsEl = $('resultIngredients');
-  const resultShareHeadlineEl = $('resultShareHeadline');
-  const resultShareStatsEl = $('resultShareStats');
   const xShareButton = $('xShareButton');
   const rulesDialog = $('rulesDialog');
   const recordsDialog = $('recordsDialog');
@@ -1573,6 +1621,8 @@
     scoreEl.textContent = score.toLocaleString('ja-JP');
     dishesEl.textContent = String(dishes);
     bestEl.textContent = readRecords().totalEnergy.toLocaleString('ja-JP');
+    foodGetLevelEl.textContent = `Lv${Math.min(foodGetActivations, FOOD_GET_REWARDS.length)}`;
+    cookingChanceValueEl.textContent = `+${Math.round(extraTastyBonus * 100)}%`;
     recipeNameEl.textContent = recipe.name;
     shuffleButton.textContent = `まぜまぜ ${shuffleCount ? '−1' : '0'}`;
     renderRequirements();
@@ -1661,7 +1711,7 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const duration = reducedMotion ? 0 : 1100;
     if (!duration || from === to) {
-      cookFinalEnergyEl.textContent = `${to.toLocaleString('ja-JP')} エナジー`;
+      cookFinalEnergyEl.textContent = to.toLocaleString('ja-JP');
       return Promise.resolve();
     }
     return new Promise(resolve => {
@@ -1670,7 +1720,7 @@
         const progress = Math.min(1, (now - startedAt) / duration);
         const eased = 1 - Math.pow(1 - progress, 3);
         const value = Math.round(from + (to - from) * eased);
-        cookFinalEnergyEl.textContent = `${value.toLocaleString('ja-JP')} エナジー`;
+        cookFinalEnergyEl.textContent = value.toLocaleString('ja-JP');
         if (progress < 1) requestAnimationFrame(step);
         else resolve();
       };
@@ -1682,7 +1732,7 @@
     cookRecipeNameEl.textContent = recipe.name;
     cookExtraTastyEl.hidden = !isExtraTasty;
     cookCelebrationEl.classList.toggle('extra-tasty', isExtraTasty);
-    cookFinalEnergyEl.textContent = `${recipe.energy.toLocaleString('ja-JP')} エナジー`;
+    cookFinalEnergyEl.textContent = recipe.energy.toLocaleString('ja-JP');
     cookCelebrationEl.hidden = false;
     await animateCookEnergy(recipe.energy, finalEnergy);
     await sleep(1800);
@@ -1727,7 +1777,7 @@
     foodGetActivations++;
     const level = Math.min(foodGetActivations, FOOD_GET_REWARDS.length);
     const bonusCount = foodGetReward(foodGetActivations);
-    const candidates = [...activePalette];
+    const candidates = [...ALL_FOOD_IDS];
     for (let index = candidates.length - 1; index > 0; index--) {
       const target = Math.floor(Math.random() * (index + 1));
       [candidates[index], candidates[target]] = [candidates[target], candidates[index]];
@@ -1938,12 +1988,15 @@
     const scoreText = score.toLocaleString('ja-JP');
     const shareHeadline = `お料理できるかなで${scoreText}エナジー！`;
     const shareStats = `${dishes}品完成・最大${maxChain}連鎖`;
-    $('resultScore').textContent = `${scoreText} エナジー`;
-    $('resultMeta').textContent = `${shareStats}${isBest ? '・ベスト更新！' : `・ベスト ${oldRecords.totalEnergy.toLocaleString('ja-JP')}`}`;
+    const resultBestStatusEl = $('resultBestStatus');
+    resultBestStatusEl.textContent = isBest
+      ? '自己ベスト更新！'
+      : `自己ベスト更新ならず（${oldRecords.totalEnergy.toLocaleString('ja-JP')} エナジー）`;
+    resultBestStatusEl.classList.toggle('updated', isBest);
+    $('resultScore').textContent = scoreText;
+    $('resultMeta').textContent = `今回の結果：${shareStats}`;
     $('resultCookMax').textContent = `最大料理エナジー ${maxCookingEnergy.toLocaleString('ja-JP')}`;
     renderResultIngredients();
-    resultShareHeadlineEl.textContent = shareHeadline;
-    resultShareStatsEl.textContent = shareStats;
     const shareText = `${shareHeadline}\n${shareStats}\n#お料理できるかな`;
     xShareButton.href = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n${SHARE_URL}`)}`;
     resultEl.hidden = false;
