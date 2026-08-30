@@ -1268,7 +1268,7 @@
         <li>一度に6個以上消すと「食材ゲット」が発動し、ランダムな3種類の食材を獲得して1手回復します。</li>
         <li>追加食材をタップしてロックすると次へ持ち越せます。次の料理で解除すると、必要な食材なら不足分へ使われます。</li>
         <li>まぜまぜは手動だけ。料理ごとに初回は0手、2回目からは1手使います。</li>
-        <li>3連鎖以上で「料理チャンス」が発動し、大成功しやすくなって1手回復します。</li>
+        <li>3連鎖目以降は連鎖ごとに「料理チャンス」が発動し、大成功しやすくなって1手回復します。</li>
         <li>料理完成時は10%の確率で大成功になり、完成料理エナジーが2倍になります。</li>
       </ul>
     </section>
@@ -1968,7 +1968,7 @@
       const foodGet = matches.size >= 6 ? activateFoodGet() : null;
 
       chain++;
-      const cookingChanceBonus = chain === 3 ? activateCookingChance() : 0;
+      const cookingChanceBonus = chain >= 3 ? activateCookingChance() : 0;
       maxChain = Math.max(maxChain, chain);
       matches.forEach(index => {
         const food = cells[index];
