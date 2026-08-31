@@ -195,6 +195,14 @@ test('SPの追加食材は全19種類をロックとバッジが重ならない2
   assert.match(mobileStyles, /\.additional-count \{ right: 0; \}/);
 });
 
+test('追加食材は全ロックだけを一括操作できる', () => {
+  assert.match(source, /id="lockAllIngredients"[\s\S]*?🔒 全ロック/);
+  assert.doesNotMatch(source, /unlockAllIngredients|全解除/);
+  assert.match(source, /lockAllIngredientsButton\.disabled = disabled \|\| ingredientIds\.length === 0 \|\| ingredientIds\.every\(id => lockedIngredients\.has\(id\)\)/);
+  assert.match(source, /function lockAllAdditionalIngredients\(\)[\s\S]*?\.forEach\(id => lockedIngredients\.add\(id\)\)/);
+  assert.match(source, /lockAllIngredientsButton\.addEventListener\('click'/);
+});
+
 test('持ち越した追加食材はロック解除時に現在料理の不足分へ充当する', () => {
   const context = {
     pot: { apple: 5, milk: 2 },
