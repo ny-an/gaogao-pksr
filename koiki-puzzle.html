@@ -306,10 +306,18 @@
     }
 
     .additional-row {
-      display: flex;
+      display: grid;
       min-height: 24px;
+      gap: 5px;
+      align-items: start;
+    }
+
+    .additional-header {
+      display: flex;
+      min-height: 28px;
       gap: 8px;
       align-items: center;
+      justify-content: space-between;
     }
 
     .additional-label {
@@ -317,6 +325,35 @@
       color: var(--muted);
       font-size: .66rem;
       font-weight: 900;
+    }
+
+    .additional-lock-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .additional-lock-action {
+      min-height: 28px;
+      padding: 3px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .78);
+      font-size: .62rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .additional-lock-action:not(:disabled):active {
+      color: var(--orange-dark);
+      background: #fff2cf;
+    }
+
+    .additional-lock-action:disabled {
+      opacity: .38;
+      cursor: default;
     }
 
     .additional-ingredients {
@@ -1198,6 +1235,8 @@
       .tile { border-radius: 11px; }
       .requirement { width: 42px; min-width: 42px; }
       .additional-label { font-size: .62rem; }
+      .additional-header { gap: 4px; }
+      .additional-lock-action { padding-inline: 7px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1246,7 +1285,12 @@
       <div class="order-title"><span class="order-prefix">つぎは</span><strong class="order-name" id="recipeName">とくせんリンゴカレー</strong></div>
       <div class="requirements" id="requirements" aria-label="必要な食材"></div>
       <div class="additional-row">
-        <span class="additional-label">追加食材</span>
+        <div class="additional-header">
+          <span class="additional-label">追加食材</span>
+          <div class="additional-lock-actions" aria-label="追加食材の一括操作">
+            <button class="additional-lock-action" id="lockAllIngredients" type="button" aria-controls="additionalIngredients">🔒 全ロック</button>
+          </div>
+        </div>
         <div class="additional-ingredients" id="additionalIngredients" aria-label="追加食材"></div>
       </div>
     </section>
@@ -1448,6 +1492,7 @@
   const recipeNameEl = $('recipeName');
   const requirementsEl = $('requirements');
   const additionalIngredientsEl = $('additionalIngredients');
+  const lockAllIngredientsButton = $('lockAllIngredients');
   const messageEl = $('message');
   const startButton = $('startButton');
   const shuffleButton = $('shuffleButton');
@@ -1684,14 +1729,24 @@
 
   function renderAdditionalIngredients() {
     const disabled = !started || ended || cooking;
-    additionalIngredientsEl.innerHTML = ALL_FOOD_IDS
-      .filter(id => (pot[id] || 0) > 0)
+    const ingredientIds = ALL_FOOD_IDS.filter(id => (pot[id] || 0) > 0);
+    lockAllIngredientsButton.disabled = disabled || ingredientIds.length === 0 || ingredientIds.every(id => lockedIngredients.has(id));
+    additionalIngredientsEl.innerHTML = ingredientIds
       .map(id => {
         const food = FOODS[id];
         const locked = lockedIngredients.has(id);
         const action = locked ? 'ロック中。タップで解除' : 'タップでロック';
         return `<button class="additional-item${locked ? ' locked' : ''}" type="button" data-lock-food="${id}" aria-pressed="${locked}" aria-label="${food.name} ${pot[id]}個 ${action}" ${disabled ? 'disabled' : ''}><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span>${locked ? '<span class="additional-lock" aria-hidden="true">🔒</span>' : ''}</button>`;
       }).join('');
+  }
+
+  function lockAllAdditionalIngredients() {
+    ALL_FOOD_IDS
+      .filter(id => (pot[id] || 0) > 0)
+      .forEach(id => lockedIngredients.add(id));
+    renderAdditionalIngredients();
+    saveGame();
+    showMessage('追加食材をすべてロック！', 'cook');
   }
 
   function renderResultIngredients() {
@@ -2378,6 +2433,11 @@
     lockedIngredients.add(id);
     renderAdditionalIngredients();
     saveGame();
+  });
+
+  lockAllIngredientsButton.addEventListener('click', () => {
+    if (!started || ended || busy || cooking) return;
+    lockAllAdditionalIngredients();
   });
 
   startButton.addEventListener('click', startGame);
