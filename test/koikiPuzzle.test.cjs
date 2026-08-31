@@ -184,9 +184,15 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.match(renderIngredients, /class="cook-additional-count"/);
 });
 
-test('SPの追加食材はロックとバッジが重ならない横余白を確保する', () => {
-  assert.match(source, /@media \(max-width: 520px\) \{[\s\S]*?\.additional-ingredients \{ column-gap: 10px; row-gap: 5px; \}/);
-  assert.match(source, /@media \(max-width: 360px\) \{[\s\S]*?\.additional-row \{ gap: 0; \}[\s\S]*?\.additional-label \{ font-size: \.62rem; \}/);
+test('SPの追加食材は全19種類をロックとバッジが重ならない2段に収める', () => {
+  const mobileStart = source.indexOf('@media (max-width: 520px)');
+  const narrowStart = source.indexOf('@media (max-width: 360px)', mobileStart);
+  const mobileStyles = source.slice(mobileStart, narrowStart);
+
+  assert.match(mobileStyles, /\.additional-row \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(mobileStyles, /\.additional-ingredients \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(10, minmax\(0, 1fr\)\);[\s\S]*?column-gap: clamp\(4px, 1\.5vw, 9px\);[\s\S]*?row-gap: 10px;/);
+  assert.match(mobileStyles, /\.additional-lock \{ left: 0; \}/);
+  assert.match(mobileStyles, /\.additional-count \{ right: 0; \}/);
 });
 
 test('持ち越した追加食材はロック解除時に現在料理の不足分へ充当する', () => {
