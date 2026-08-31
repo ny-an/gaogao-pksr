@@ -1260,6 +1260,7 @@
         <li>料理の必要数を超えて消した食材は、追加食材エナジーとしてたまります。</li>
         <li>材料がそろうと、料理エナジーと追加食材エナジーを獲得。手数も5回復します。</li>
         <li>料理を作るたびにレシピレベルが上がり、次の料理からレシピレベルボーナスが加わります。</li>
+        <li>途中のゲームはこの端末へ自動保存され、アプリを開き直すと続きから再開します。</li>
       </ol>
     </section>
     <section class="rules-section">
@@ -1344,6 +1345,8 @@
   const IDLE_SWAP_INTERVAL = 1450;
   const BEST_KEY = 'gaogao-pksr.koiki-puzzle.best.v7';
   const RECORDS_KEY = 'gaogao-pksr.koiki-puzzle.records.v1';
+  const GAME_STATE_KEY = 'gaogao-pksr.koiki-puzzle.game.v1';
+  const GAME_STATE_VERSION = 1;
   const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
 
   function miniNeeds(needs) {
@@ -1727,6 +1730,154 @@
     renderBoard();
   }
 
+  function validSavedNumber(value, min = 0, max = Number.MAX_SAFE_INTEGER, integer = true) {
+    return typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max && (!integer || Number.isInteger(value));
+  }
+
+  function normalizeIngredientCounts(value, allowedIds = ALL_FOOD_IDS) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const allowed = new Set(allowedIds);
+    const normalized = {};
+    for (const [id, count] of Object.entries(value)) {
+      if (!allowed.has(id) || !validSavedNumber(count)) return null;
+      if (count > 0) normalized[id] = count;
+    }
+    return normalized;
+  }
+
+  function gameStateSnapshot() {
+    return {
+      version: GAME_STATE_VERSION,
+      savedAt: Date.now(),
+      moves,
+      score,
+      dishes,
+      maxChain,
+      maxCookingEnergy,
+      extraTastyBonus,
+      recipeName: activeRecipe.name,
+      activePalette: [...activePalette],
+      recipeProgress: { ...recipeProgress },
+      pot: { ...pot },
+      lockedIngredientIds: [...lockedIngredients],
+      totalAdditionalIngredients: { ...totalAdditionalIngredients },
+      shuffleCount,
+      foodGetActivations,
+      cellIds: cells.map(tile => tile?.kind === 'koiki' ? KOIKI.id : tile?.id)
+    };
+  }
+
+  function saveGame() {
+    if (!started || ended || busy || cooking || clearing.size > 0 || dropping.size > 0) return false;
+    try {
+      localStorage.setItem(GAME_STATE_KEY, JSON.stringify(gameStateSnapshot()));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function clearSavedGame() {
+    try { localStorage.removeItem(GAME_STATE_KEY); } catch (_) {}
+  }
+
+  function parseSavedGame(raw) {
+    if (!raw) return null;
+    try {
+      const saved = JSON.parse(raw);
+      if (!saved || saved.version !== GAME_STATE_VERSION) return null;
+      if (!validSavedNumber(saved.moves, 1, MAX_MOVES)) return null;
+      if (!validSavedNumber(saved.score)) return null;
+      if (!validSavedNumber(saved.dishes)) return null;
+      if (!validSavedNumber(saved.maxChain)) return null;
+      if (!validSavedNumber(saved.maxCookingEnergy)) return null;
+      if (!validSavedNumber(saved.extraTastyBonus, 0, MAX_COOKING_CHANCE_BONUS, false)) return null;
+      if (!validSavedNumber(saved.shuffleCount)) return null;
+      if (!validSavedNumber(saved.foodGetActivations)) return null;
+
+      const baseRecipe = RECIPES.find(recipe => recipe.name === saved.recipeName);
+      if (!baseRecipe) return null;
+      const restoredRecipe = recipeAtDifficulty(baseRecipe, saved.dishes);
+      const requiredIds = Object.keys(restoredRecipe.needs);
+      const palette = Array.isArray(saved.activePalette) ? saved.activePalette : [];
+      if (
+        palette.length !== BOARD_FOOD_TYPES ||
+        new Set(palette).size !== palette.length ||
+        palette.some(id => !FOODS[id]) ||
+        requiredIds.some(id => !palette.includes(id))
+      ) return null;
+
+      const restoredProgress = normalizeIngredientCounts(saved.recipeProgress, requiredIds);
+      const restoredPot = normalizeIngredientCounts(saved.pot);
+      const restoredTotals = normalizeIngredientCounts(saved.totalAdditionalIngredients);
+      if (!restoredProgress || !restoredPot || !restoredTotals) return null;
+      if (Object.entries(restoredProgress).some(([id, count]) => count > restoredRecipe.needs[id])) return null;
+
+      const lockedIds = Array.isArray(saved.lockedIngredientIds) ? saved.lockedIngredientIds : [];
+      if (new Set(lockedIds).size !== lockedIds.length || lockedIds.some(id => !restoredPot[id])) return null;
+
+      const cellIds = Array.isArray(saved.cellIds) ? saved.cellIds : [];
+      if (
+        cellIds.length !== ROWS * COLS ||
+        cellIds.filter(id => id === KOIKI.id).length !== 1 ||
+        cellIds.some(id => id !== KOIKI.id && !palette.includes(id))
+      ) return null;
+
+      return {
+        moves: saved.moves,
+        score: saved.score,
+        dishes: saved.dishes,
+        maxChain: saved.maxChain,
+        maxCookingEnergy: saved.maxCookingEnergy,
+        extraTastyBonus: saved.extraTastyBonus,
+        activeRecipe: restoredRecipe,
+        activePalette: [...palette],
+        recipeProgress: restoredProgress,
+        pot: restoredPot,
+        lockedIngredients: new Set(lockedIds),
+        totalAdditionalIngredients: restoredTotals,
+        shuffleCount: saved.shuffleCount,
+        foodGetActivations: saved.foodGetActivations,
+        cells: cellIds.map(id => id === KOIKI.id ? KOIKI : makeFood(id))
+      };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function restoreGame() {
+    let restored;
+    try {
+      restored = parseSavedGame(localStorage.getItem(GAME_STATE_KEY));
+    } catch (_) {
+      return false;
+    }
+    if (!restored) return false;
+
+    moves = restored.moves;
+    score = restored.score;
+    dishes = restored.dishes;
+    maxChain = restored.maxChain;
+    maxCookingEnergy = restored.maxCookingEnergy;
+    extraTastyBonus = restored.extraTastyBonus;
+    activeRecipe = restored.activeRecipe;
+    activePalette = restored.activePalette;
+    recipeProgress = restored.recipeProgress;
+    pot = restored.pot;
+    lockedIngredients = restored.lockedIngredients;
+    totalAdditionalIngredients = restored.totalAdditionalIngredients;
+    shuffleCount = restored.shuffleCount;
+    foodGetActivations = restored.foodGetActivations;
+    cells = restored.cells;
+    busy = false;
+    cooking = false;
+    started = true;
+    ended = false;
+    clearing = new Set();
+    dropping = new Map();
+    return true;
+  }
+
   function stopIdleMotion() {
     clearTimeout(idleMotionTimer);
     clearTimeout(idleCleanupTimer);
@@ -2027,6 +2178,7 @@
     renderAll();
 
     if (moves <= 0) endGame();
+    else saveGame();
   }
 
   function readBest() {
@@ -2098,6 +2250,7 @@
     ended = true;
     busy = false;
     cooking = false;
+    clearSavedGame();
     const oldRecords = readRecords();
     const additionalTotal = Object.values(totalAdditionalIngredients).reduce((sum, count) => sum + count, 0);
     const isBest = score > oldRecords.totalEnergy;
@@ -2134,6 +2287,7 @@
 
   function startGame() {
     if (started && !ended && !window.confirm('いまのゲームをやめて、最初からあそびますか？')) return;
+    clearSavedGame();
     stopIdleMotion();
     moves = START_MOVES;
     score = 0;
@@ -2159,6 +2313,7 @@
     resultEl.hidden = true;
     startButton.textContent = 'やりなおす';
     renderAll();
+    saveGame();
     showMessage('お料理スタート！');
   }
 
@@ -2182,11 +2337,13 @@
         showMessage(`${FOODS[id].name} ${usedForRecipe}個を料理に使用！`, 'cook');
         if (recipeComplete()) await cookRecipe();
       }
+      saveGame();
       return;
     }
 
     lockedIngredients.add(id);
     renderAdditionalIngredients();
+    saveGame();
   });
 
   startButton.addEventListener('click', startGame);
@@ -2200,7 +2357,13 @@
     busy = false;
     renderAll();
     if (moves <= 0) endGame();
+    else saveGame();
   });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') saveGame();
+  });
+  window.addEventListener('pagehide', saveGame);
 
   $('rulesButton').addEventListener('click', () => {
     if (typeof rulesDialog.showModal === 'function') rulesDialog.showModal();
@@ -2213,9 +2376,16 @@
   });
   $('recordsClose').addEventListener('click', () => recordsDialog.close());
 
-  cells = buildBoard();
-  renderAll();
-  startIdleMotion();
+  if (restoreGame()) {
+    resultEl.hidden = true;
+    startButton.textContent = 'やりなおす';
+    renderAll();
+    showMessage('つづきから再開しました！', 'cook');
+  } else {
+    cells = buildBoard();
+    renderAll();
+    startIdleMotion();
+  }
 })();
 </script>
 </body>

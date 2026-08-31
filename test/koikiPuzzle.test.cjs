@@ -70,6 +70,84 @@ test('料理チャンスは3連鎖目以降の各連鎖で発動し上限到達�
   assert.match(functionSource('showCookingChanceMessage'), /料理チャンス発動！ 大成功＋\$\{bonusPercent\}%/);
 });
 
+test('保存した未終了ゲームを検証して盤面と進捗を復元する', () => {
+  const foodIds = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const foods = Object.fromEntries(foodIds.map(id => [id, { id, name: id }]));
+  const recipe = { name: 'テスト料理', energy: 100, needs: { a: 2 } };
+  const cellIds = ['koiki', ...Array.from({ length: 35 }, (_, index) => foodIds[index % foodIds.length])];
+  const saved = {
+    version: 1,
+    moves: 7,
+    score: 1234,
+    dishes: 1,
+    maxChain: 4,
+    maxCookingEnergy: 800,
+    extraTastyBonus: 0.3,
+    recipeName: recipe.name,
+    activePalette: foodIds,
+    recipeProgress: { a: 2 },
+    pot: { b: 3 },
+    lockedIngredientIds: ['b'],
+    totalAdditionalIngredients: { b: 5 },
+    shuffleCount: 2,
+    foodGetActivations: 3,
+    cellIds
+  };
+  const baseContext = {
+    GAME_STATE_VERSION: 1,
+    MAX_MOVES: 12,
+    MAX_COOKING_CHANCE_BONUS: 0.7,
+    BOARD_FOOD_TYPES: 6,
+    ROWS: 6,
+    COLS: 6,
+    ALL_FOOD_IDS: foodIds,
+    FOODS: foods,
+    RECIPES: [recipe],
+    KOIKI: { id: 'koiki', kind: 'koiki' },
+    recipeAtDifficulty: (baseRecipe, dishes) => ({ ...baseRecipe, needs: { a: baseRecipe.needs.a + dishes } }),
+    makeFood: id => ({ ...foods[id], kind: 'food' })
+  };
+  const parse = raw => vm.runInNewContext(
+    `${functionSource('validSavedNumber')}; ${functionSource('normalizeIngredientCounts')}; ${functionSource('parseSavedGame')}; parseSavedGame(raw);`,
+    { ...baseContext, raw }
+  );
+
+  const restored = parse(JSON.stringify(saved));
+  assert.equal(restored.moves, 7);
+  assert.equal(restored.score, 1234);
+  assert.equal(restored.activeRecipe.needs.a, 3);
+  assert.equal(restored.recipeProgress.a, 2);
+  assert.equal(restored.pot.b, 3);
+  assert.deepEqual(Array.from(restored.lockedIngredients), ['b']);
+  assert.equal(restored.cells[0].kind, 'koiki');
+  assert.equal(restored.cells[1].kind, 'food');
+
+  assert.equal(parse(JSON.stringify({ ...saved, version: 2 })), null);
+  assert.equal(parse(JSON.stringify({ ...saved, cellIds: Array(36).fill('a') })), null);
+  assert.equal(parse(JSON.stringify({ ...saved, moves: 0 })), null);
+});
+
+test('ゲーム状態は安定時に自動保存し終了時に削除して起動時に復元する', () => {
+  const snapshot = functionSource('gameStateSnapshot');
+  const save = functionSource('saveGame');
+  const restore = functionSource('restoreGame');
+
+  for (const field of [
+    'moves', 'score', 'dishes', 'maxChain', 'maxCookingEnergy', 'extraTastyBonus',
+    'recipeName', 'activePalette', 'recipeProgress', 'pot', 'lockedIngredientIds',
+    'totalAdditionalIngredients', 'shuffleCount', 'foodGetActivations', 'cellIds'
+  ]) assert.match(snapshot, new RegExp(`\\b${field}\\b`));
+
+  assert.match(save, /!started \|\| ended \|\| busy \|\| cooking \|\| clearing\.size > 0 \|\| dropping\.size > 0/);
+  assert.match(save, /localStorage\.setItem\(GAME_STATE_KEY/);
+  assert.match(restore, /parseSavedGame\(localStorage\.getItem\(GAME_STATE_KEY\)\)/);
+  assert.match(functionSource('playMove'), /if \(moves <= 0\) endGame\(\);\s*else saveGame\(\);/);
+  assert.match(functionSource('startGame'), /clearSavedGame\(\);[\s\S]*saveGame\(\);/);
+  assert.match(functionSource('endGame'), /clearSavedGame\(\);/);
+  assert.match(source, /document\.addEventListener\('visibilitychange',[\s\S]*window\.addEventListener\('pagehide', saveGame\)/);
+  assert.match(source, /if \(restoreGame\(\)\)[\s\S]*つづきから再開しました！/);
+});
+
 test('各スキル表示の終了後に独立した手数回復を表示する', () => {
   const foodGetMessage = functionSource('showFoodGetMessage');
   const cookingChanceMessage = functionSource('showCookingChanceMessage');
