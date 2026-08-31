@@ -1158,12 +1158,19 @@
       gap: 6px;
     }
 
+    @media (max-width: 520px) {
+      .additional-row { align-items: flex-start; }
+      .additional-ingredients { column-gap: 10px; row-gap: 5px; }
+    }
+
     @media (max-width: 360px) {
       .page { padding-inline: 9px; }
       .game-card { padding: 10px; border-radius: 20px; }
       .board { gap: 3px; padding: 5px; }
       .tile { border-radius: 11px; }
       .requirement { width: 42px; min-width: 42px; }
+      .additional-row { gap: 0; }
+      .additional-label { font-size: .62rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {

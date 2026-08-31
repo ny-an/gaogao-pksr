@@ -184,6 +184,11 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.match(renderIngredients, /class="cook-additional-count"/);
 });
 
+test('SPの追加食材はロックとバッジが重ならない横余白を確保する', () => {
+  assert.match(source, /@media \(max-width: 520px\) \{[\s\S]*?\.additional-ingredients \{ column-gap: 10px; row-gap: 5px; \}/);
+  assert.match(source, /@media \(max-width: 360px\) \{[\s\S]*?\.additional-row \{ gap: 0; \}[\s\S]*?\.additional-label \{ font-size: \.62rem; \}/);
+});
+
 test('持ち越した追加食材はロック解除時に現在料理の不足分へ充当する', () => {
   const context = {
     pot: { apple: 5, milk: 2 },
