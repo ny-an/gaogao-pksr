@@ -49,8 +49,8 @@ function eventCalls(context) {
 }
 
 test('V2とサバイバルが同じGA4共通処理を読み込む', () => {
-  assert.match(v2PageSource, /<script src="js\/koiki-puzzle-analytics\.js"><\/script>/);
-  assert.match(survivalSource, /<script src="js\/koiki-puzzle-analytics\.js"><\/script>/);
+  assert.match(v2PageSource, /<script src="js\/koiki-puzzle-analytics\.js\?v=20260901-2"><\/script>/);
+  assert.match(survivalSource, /<script src="js\/koiki-puzzle-analytics\.js\?v=20260901-2"><\/script>/);
   assert.match(analyticsSource, /G-Q5BGCQDCV6/);
 });
 

@@ -135,7 +135,7 @@ test('盤面リセットは全6種類・自動消去なし・有効手ありを�
 });
 
 test('v2ランタイムと3モード・食材バッグ調理UIを読み込む', () => {
-  assert.match(source, /<script src="js\/koiki-puzzle-v2\.js"><\/script>/);
+  assert.match(source, /<script src="js\/koiki-puzzle-v2\.js\?v=20260901-2"><\/script>/);
   assert.match(source, /id="modeDialog"/);
   assert.match(source, /data-mode="endless"/);
   assert.match(source, /data-mode="normal"/);
