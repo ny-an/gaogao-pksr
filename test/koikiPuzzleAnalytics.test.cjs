@@ -6,9 +6,9 @@ const vm = require('node:vm');
 
 const projectRoot = path.join(__dirname, '..');
 const analyticsSource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-analytics.js'), 'utf8');
-const v2PageSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
+const v2PageSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-v2.html'), 'utf8');
 const v2Source = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-v2.js'), 'utf8');
-const survivalSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-legacy.html'), 'utf8');
+const survivalSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
 
 function runAnalytics({ protocol = 'https:', hostname = 'ny-an.github.io', gtag } = {}) {
   const appendedScripts = [];

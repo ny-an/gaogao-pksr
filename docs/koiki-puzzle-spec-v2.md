@@ -2,8 +2,8 @@
 
 更新日: 2026-08-31
 状態: ローカル実装済み・確認待ち
-実装ページ: `koiki-puzzle.html`
-サバイバル（旧式）ページ: `koiki-puzzle-legacy.html`
+実装ページ: `koiki-puzzle-v2.html`
+サバイバル（旧式）ページ: `koiki-puzzle.html`
 サバイバル（旧式）仕様: `docs/koiki-puzzle-spec.md`
 
 ## 1. ゲームの目的

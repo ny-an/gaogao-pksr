@@ -36,7 +36,7 @@
   const MODE_SAVE_MIGRATION_KEY = 'gaogao-pksr.koiki-puzzle.game.v2.mode-migration';
   const RECORDS_KEY_PREFIX = 'gaogao-pksr.koiki-puzzle.records.v2.';
   const MODE_GUIDE_HIDDEN_KEY_PREFIX = 'gaogao-pksr.koiki-puzzle.mode-guide-hidden.v2.';
-  const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
+  const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle-v2.html';
 
   const MODES = Object.freeze({
     endless: { id: 'endless', name: 'とことん', capped: false },

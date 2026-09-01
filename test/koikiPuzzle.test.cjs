@@ -5,8 +5,8 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const projectRoot = path.join(__dirname, '..');
-const source = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
-const legacySource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-legacy.html'), 'utf8');
+const source = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-v2.html'), 'utf8');
+const legacySource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
 const indexSource = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
 const v2Source = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-v2.js'), 'utf8');
 const debugSource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-debug-ui.js'), 'utf8');
@@ -149,7 +149,7 @@ test('v2ランタイムと3モード・食材バッグ調理UIを読み込む', 
   assert.match(source, /id="additionalIngredients" aria-label="食材バッグ"/);
   assert.match(source, /id="bagFullDialog"/);
   assert.doesNotMatch(source, /id="weeklyDialog"/);
-  assert.match(source, /href="koiki-puzzle-legacy\.html"><strong>サバイバル<\/strong><span>手数が尽きるまで料理を続ける<\/span>/);
+  assert.match(source, /href="koiki-puzzle\.html"><strong>サバイバル<\/strong><span>手数が尽きるまで料理を続ける<\/span>/);
   assert.doesNotMatch(source, /const GAME_STATE_KEY = 'gaogao-pksr\.koiki-puzzle\.game\.v1'/);
 });
 
@@ -174,7 +174,7 @@ test('SPの主要操作は下部1列ドックで常に見つけられる', () =>
 test('サバイバルはv1のページ・保存領域・ランタイムとしてv2から分離する', () => {
   assert.match(legacySource, /<title>お料理できるかな！！（サバイバル）<\/title>/);
   assert.match(legacySource, /class="legacy-label">サバイバル<\/p>/);
-  assert.doesNotMatch(legacySource, /href="koiki-puzzle\.html"|新版へ/);
+  assert.doesNotMatch(legacySource, /href="koiki-puzzle-v2\.html"|新版へ/);
   assert.match(legacySource, /const GAME_STATE_KEY = 'gaogao-pksr\.koiki-puzzle\.game\.v1'/);
   assert.match(legacySource, /const RECORDS_KEY = 'gaogao-pksr\.koiki-puzzle\.records\.v1'/);
   assert.match(legacySource, /const RARE_RECIPE_WEIGHT = 0\.5;/);

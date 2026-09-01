@@ -2,7 +2,7 @@
 
 更新日: 2026-08-30
 
-実装ページ: `koiki-puzzle-legacy.html`
+実装ページ: `koiki-puzzle.html`
 
 この仕様はv2へ取り込まず、従来ルールを維持する旧式として独立開発する。新版のとことん・ノーマル・EXは`docs/koiki-puzzle-spec-v2.md`を正本とする。
 
