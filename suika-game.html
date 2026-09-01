@@ -1,0 +1,3060 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#fff7e5">
+  <meta name="description" content="おなじ食材をくっつけて、でんせつのごちそうをめざす落ちものパズル。スキルを発動してエナジーをためよう！">
+  <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/suika-game.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ごちそうできるかな！！">
+  <meta property="og:description" content="おなじ食材をくっつけて、でんせつのごちそうをめざす落ちものパズル。スキルを発動してエナジーをためよう！">
+  <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/suika-game.html">
+  <meta name="twitter:card" content="summary">
+  <title>ごちそうできるかな！！</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8D%B2%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #40372f;
+      --muted: #7d7269;
+      --cream: #fff7e5;
+      --paper: #fffdf8;
+      --line: #eadbc5;
+      --green: #4d9e66;
+      --green-dark: #35804d;
+      --orange: #ef8f4f;
+      --orange-dark: #d96f2f;
+      --red: #e85f5c;
+      --red-dark: #d34744;
+      --shadow: 0 12px 34px rgba(88, 62, 38, .12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--cream); }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 4%, rgba(255, 210, 117, .35), transparent 26rem),
+        radial-gradient(circle at 90% 12%, rgba(178, 232, 154, .24), transparent 20rem),
+        linear-gradient(180deg, #fffaf0 0%, #fff3d8 100%);
+      font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    button, a { font: inherit; }
+    button { touch-action: manipulation; }
+
+    .page {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px 14px 34px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 42px;
+      margin-bottom: 6px;
+    }
+
+    .back {
+      padding: 10px 4px;
+      border: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: .84rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .topbar-actions { display: flex; gap: 7px; }
+
+    .chip-button {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .7);
+      font-size: .84rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .chip-button:active { transform: translateY(1px); }
+
+    .chip-button.muted {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .title {
+      display: grid;
+      grid-template-columns: 68px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 2px 6px 12px;
+    }
+
+    .title-mascot {
+      display: grid;
+      width: 68px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 3px solid #f2c06c;
+      border-radius: 50%;
+      /* @GaoGaoPuuun提供の操作アイコン（koiki-puzzleと同じ） */
+      background: url("img/icons/gaogaopuuun-koiki.png") center / cover no-repeat;
+      box-shadow: 0 6px 0 rgba(216, 142, 57, .18);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.38rem, 6vw, 2rem);
+      line-height: 1.16;
+      letter-spacing: .02em;
+    }
+
+    h1 small {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      margin-bottom: 2px;
+      color: var(--orange-dark);
+      font-size: .62em;
+      cursor: pointer;
+    }
+
+    .resume-info {
+      margin: -4px 0 14px;
+      color: var(--muted);
+      font-size: .74rem;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .resume-info strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .resume-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .resume-continue,
+    .resume-reset {
+      display: grid;
+      min-height: 48px;
+      place-items: center;
+      border-radius: 14px;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .resume-continue {
+      border: 0;
+      color: #fff;
+      background: linear-gradient(180deg, var(--green), var(--green-dark));
+      box-shadow: 0 4px 0 #2a6a3e;
+    }
+
+    .resume-reset {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .resume-continue:active,
+    .resume-reset:active { transform: translateY(2px); box-shadow: none; }
+
+    .rank-progress {
+      margin: -6px 0 10px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .rank-progress strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .rank-list { display: grid; gap: 5px; }
+
+    .rank-row {
+      display: flex;
+      min-width: 0;
+      padding: 6px 9px;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .rank-row.got { border-color: #ecd9ad; background: #fdf6e6; }
+
+    .rank-row.now {
+      border-color: var(--orange);
+      background: #fff4e2;
+      box-shadow: 0 0 0 2px rgba(239, 143, 79, .22);
+    }
+
+    .rank-row.locked { color: var(--muted); background: #faf6ec; }
+
+    .rank-num {
+      display: grid;
+      width: 22px;
+      aspect-ratio: 1;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--line);
+      font-size: .58rem;
+    }
+
+    .rank-row.got .rank-num,
+    .rank-row.now .rank-num { color: #fff; background: var(--orange); }
+
+    .rank-name {
+      overflow: hidden;
+      min-width: 0;
+      flex: 1;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .rank-thr {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: .62rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-now {
+      flex: 0 0 auto;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: #fff;
+      background: var(--orange);
+      font-size: .56rem;
+      font-weight: 1000;
+    }
+
+    .game-card {
+      position: relative;
+      overflow: hidden;
+      padding: 13px;
+      border: 1px solid rgba(220, 196, 162, .8);
+      border-radius: 24px;
+      background: rgba(255, 253, 248, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, .8fr);
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 8px 5px 7px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .stat-label {
+      display: block;
+      color: var(--muted);
+      font-size: clamp(.56rem, 2.6vw, .67rem);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stat-value {
+      display: block;
+      overflow: hidden;
+      margin-top: 1px;
+      font-size: clamp(1.05rem, 5.4vw, 1.3rem);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+    }
+
+    .stat-value.score-bump { animation: score-bump .22s ease; }
+
+    @keyframes score-bump {
+      40% { transform: scale(1.18); color: var(--red-dark); }
+    }
+
+    .stat-next { display: grid; place-items: center; padding-bottom: 4px; }
+
+    .stat-next canvas {
+      width: 34px;
+      height: 34px;
+      margin-top: 2px;
+    }
+
+    .guide {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 6px 8px 4px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .76);
+      cursor: pointer;
+    }
+
+    .guide:active { transform: translateY(1px); }
+
+    .guide-label {
+      display: block;
+      margin-bottom: 1px;
+      color: var(--muted);
+      font-size: .58rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .guide canvas {
+      display: block;
+      width: 100%;
+      height: 34px;
+    }
+
+    .skills {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 9px;
+    }
+
+    .skill-chip {
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      padding: 5px 7px 4px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .78);
+      text-align: center;
+    }
+
+    .skill-chip::before {
+      position: absolute;
+      z-index: 0;
+      inset: 0 auto 0 0;
+      width: var(--meter-progress, 0%);
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(226, 174, 104, .2), rgba(207, 139, 74, .3));
+      content: "";
+      transition: width .3s ease;
+    }
+
+    .skill-chip > * { position: relative; z-index: 1; }
+
+    .skill-name {
+      display: block;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: .56rem;
+      font-weight: 900;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .skill-state {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: .54rem;
+      font-weight: 850;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .skill-state strong {
+      color: var(--orange-dark);
+      font-variant-numeric: tabular-nums;
+      font-weight: 1000;
+    }
+
+    .skill-chip.fired { animation: chip-fired .8s ease; }
+
+    @keyframes chip-fired {
+      0% { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(239, 143, 79, .35); }
+      100% { border-color: var(--line); box-shadow: none; }
+    }
+
+    .skill-chip.spent { opacity: .55; }
+
+    .order {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 9px;
+      padding: 7px 9px;
+      border: 2px solid #f2c984;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #fff8df, #fffdf5);
+    }
+
+    .order-label {
+      flex: 0 0 auto;
+      color: var(--orange-dark);
+      font-size: .62rem;
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .order-main {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .order-name {
+      overflow: hidden;
+      min-width: 0;
+      font-size: .74rem;
+      font-weight: 1000;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .order-needs {
+      display: flex;
+      overflow: hidden;
+      min-width: 0;
+      gap: 6px;
+      flex-wrap: nowrap; /* 素材が4つでも折り返さず2行表示をキープ */
+    }
+
+    .order-need {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      color: var(--muted);
+      font-size: .6rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .order-need img { width: 15px; height: 15px; object-fit: contain; }
+
+    .order-need.done { color: var(--green-dark); }
+
+    .order-reward {
+      flex: 0 0 auto;
+      color: var(--red-dark);
+      font-size: .68rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .order { cursor: pointer; }
+
+    .order-label-sub { color: var(--muted); font-size: .52rem; font-weight: 900; }
+
+    .recipe-fb {
+      margin: -6px 0 10px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .recipe-fb strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .note-sort {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .note-sort-btn {
+      padding: 6px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: #fff;
+      font-size: .66rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .note-sort-btn.active {
+      border-color: var(--orange);
+      color: var(--orange-dark);
+      background: #fff4e2;
+    }
+
+    .recipe-list { display: grid; gap: 6px; }
+
+    .recipe-row {
+      position: relative;
+      display: flex;
+      overflow: hidden;
+      min-width: 0;
+      padding: 7px 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    /* レシピLvのメーター（背景の塗り） */
+    .recipe-row::before {
+      position: absolute;
+      z-index: 0;
+      inset: 0 auto 0 0;
+      width: var(--lv-progress, 0%);
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(226, 174, 104, .16), rgba(207, 139, 74, .32));
+      content: "";
+      transition: width .3s ease;
+    }
+
+    .recipe-row > * { position: relative; z-index: 1; }
+
+    .recipe-row-main {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .recipe-row-name { font-size: .7rem; font-weight: 1000; }
+
+    .recipe-row-needs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: .6rem;
+      font-weight: 850;
+    }
+
+    .recipe-row-needs img { width: 15px; height: 15px; object-fit: contain; vertical-align: middle; }
+
+    .recipe-row-reward {
+      flex: 0 0 auto;
+      color: var(--red-dark);
+      font-size: .68rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .order-lv {
+      color: var(--orange-dark);
+      font-size: .58rem;
+      font-weight: 1000;
+    }
+
+    .order-lv.max { color: #c9880e; text-shadow: 0 0 6px rgba(240, 190, 60, .55); }
+
+    .order-change {
+      display: grid;
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid #e8cf9a;
+      border-radius: 50%;
+      color: var(--orange-dark);
+      background: rgba(255, 255, 255, .85);
+      font-size: 1.05rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .order-change:active { transform: translateY(1px); }
+
+    .order.completed { animation: order-done .5s ease; }
+
+    @keyframes order-done {
+      30% { border-color: var(--green); box-shadow: 0 0 0 4px rgba(77, 158, 102, .3); transform: scale(1.02); }
+    }
+
+    .board-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #e5d3b4;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, #fdfbf4 0%, #fbf3de 78%, #f4e5c4 100%);
+    }
+
+    .board-wrap canvas {
+      display: block;
+      width: 100%;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .board-wrap.over canvas { cursor: default; }
+
+    .skill-banner {
+      position: absolute;
+      z-index: 4;
+      top: 13%;
+      left: 50%;
+      padding: 8px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      box-shadow: 0 6px 18px rgba(45, 90, 60, .38);
+      font-size: .82rem;
+      font-weight: 1000;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .skill-banner.show { animation: banner-pop 1.8s ease forwards; }
+
+    @keyframes banner-pop {
+      0% { opacity: 0; transform: translate(-50%, 12px) scale(.82); }
+      12% { opacity: 1; transform: translate(-50%, 0) scale(1.06); }
+      22% { transform: translate(-50%, 0) scale(1); }
+      78% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -10px); }
+    }
+
+    .result[hidden] { display: none; }
+
+    .result {
+      position: absolute;
+      z-index: 5;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: rgba(64, 52, 38, .42);
+      backdrop-filter: blur(3px);
+    }
+
+    .result-card {
+      width: min(100%, 320px);
+      padding: 22px 18px 18px;
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: 0 20px 50px rgba(45, 31, 18, .3);
+      text-align: center;
+      animation: result-pop .34s cubic-bezier(.2, 1.4, .4, 1);
+    }
+
+    @keyframes result-pop {
+      from { opacity: 0; transform: translateY(18px) scale(.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .result-emoji { font-size: 2.2rem; line-height: 1; }
+
+    .result-card h2 { margin: 8px 0 2px; font-size: 1.24rem; }
+
+    .result-sub { margin: 0 0 12px; color: var(--muted); font-size: .74rem; font-weight: 800; }
+
+    .result-score {
+      margin: 0 0 4px;
+      padding: 12px 10px;
+      border: 2px solid #f2c984;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #fff8df, #fffdf5);
+    }
+
+    .result-score span { display: block; color: var(--muted); font-size: .66rem; font-weight: 900; }
+
+    .result-score strong {
+      display: block;
+      font-size: 2rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .result-score span.result-best {
+      display: none;
+      margin: 8px auto 0;
+      padding: 6px 14px;
+      width: max-content;
+      max-width: 100%;
+      border: 2px solid #fff;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, #e0403c, #b52a30);
+      box-shadow: 0 3px 10px rgba(181, 42, 48, .45);
+      font-size: .8rem;
+      font-weight: 1000;
+      letter-spacing: .02em;
+      animation: best-flash 1s ease infinite alternate;
+    }
+
+    .result-score span.result-best.show { display: block; }
+
+    @keyframes best-flash {
+      from { box-shadow: 0 3px 10px rgba(181, 42, 48, .45); }
+      to { box-shadow: 0 3px 16px rgba(224, 64, 60, .85), 0 0 0 4px rgba(224, 64, 60, .18); }
+    }
+
+    .result-max {
+      margin: 8px 0 0;
+      color: var(--green-dark);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .result-rank {
+      margin: 6px 0 0;
+      color: var(--orange-dark);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .x-share,
+    .result-restart {
+      display: grid;
+      min-height: 48px;
+      place-items: center;
+      border-radius: 14px;
+      font-weight: 1000;
+      text-decoration: none;
+    }
+
+    .x-share {
+      color: #fff;
+      background: #0f1419;
+      box-shadow: 0 4px 0 #000;
+      font-size: .9rem;
+    }
+
+    .result-restart {
+      border: 0;
+      color: #fff;
+      background: linear-gradient(180deg, var(--green), var(--green-dark));
+      box-shadow: 0 4px 0 #2a6a3e;
+      cursor: pointer;
+      font-size: .9rem;
+    }
+
+    .result-restart:active,
+    .x-share:active { transform: translateY(2px); box-shadow: none; }
+
+    .hint {
+      margin: 10px 4px 0;
+      color: var(--muted);
+      font-size: .66rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    dialog {
+      width: min(calc(100% - 30px), 400px);
+      padding: 0;
+      overflow: hidden;
+      border: 0;
+      border-radius: 22px;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 0 24px 70px rgba(45, 31, 18, .28);
+    }
+
+    dialog::backdrop { background: rgba(55, 43, 32, .45); backdrop-filter: blur(2px); }
+
+    .rules-content {
+      max-height: calc(100dvh - 24px);
+      padding: 18px 16px 14px;
+      overflow-y: auto;
+    }
+
+    .rules-content h2 { margin: 0 0 12px; font-size: 1.14rem; text-align: center; }
+
+    .rules-section-title {
+      margin: 12px 0 7px;
+      color: var(--green-dark);
+      font-size: .82rem;
+      font-weight: 1000;
+    }
+
+    .rules-list {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 12px;
+      padding: 0;
+      list-style: none;
+      counter-reset: rules;
+    }
+
+    .rules-list li {
+      display: grid;
+      grid-template-columns: 27px minmax(0, 1fr);
+      gap: 9px;
+      align-items: center;
+      font-size: .78rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .rules-list li strong { display: block; font-size: .82rem; font-weight: 1000; }
+    .rules-list li span { color: var(--muted); }
+
+    .rules-list li::before {
+      counter-increment: rules;
+      content: counter(rules);
+      display: grid;
+      width: 25px;
+      aspect-ratio: 1;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      font-weight: 900;
+    }
+
+    .rules-skills { display: grid; gap: 6px; }
+
+    .rules-skill {
+      min-width: 0;
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .rules-skill strong {
+      display: block;
+      color: var(--orange-dark);
+      font-size: .74rem;
+      font-weight: 1000;
+    }
+
+    .rules-skill span { display: block; margin-top: 1px; color: var(--muted); font-size: .66rem; font-weight: 800; line-height: 1.4; }
+
+    .rules-tips {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .rules-tip {
+      min-width: 0;
+      margin: 0;
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .rules-tip strong {
+      display: block;
+      color: var(--green-dark);
+      font-size: .72rem;
+      font-weight: 1000;
+    }
+
+    .rules-tip span { display: block; margin-top: 1px; color: var(--muted); font-size: .66rem; font-weight: 800; line-height: 1.35; }
+
+    /* 紙色の太いボーダーがシールドになり、スクロール中の中身が透けない */
+    .rules-close {
+      position: sticky;
+      z-index: 2;
+      bottom: -14px;
+      display: grid;
+      width: calc(100% + 32px);
+      min-height: 68px;
+      margin: 12px -16px -14px;
+      place-items: center;
+      border: solid var(--paper);
+      border-width: 10px 16px 14px;
+      border-radius: 24px;
+      color: #fff;
+      background: linear-gradient(180deg, var(--green), var(--green-dark));
+      background-clip: padding-box;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .rules-close:active { transform: translateY(2px); }
+
+    .secret-progress {
+      margin: -6px 0 10px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .secret-progress strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .secret-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .secret-item {
+      display: flex;
+      min-width: 0;
+      padding: 8px 10px;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .secret-item img {
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+    }
+
+    .secret-item span {
+      min-width: 0;
+      overflow: hidden;
+      font-size: .72rem;
+      font-weight: 900;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .history-summary {
+      margin: -6px 0 10px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .history-summary strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .history-list { display: grid; gap: 5px; }
+
+    .history-row {
+      display: flex;
+      min-width: 0;
+      min-height: 34px;
+      padding: 5px 9px;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .history-row.skill { background: #fdf6e6; border-color: #ecd9ad; }
+
+    .history-time {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: .6rem;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .history-text {
+      display: flex;
+      min-width: 0;
+      flex: 1;
+      align-items: center;
+      gap: 3px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: .66rem;
+      font-weight: 850;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .history-text img {
+      flex: 0 0 auto;
+      width: 19px;
+      height: 19px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    .history-text .history-arrow { color: #c9b998; font-weight: 700; }
+
+    .history-pts {
+      flex: 0 0 auto;
+      color: var(--red-dark);
+      font-size: .7rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .history-empty {
+      margin: 4px 0;
+      padding: 14px 10px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .secret-empty {
+      grid-column: 1 / -1;
+      margin: 4px 0;
+      padding: 14px 10px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .secret-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: .64rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="back" href="index.html">← トップへ</a>
+      <div class="topbar-actions">
+        <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
+        <button type="button" class="chip-button" id="historyButton" aria-label="このゲームのきろく">きろく</button>
+        <button type="button" class="chip-button" id="rulesButton">あそびかた</button>
+      </div>
+    </div>
+
+    <header class="title">
+      <div class="title-mascot" aria-hidden="true"></div>
+      <h1><small id="rankLabel" role="button" tabindex="0" aria-label="かくとくしたタイトルいちらんをひらく">めざせ でんせつ</small>ごちそうできるかな！！</h1>
+    </header>
+
+    <main class="game-card">
+      <div class="hud">
+        <div class="stat">
+          <span class="stat-label" id="scoreLabel">エナジー</span>
+          <span class="stat-value" id="scoreValue">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">ベスト</span>
+          <span class="stat-value" id="bestValue">0</span>
+        </div>
+        <div class="stat stat-next">
+          <span class="stat-label">つぎ</span>
+          <canvas id="nextCanvas" width="68" height="68" aria-hidden="true"></canvas>
+        </div>
+      </div>
+
+      <button type="button" class="guide" id="guideBox" aria-label="食材のじゅんばんとシークレット図鑑をひらく">
+        <span class="guide-label">食材のじゅんばん（タップで図鑑）</span>
+        <canvas id="guideCanvas" aria-hidden="true"></canvas>
+      </button>
+
+      <div class="skills" aria-label="スキル状況">
+        <div class="skill-chip" id="chipCharge">
+          <span class="skill-name">⚡エナジーチャージS</span>
+          <span class="skill-state" id="chipChargeState"><strong>4</strong>コンボで発動</span>
+        </div>
+        <div class="skill-chip" id="chipFood" style="--meter-progress: 0%">
+          <span class="skill-name">🌽食材ゲットS</span>
+          <span class="skill-state" id="chipFoodState">しんか <strong>0/10</strong></span>
+        </div>
+        <div class="skill-chip" id="chipCheer">
+          <span class="skill-name">📣げんきオールS</span>
+          <span class="skill-state" id="chipCheerState">ピンチで発動</span>
+        </div>
+      </div>
+
+      <div class="order" id="orderCard" aria-live="polite" role="button" tabindex="0" aria-label="ごちそう。タップで料理ノートをひらく">
+        <span class="order-label">ごちそう</span>
+        <div class="order-main">
+          <span class="order-name" id="orderName"></span>
+          <span class="order-needs" id="orderNeeds"></span>
+        </div>
+        <strong class="order-reward" id="orderReward"></strong>
+        <button type="button" class="order-change" id="orderChange" aria-label="べつのごちそうに変える">↻</button>
+      </div>
+
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="gameCanvas"></canvas>
+        <div class="skill-banner" id="skillBanner" aria-live="polite"></div>
+        <section class="result" id="result" hidden role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+          <div class="result-card">
+            <div class="result-emoji" id="resultEmoji">🎃</div>
+            <h2 id="resultTitle">おしまい！</h2>
+            <p class="result-sub" id="resultSub">食材があふれちゃった…</p>
+            <div class="result-score">
+              <span>ためたエナジー</span>
+              <strong id="resultScore">0</strong>
+              <span class="result-best" id="resultBestBadge">✨ ベスト記録こうしん！ ✨</span>
+            </div>
+            <p class="result-max" id="resultMax"></p>
+            <p class="result-rank" id="resultRank"></p>
+            <div class="result-actions">
+              <a class="x-share" id="xShare" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>
+              <button type="button" class="result-restart" id="restartButton">もういちど！</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <p class="hint">スライドでねらい、はなして落とす。ながおしで連続！<br>おなじ食材がふれると しんか！</p>
+    </main>
+  </div>
+
+  <dialog id="rulesDialog" aria-labelledby="rulesTitle">
+    <div class="rules-content">
+      <h2 id="rulesTitle">あそびかた</h2>
+      <ol class="rules-list">
+        <li><div><strong>ねらって おとす</strong><span>よこにスライド（パソコンはマウス）で位置をきめて、はなすと落ちるよ。</span></div></li>
+        <li><div><strong>くっつけて しんか</strong><span>おなじ食材同士がふれると、ひとまわり大きな食材に！食材はカタチどおりに転がるよ。</span></div></li>
+        <li><div><strong>あふれたら おしまい</strong><span>上の点線から食材がはみ出したままだとゲームオーバー。</span></div></li>
+      </ol>
+      <p class="rules-section-title">スキル（特別なときに発動！）</p>
+      <div class="rules-skills">
+        <p class="rules-skill"><strong>⚡ エナジーチャージS</strong><span>4コンボめのしんかで発動。エナジーをどーんと追加ゲット！</span></p>
+        <p class="rules-skill"><strong>🌽 食材ゲットS</strong><span>しんか10回でゲージ満タン。つぎに落とす食材がレアな大きい食材にかわる！</span></p>
+        <p class="rules-skill"><strong>📣 げんきオールS</strong><span>あふれそうなピンチのとき、1回だけ自動で発動。小さい食材をおかたづけしてくれる！</span></p>
+      </div>
+      <div class="rules-tips">
+        <p class="rules-tip"><strong>🍳 ちゅうもん</strong><span>たのまれた食材をつくると料理かんせい！こなすとレシピLvとフィールドボーナスが育つ！</span></p>
+        <p class="rules-tip"><strong>❓ シークレット</strong><span>ハーブのそのさきは…育てて たしかめよう！めざせカボチャ！</span></p>
+        <p class="rules-tip"><strong>🔥 れんぞくしんか</strong><span>コンボの数だけエナジー倍増！（3コンボ＝×3）</span></p>
+        <p class="rules-tip"><strong>👆 ながおし</strong><span>2秒おしっぱなしで連続ドロップ！</span></p>
+      </div>
+      <button type="button" class="rules-close" id="rulesClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="secretDialog" aria-labelledby="secretTitle">
+    <div class="rules-content">
+      <h2 id="secretTitle">シークレット図鑑</h2>
+      <p class="secret-progress" id="secretProgress"></p>
+      <div class="secret-list" id="secretList"></div>
+      <p class="secret-note">シークレット食材は一度つくれば ずっと図鑑にのこるよ。<br>この先になにがいるかは…おたのしみ！</p>
+      <button type="button" class="rules-close" id="secretClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="recipeDialog" aria-labelledby="recipeTitle">
+    <div class="rules-content">
+      <h2 id="recipeTitle">料理ノート</h2>
+      <p class="recipe-fb" id="recipeFb"></p>
+      <div class="note-sort" role="group" aria-label="ならびかえ">
+        <button type="button" class="note-sort-btn" id="sortEnergy">エナジーじゅん</button>
+        <button type="button" class="note-sort-btn" id="sortLv">Lvじゅん</button>
+      </div>
+      <div class="recipe-list" id="recipeList"></div>
+      <button type="button" class="rules-close" id="recipeClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="resumeDialog" aria-labelledby="resumeTitle">
+    <div class="rules-content">
+      <h2 id="resumeTitle">とちゅうのゲームがあるよ</h2>
+      <p class="resume-info" id="resumeInfo"></p>
+      <div class="resume-actions">
+        <button type="button" class="resume-continue" id="resumeContinue">つづきから</button>
+        <button type="button" class="resume-reset" id="resumeReset">さいしょから</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="rankDialog" aria-labelledby="rankTitle">
+    <div class="rules-content">
+      <h2 id="rankTitle">タイトルいちらん</h2>
+      <p class="rank-progress" id="rankProgress"></p>
+      <div class="rank-list" id="rankList"></div>
+      <button type="button" class="rules-close" id="rankClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="historyDialog" aria-labelledby="historyTitle">
+    <div class="rules-content">
+      <h2 id="historyTitle">このゲームのきろく</h2>
+      <p class="history-summary" id="historySummary"></p>
+      <div class="history-list" id="historyList"></div>
+      <button type="button" class="rules-close" id="historyClose">とじる</button>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      "use strict";
+
+      // ---- 定数 -------------------------------------------------------
+      const WORLD = { w: 420, h: 560 };
+      const DROP_Y = 46;
+      const LINE_Y = 92;
+      const OVER_TIME = 1.8;       // 危険ライン超過の猶予秒（鬼）
+      const DROP_COOLDOWN = 0.5;   // 次の食材が出るまで
+      const GRAVITY = 1600;
+      const RESTITUTION = 0.06;
+      const FRICTION = 0.35;
+      const SUBSTEPS = 4;
+      const SOLVER_ITERS = 7;
+      const MAX_BOUND_RATIO = 1.65; // 形状の広がり上限（基準半径比）
+
+      // ポケモンスリープの全19食材プール（エナジー順、js/data/foods.js 参照）
+      // opt: true のものは毎ゲームランダムで6種類除外される。
+      // ピーキーな形の食材（ミルク・マメミート・ハーブ・キノコ・ながねぎ）と
+      // リンゴ（起点）・カボチャ（主役）・シッポ（最終）は必ず登場。
+      // energy は js/data/foods.js の基礎エナジー
+      const FOOD_POOL = [
+        { name: "とくせんリンゴ",     img: "FancyApple",         color: "#EF3930", energy: 90 },
+        { name: "モーモーミルク",     img: "MoomooMilk",         color: "#4C6DC1", energy: 98 },
+        { name: "ワカクサ大豆",       img: "GreengrassSoybeans", color: "#F9D79B", energy: 100, opt: true },
+        { name: "あまいミツ",         img: "Honey",              color: "#FAC801", energy: 101, opt: true },
+        { name: "マメミート",         img: "BeanSausage",        color: "#EA9E6A", energy: 103 },
+        { name: "あったかジンジャー", img: "WarmingGinger",      color: "#FCC56B", energy: 109, opt: true },
+        { name: "あんみんトマト",     img: "SnoozyTomato",       color: "#ED4F4F", energy: 110, opt: true },
+        { name: "とくせんエッグ",     img: "FancyEgg",           color: "#F4BF7A", energy: 115, opt: true },
+        { name: "ピュアなオイル",     img: "PureOil",            color: "#E5DF6C", energy: 121, opt: true },
+        { name: "ほっこりポテト",     img: "SoftPotato",         color: "#C9A227", energy: 124, opt: true },
+        { name: "げきからハーブ",     img: "FieryHerb",          color: "#E84B4B", energy: 130 },
+        { name: "ワカクサコーン",     img: "GreengrassCorn",     color: "#FFE36C", energy: 140, opt: true },
+        { name: "リラックスカカオ",   img: "SoothingCacao",      color: "#E0945C", energy: 151, opt: true },
+        { name: "めざましコーヒー",   img: "RousingCoffee",      color: "#A37D55", energy: 153, opt: true },
+        { name: "つやつやアボカド",   img: "ShinyAvocado",       color: "#87A96B", energy: 162, opt: true },
+        { name: "あじわいキノコ",     img: "TastyMushroom",      color: "#B27054", energy: 167 },
+        { name: "ふといながねぎ",     img: "LargeLeek",          color: "#37A56B", energy: 185 },
+        { name: "ずっしりカボチャ",   img: "ChunkyPumpkin",      color: "#E5A323", energy: 250 },
+        { name: "おいしいシッポ",     img: "SlowpokeTail",       color: "#F2BBC4", energy: 342 },
+      ];
+      const HERB_POOL_IDX = 10;    // ここまでが「じゅんばん」に見える
+      const EXCLUDE_COUNT = 4;     // opt から毎ゲーム除外する数
+
+      // チェーン位置ごとの半径はチェーン長に合わせて生成（序盤の差を大きく、前傾カーブ）
+      const CHAIN_MIN_R = 14;
+      const CHAIN_MAX_R = 100;
+      const RADII_CURVE = 0.85;
+      let RADII = [];
+      let MAX_TIER = 0;
+
+      function computeRadii(n) {
+        RADII = Array.from({ length: n }, (_, i) =>
+          i === 0
+            ? CHAIN_MIN_R
+            : Math.round(CHAIN_MIN_R * Math.pow(CHAIN_MAX_R / CHAIN_MIN_R, Math.pow(i / (n - 1), RADII_CURVE)))
+        );
+        MAX_TIER = n - 1;
+      }
+      const DROP_WEIGHTS = [22, 22, 20, 18, 18]; // tier0-4 の出現率
+      const fmt = (n) => n.toLocaleString("ja-JP");
+      const TAIL_BONUS = 55555;    // シッポ×シッポのバカボーナス
+
+      // ちゅうもん（ポケモンスリープの実在料理。needs はミニ化した必要数、
+      // bonus は js/data/dishes.js の基礎エナジーそのまま）
+      const RECIPES = [
+        { name: "とくせんリンゴカレー", needs: { "とくせんリンゴ": 4 }, bonus: 748 },
+        { name: "とくせんリンゴジュース", needs: { "とくせんリンゴ": 5 }, bonus: 855 },
+        { name: "ねがいごとアップルパイ", needs: { "とくせんリンゴ": 3, "モーモーミルク": 2 }, bonus: 1748 },
+        { name: "ひのこのジンジャーティー", needs: { "あったかジンジャー": 2, "とくせんリンゴ": 2 }, bonus: 1913 },
+        { name: "クラフトサイコソーダ", needs: { "あまいミツ": 3 }, bonus: 1079 },
+        { name: "ベイビィハニーカレー", needs: { "あまいミツ": 3, "とくせんリンゴ": 1 }, bonus: 839 },
+        { name: "マメバーグカレー", needs: { "マメミート": 4 }, bonus: 856 },
+        { name: "ゆきかきシーザーサラダ", needs: { "モーモーミルク": 3, "マメミート": 2 }, bonus: 1898 },
+        { name: "うるおいとうふサラダ", needs: { "ワカクサ大豆": 3, "あんみんトマト": 2 }, bonus: 3113 },
+        { name: "じゅくせいスイートポテト", needs: { "ほっこりポテト": 3, "モーモーミルク": 2 }, bonus: 1907 },
+        { name: "あくまのキッスフルーツオレ", needs: { "とくせんリンゴ": 2, "あまいミツ": 2, "モーモーミルク": 2, "リラックスカカオ": 1 }, bonus: 4734 },
+        { name: "ムラっけチョコミートサラダ", needs: { "リラックスカカオ": 2, "マメミート": 2 }, bonus: 3665 },
+        { name: "サンパワートマトカレー", needs: { "げきからハーブ": 2, "あんみんトマト": 3 }, bonus: 2078 },
+        { name: "オーバーヒートサラダ", needs: { "げきからハーブ": 2, "あったかジンジャー": 2, "あんみんトマト": 2 }, bonus: 5225 },
+        { name: "ぜったいねむりバターカレー", needs: { "あんみんトマト": 2, "リラックスカカオ": 2, "あまいミツ": 2, "モーモーミルク": 2 }, bonus: 9010 },
+        { name: "キノコのほうしサラダ", needs: { "あじわいキノコ": 2, "あんみんトマト": 2, "ピュアなオイル": 1 }, bonus: 5859 },
+        { name: "ニンジャカレー", needs: { "ワカクサ大豆": 3, "あじわいキノコ": 2, "ふといながねぎ": 1 }, bonus: 9445 },
+        { name: "とけるオムカレー", needs: { "とくせんエッグ": 2, "あんみんトマト": 1 }, bonus: 2150 },
+        { name: "ビルドアップマメカレー", needs: { "ワカクサ大豆": 2, "マメミート": 2, "げきからハーブ": 1, "とくせんエッグ": 1 }, bonus: 3372 },
+        { name: "ふくつのジンジャークッキー", needs: { "あまいミツ": 2, "あったかジンジャー": 2, "リラックスカカオ": 1, "とくせんエッグ": 1 }, bonus: 4921 },
+        { name: "じゅうなんコーンシチュー", needs: { "ワカクサコーン": 2, "ほっこりポテト": 1, "モーモーミルク": 2 }, bonus: 4670 },
+        { name: "くいしんぼうポテトサラダ", needs: { "ほっこりポテト": 2, "とくせんエッグ": 2, "マメミート": 1, "とくせんリンゴ": 1 }, bonus: 5040 },
+        { name: "ネロリのデトックスティー", needs: { "とくせんリンゴ": 3, "あったかジンジャー": 2, "あじわいキノコ": 1 }, bonus: 5065 },
+        { name: "ピヨピヨパンチ辛口カレー", needs: { "あまいミツ": 2, "げきからハーブ": 2, "めざましコーヒー": 1 }, bonus: 5702 },
+        { name: "プリンのプリンアラモード", needs: { "あまいミツ": 3, "とくせんエッグ": 2, "とくせんリンゴ": 2, "モーモーミルク": 2 }, bonus: 7594 },
+        { name: "めいそうスイートサラダ", needs: { "とくせんリンゴ": 4, "あまいミツ": 3, "ワカクサコーン": 2 }, bonus: 7675 },
+        { name: "クロスチョップドサラダ", needs: { "とくせんエッグ": 2, "マメミート": 2, "ワカクサコーン": 2, "あんみんトマト": 1 }, bonus: 8755 },
+        { name: "ワカクササラダ", needs: { "ピュアなオイル": 2, "ワカクサコーン": 2, "あんみんトマト": 2, "ほっこりポテト": 1 }, bonus: 11393 },
+        { name: "ニンジャサラダ", needs: { "ワカクサ大豆": 2, "ふといながねぎ": 1, "あじわいキノコ": 2, "あったかジンジャー": 2 }, bonus: 11659 },
+        { name: "れんごくコーンキーマカレー", needs: { "げきからハーブ": 3, "マメミート": 3, "ワカクサコーン": 2, "あったかジンジャー": 2 }, bonus: 13690 },
+        { name: "めざめるパワーシチュー", needs: { "ワカクサ大豆": 3, "あんみんトマト": 3, "あじわいキノコ": 2, "めざましコーヒー": 1 }, bonus: 19061 },
+        { name: "まけんきコーヒーサラダ", needs: { "マメミート": 3, "めざましコーヒー": 2, "ピュアなオイル": 2, "ほっこりポテト": 2 }, bonus: 20218 },
+        { name: "いあいぎりすき焼きカレー", needs: { "ふといながねぎ": 2, "あまいミツ": 3, "マメミート": 3, "とくせんエッグ": 2 }, bonus: 20655 },
+        { name: "はやおきコーヒーゼリー", needs: { "めざましコーヒー": 2, "モーモーミルク": 2, "あまいミツ": 1 }, bonus: 6793 },
+        { name: "かたやぶりコーンティラミス", needs: { "めざましコーヒー": 2, "ワカクサコーン": 2, "モーモーミルク": 1 }, bonus: 7125 },
+        { name: "くだけるアボカドサラダ", needs: { "ワカクサ大豆": 2, "つやつやアボカド": 1, "ピュアなオイル": 1 }, bonus: 7125 },
+        { name: "グラスミキサースムージー", needs: { "つやつやアボカド": 2, "あんみんトマト": 2, "モーモーミルク": 1 }, bonus: 8165 },
+        { name: "おちゃかいコーンスコーン", needs: { "あったかジンジャー": 2, "とくせんリンゴ": 2, "ワカクサコーン": 2, "モーモーミルク": 1 }, bonus: 10925 },
+        { name: "ワカクサカレーパン", needs: { "あったかジンジャー": 2, "げきからハーブ": 2, "ピュアなオイル": 2, "ワカクサ大豆": 1 }, bonus: 10945 },
+        { name: "はなふぶきミモザサラダ", needs: { "とくせんエッグ": 3, "ピュアなオイル": 2, "ほっこりポテト": 1, "マメミート": 1 }, bonus: 11811 },
+        { name: "フラワーギフトマカロン", needs: { "とくせんエッグ": 2, "リラックスカカオ": 2, "あまいミツ": 2, "モーモーミルク": 1 }, bonus: 13834 },
+        { name: "スパークスパイスコーラ", needs: { "とくせんリンゴ": 3, "あったかジンジャー": 2, "ふといながねぎ": 2, "めざましコーヒー": 1 }, bonus: 17494 },
+        { name: "りんごさんヨーグルトサラダ", needs: { "とくせんエッグ": 3, "とくせんリンゴ": 3, "あんみんトマト": 2, "モーモーミルク": 2 }, bonus: 19293 },
+        { name: "ドオーのエクレア", needs: { "リラックスカカオ": 3, "モーモーミルク": 3, "めざましコーヒー": 2, "あまいミツ": 2 }, bonus: 20885 },
+        { name: "しんりょくアボカドグラタン", needs: { "モーモーミルク": 4, "ピュアなオイル": 3, "つやつやアボカド": 2, "ほっこりポテト": 2 }, bonus: 24802 },
+        { name: "じならしワカモレチップス", needs: { "げきからハーブ": 3, "つやつやアボカド": 3, "ワカクサコーン": 2, "ワカクサ大豆": 2 }, bonus: 25162 },
+        { name: "みつあつめチョコワッフル", needs: { "あまいミツ": 4, "ピュアなオイル": 3, "ワカクサコーン": 3, "リラックスカカオ": 2 }, bonus: 25484 },
+        { name: "とびはねるカレーうどん", needs: { "あったかジンジャー": 3, "あじわいキノコ": 3, "げきからハーブ": 2, "マメミート": 2 }, bonus: 25539 },
+      ];
+      const ORDER_MAX_POOL_IDX = 16; // ふといながねぎまで。カボチャ・シッポは注文に使わない
+      const POOL_IDX_BY_NAME = {};
+
+      // スキル設定
+      const CHARGE_COMBO = 4;        // エナジーチャージS: このコンボ数で発動
+      const CHARGE_BONUS = 300;
+      const FOODGET_GAUGE_MAX = 10;  // 食材ゲットS: しんか回数でゲージMAX
+      const CHEER_WARN_RATIO = 0.5;  // げんきオールS: 警告ゲージがこの割合でピンチ発動
+
+      const SHARE_URL = "https://ny-an.github.io/gaogao-pksr/suika-game.html";
+
+      // ---- DOM --------------------------------------------------------
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const boardWrap = document.getElementById("boardWrap");
+      const nextCanvas = document.getElementById("nextCanvas");
+      const guideCanvas = document.getElementById("guideCanvas");
+      const scoreValue = document.getElementById("scoreValue");
+      const bestValue = document.getElementById("bestValue");
+      const result = document.getElementById("result");
+      const resultEmoji = document.getElementById("resultEmoji");
+      const resultSub = document.getElementById("resultSub");
+      const resultScore = document.getElementById("resultScore");
+      const resultBestBadge = document.getElementById("resultBestBadge");
+      const resultMax = document.getElementById("resultMax");
+      const xShare = document.getElementById("xShare");
+      const restartButton = document.getElementById("restartButton");
+      const soundButton = document.getElementById("soundButton");
+      const rulesButton = document.getElementById("rulesButton");
+      const rulesDialog = document.getElementById("rulesDialog");
+      const rulesClose = document.getElementById("rulesClose");
+      const skillBanner = document.getElementById("skillBanner");
+      const chipCharge = document.getElementById("chipCharge");
+      const chipChargeState = document.getElementById("chipChargeState");
+      const chipFood = document.getElementById("chipFood");
+      const chipFoodState = document.getElementById("chipFoodState");
+      const chipCheer = document.getElementById("chipCheer");
+      const chipCheerState = document.getElementById("chipCheerState");
+      const guideBox = document.getElementById("guideBox");
+      const secretDialog = document.getElementById("secretDialog");
+      const secretProgress = document.getElementById("secretProgress");
+      const secretList = document.getElementById("secretList");
+      const secretClose = document.getElementById("secretClose");
+      const historyButton = document.getElementById("historyButton");
+      const historyDialog = document.getElementById("historyDialog");
+      const historySummary = document.getElementById("historySummary");
+      const historyList = document.getElementById("historyList");
+      const historyClose = document.getElementById("historyClose");
+      const orderCard = document.getElementById("orderCard");
+      const orderName = document.getElementById("orderName");
+      const orderNeeds = document.getElementById("orderNeeds");
+      const orderReward = document.getElementById("orderReward");
+
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ---- 状態 -------------------------------------------------------
+      let fruits = [];   // 剛体（複合サークル）
+      let particles = [];
+      let popups = [];
+      let fruitSeq = 0;
+      let score = 0;
+      let best = 0;
+      let maxTierReached = 0;
+      let combo = 0;
+      let comboTimer = 0;
+      let warn = 0;
+      let shake = 0;
+      let gameOver = false;
+      let current = null;        // これから落とす食材 { tier }
+      let nextTier = 0;
+      let dropX = WORLD.w / 2;
+      let cooldown = 0;
+      let aiming = false;
+      let holdTime = 0;          // 押しっぱなし時間
+      let heldDrop = false;      // ホールド中に自動ドロップしたか
+      const HOLD_DELAY = 2.0;    // これ以上おしっぱなしで連続ドロップ
+
+      // 今ゲームのチェーン（FOOD_POOL のインデックス列）
+      let chain = [];
+      let activeShapes = [];
+      let visibleTiers = 8;      // ハーブの位置+1（これ以降はシークレット）
+
+      // スキル状態
+      let foodGauge = 0;         // 食材ゲットS: しんか回数
+      let cheerUsed = false;     // げんきオールS: 1ゲーム1回
+      let chargeFired = false;   // エナジーチャージS: 同一コンボ中1回
+
+      // きろく（このゲームの合体・スキル・スコアの履歴）
+      let history = [];
+      let playTime = 0;
+      let mergeCount = 0;
+      let gameDishes = 0;
+      const HISTORY_MAX = 200;
+
+      // ちゅうもん状態
+      let order = null;          // { recipe, got: { poolIdx: n } }
+      let lastRecipeName = "";
+      FOOD_POOL.forEach((f, i) => { POOL_IDX_BY_NAME[f.name] = i; });
+
+      // レシピLvとフィールドボーナス（ゲームをまたいで永続）
+      const RECIPE_LV_MAX = 70;      // Lvごとに報酬+5%、Lv70でメーター満タン
+      const FB_STEP_DISHES = 21;     // 通算21品ごとにFB+5%（上限85%）
+      let recipeLv = {};
+      let dishesCooked = 0;
+      try { recipeLv = JSON.parse(localStorage.getItem("kabocha.recipeLv") || "{}") || {}; } catch (_) {}
+      try { dishesCooked = Number(localStorage.getItem("kabocha.dishes")) || 0; } catch (_) {}
+
+      function persistCooking() {
+        try {
+          localStorage.setItem("kabocha.recipeLv", JSON.stringify(recipeLv));
+          localStorage.setItem("kabocha.dishes", String(dishesCooked));
+        } catch (_) {}
+      }
+
+      const recipeLevel = (name) => Math.min(RECIPE_LV_MAX, Math.max(1, Number(recipeLv[name]) || 1));
+      const recipeReward = (recipe) => Math.round(recipe.bonus * (1 + 0.05 * (recipeLevel(recipe.name) - 1)));
+      const fbPercent = () => Math.min(85, Math.floor(dishesCooked / FB_STEP_DISHES) * 5);
+      const withFb = (v) => Math.round(v * (1 + fbPercent() / 100));
+
+
+      try { best = Number(localStorage.getItem("kabocha.best")) || 0; } catch (_) {}
+      bestValue.textContent = fmt(best);
+
+      // ベスト記録に応じた20段階のランク称号（食材の進化順をのぼっていく）
+      // 文字は「4+3」「4+4」「3+4」のリズム。
+      // しきい値は本家ワカクサ本島の必要エナジー準拠:
+      // 1-5=ノーマル1-5, 6-10=スーパー1-5, 11-15=ハイパー1-5,
+      // 16-20=マスター1/5/10/15/20（マスター20 = 3,245,795）
+      // 成長ストーリー: 失敗期→ゲーム慣れ期→職人期→ポケスリ沼期→食欲暴走期→超越期→伝説期
+      const RANKS = [
+        { t: 0,       name: "おゆだけ わかせる" },
+        { t: 3118,    name: "あじみで まんぷく" },
+        { t: 7171,    name: "たまごの からいり" },
+        { t: 11693,   name: "てんせん こわい" },
+        { t: 17149,   name: "ぎりぎり セーフ" },
+        { t: 23385,   name: "やたいの おやじ" },
+        { t: 31492,   name: "まかない たいしょう" },
+        { t: 41314,   name: "すいみん ぶそく" },
+        { t: 53006,   name: "ねごとで レシピ" },
+        { t: 65634,   name: "カビンゴ こうにん" },
+        { t: 79197,   name: "カレーは のみもの" },
+        { t: 93540,   name: "おかわり むげん" },
+        { t: 109130,  name: "はしが とまらん" },
+        { t: 125032,  name: "べつばら かくちょう" },
+        { t: 156121,  name: "ほうちょう いらず" },
+        { t: 187832,  name: "いぶくろ せいふく" },
+        { t: 321146,  name: "こんろの かみさま" },
+        { t: 532707,  name: "めざせ でんせつ" },
+        { t: 1199506, name: "かぴわん びっくり" },
+        { t: 3245795, name: "ごちそう でんせつ" },
+      ];
+
+      function rankIndex(v) {
+        let i = 0;
+        for (let k = 0; k < RANKS.length; k++) if (v >= RANKS[k].t) i = k;
+        return i;
+      }
+
+      function updateRankLabel() {
+        document.getElementById("rankLabel").textContent = RANKS[rankIndex(best)].name;
+      }
+      updateRankLabel();
+
+      // タイトルいちらん（獲得ずみ＋つぎの1つだけ名前が見える）
+      function renderRankList() {
+        const cur = rankIndex(best);
+        document.getElementById("rankProgress").innerHTML =
+          `いまは <strong>${RANKS[cur].name}</strong>（${cur + 1}/${RANKS.length}）／ ベスト <strong>${fmt(best)}</strong>`;
+        const list = document.getElementById("rankList");
+        list.innerHTML = "";
+        RANKS.forEach((r, i) => {
+          const got = best >= r.t;
+          const visible = i <= cur; // 獲得したものだけ名前が見える
+
+          const row = document.createElement("div");
+          row.className = "rank-row" + (i === cur ? " now" : got ? " got" : " locked");
+          row.innerHTML =
+            `<span class="rank-num">${i + 1}</span>` +
+            `<span class="rank-name">${visible ? r.name : "？？？ ？？？"}</span>` +
+            (i === cur ? `<span class="rank-now">いま</span>` : "") +
+            `<strong class="rank-thr">${fmt(r.t)}</strong>`;
+          list.append(row);
+        });
+      }
+
+      const foodOf = (tier) => FOOD_POOL[chain[tier]];
+
+      // シークレット図鑑（ハーブより先の食材、ゲームをまたいで永続）
+      const SECRET_START = HERB_POOL_IDX + 1;
+      const SECRET_TOTAL = FOOD_POOL.length - SECRET_START;
+      const discovered = new Set();
+      try {
+        JSON.parse(localStorage.getItem("kabocha.secrets") || "[]").forEach((i) => {
+          if (Number.isInteger(i) && i >= SECRET_START && i < FOOD_POOL.length) discovered.add(i);
+        });
+      } catch (_) {}
+
+      function persistSecrets() {
+        try { localStorage.setItem("kabocha.secrets", JSON.stringify([...discovered])); } catch (_) {}
+      }
+
+      function recordDiscovery(poolIdx) {
+        if (poolIdx < SECRET_START || discovered.has(poolIdx)) return;
+        discovered.add(poolIdx);
+        persistSecrets();
+        drawGuide(); // バッジの数字を更新
+      }
+
+      function renderSecretList() {
+        // 見つけたものだけ表示。未発見の存在や総数はいっさい見せない。
+        secretProgress.innerHTML = discovered.size > 0 ? `はっけん <strong>${discovered.size}</strong>こ` : "";
+        secretList.innerHTML = "";
+        if (discovered.size === 0) {
+          const empty = document.createElement("p");
+          empty.className = "secret-empty";
+          empty.textContent = "まだ なにも見つけていないよ。ハーブのそのさきへ 進んでみよう！";
+          secretList.append(empty);
+          return;
+        }
+        for (let i = SECRET_START; i < FOOD_POOL.length; i++) {
+          if (!discovered.has(i)) continue;
+          const item = document.createElement("div");
+          item.className = "secret-item";
+          const img = document.createElement("img");
+          img.src = `img/foods/svg/${FOOD_POOL[i].img}.svg`;
+          img.alt = "";
+          const span = document.createElement("span");
+          span.textContent = FOOD_POOL[i].name;
+          item.append(img, span);
+          secretList.append(item);
+        }
+      }
+
+      // ---- サウンド ---------------------------------------------------
+      let muted = false;
+      try { muted = localStorage.getItem("kabocha.muted") === "1"; } catch (_) {}
+      let audioCtx = null;
+
+      const updateSoundButton = () => {
+        soundButton.textContent = "おと";
+        soundButton.classList.toggle("muted", muted);
+      };
+      updateSoundButton();
+
+      function ensureAudio() {
+        if (!audioCtx) {
+          try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+        }
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      }
+
+      function tone(freq, dur, { type = "sine", gain = 0.14, slide = 0, delay = 0 } = {}) {
+        if (muted || !audioCtx) return;
+        const t0 = audioCtx.currentTime + delay;
+        const osc = audioCtx.createOscillator();
+        const amp = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t0);
+        if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(30, freq + slide), t0 + dur);
+        amp.gain.setValueAtTime(0, t0);
+        amp.gain.linearRampToValueAtTime(gain, t0 + 0.008);
+        amp.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(amp).connect(audioCtx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      }
+
+      const sfx = {
+        drop() { tone(150, 0.1, { type: "triangle", gain: 0.1, slide: -60 }); },
+        merge(tier) {
+          const f = 330 + tier * 70;
+          tone(f, 0.12, { type: "sine", gain: 0.16, slide: f * 0.5 });
+          tone(f * 1.5, 0.1, { type: "sine", gain: 0.07, delay: 0.05 });
+        },
+        feast() {
+          [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, { type: "triangle", gain: 0.14, delay: i * 0.09 }));
+        },
+        legend() {
+          [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0.26, { type: "triangle", gain: 0.15, delay: i * 0.09 }));
+        },
+        skill() {
+          [660, 880, 1175].forEach((f, i) => tone(f, 0.14, { type: "square", gain: 0.06, delay: i * 0.07 }));
+        },
+        cheer() {
+          [523, 659, 784].forEach((f, i) => tone(f, 0.18, { type: "triangle", gain: 0.13, delay: i * 0.08 }));
+        },
+        over() {
+          [392, 330, 262, 196].forEach((f, i) => tone(f, 0.26, { type: "triangle", gain: 0.12, delay: i * 0.16 }));
+        },
+      };
+
+      soundButton.addEventListener("click", () => {
+        muted = !muted;
+        try { localStorage.setItem("kabocha.muted", muted ? "1" : "0"); } catch (_) {}
+        updateSoundButton();
+        if (!muted) { ensureAudio(); tone(660, 0.08, { gain: 0.1 }); }
+      });
+
+      // ---- 形状解析: アイコンの不透明領域を円の集合で近似 --------------
+      // 単位半径1で解析し、チェーン位置の半径にスケールして使う。
+      const ANALYZE_N = 96;
+
+      function fallbackShape(r) {
+        const m = r * r;
+        return {
+          circles: [{ dx: 0, dy: 0, r }],
+          boundR: r,
+          invM: 1 / m,
+          invI: 1 / (0.5 * m * r * r),
+          iconBox: null, // 画像なし → 円プレート描画
+          half: r * 1.08,
+        };
+      }
+
+      let UNIT_SHAPES = FOOD_POOL.map(() => fallbackShape(1));
+
+      function scaleShape(u, R) {
+        return {
+          circles: u.circles.map((c) => ({ dx: c.dx * R, dy: c.dy * R, r: c.r * R })),
+          boundR: u.boundR * R,
+          invM: u.invM / (R * R),
+          invI: u.invI / (R * R * R * R),
+          iconBox: u.iconBox ? { x: u.iconBox.x * R, y: u.iconBox.y * R, s: u.iconBox.s * R } : null,
+          half: u.half * R,
+        };
+      }
+
+      function analyzeIcon(im, baseR) {
+        const N = ANALYZE_N;
+        const c = document.createElement("canvas");
+        c.width = N;
+        c.height = N;
+        const g = c.getContext("2d", { willReadFrequently: true });
+        // アスペクト比を保って中央に描く
+        const iw = im.naturalWidth, ih = im.naturalHeight;
+        const k = Math.min(N / iw, N / ih);
+        const dw = iw * k, dh = ih * k;
+        const ox = (N - dw) / 2, oy = (N - dh) / 2;
+        g.drawImage(im, ox, oy, dw, dh);
+        let data;
+        try { data = g.getImageData(0, 0, N, N).data; } catch (_) { return fallbackShape(baseR); }
+
+        const mask = new Uint8Array(N * N);
+        let area = 0, cx = 0, cy = 0;
+        for (let y = 0; y < N; y++) {
+          for (let x = 0; x < N; x++) {
+            if (data[(y * N + x) * 4 + 3] > 70) {
+              mask[y * N + x] = 1;
+              area++;
+              cx += x;
+              cy += y;
+            }
+          }
+        }
+        if (area < 40) return fallbackShape(baseR);
+        cx /= area;
+        cy /= area;
+
+        // ２パスの距離変換（外周までの距離）
+        const INF = 1e9;
+        const dist = new Float32Array(N * N);
+        for (let i = 0; i < N * N; i++) dist[i] = mask[i] ? INF : 0;
+        const D = 1, D2 = 1.4142;
+        for (let y = 0; y < N; y++) {
+          for (let x = 0; x < N; x++) {
+            const i = y * N + x;
+            if (!dist[i]) continue;
+            let v = dist[i];
+            if (x > 0) v = Math.min(v, dist[i - 1] + D);
+            if (y > 0) v = Math.min(v, dist[i - N] + D);
+            if (x > 0 && y > 0) v = Math.min(v, dist[i - N - 1] + D2);
+            if (x < N - 1 && y > 0) v = Math.min(v, dist[i - N + 1] + D2);
+            if (x === 0 || y === 0 || x === N - 1 || y === N - 1) v = Math.min(v, 1);
+            dist[i] = v;
+          }
+        }
+        for (let y = N - 1; y >= 0; y--) {
+          for (let x = N - 1; x >= 0; x--) {
+            const i = y * N + x;
+            if (!dist[i]) continue;
+            let v = dist[i];
+            if (x < N - 1) v = Math.min(v, dist[i + 1] + D);
+            if (y < N - 1) v = Math.min(v, dist[i + N] + D);
+            if (x < N - 1 && y < N - 1) v = Math.min(v, dist[i + N + 1] + D2);
+            if (x > 0 && y < N - 1) v = Math.min(v, dist[i + N - 1] + D2);
+            dist[i] = v;
+          }
+        }
+
+        // 貪欲に内接円を選ぶ（最大6個、面積カバー率90%で打ち切り）
+        const covered = new Uint8Array(N * N);
+        const circlesPx = [];
+        let coveredCount = 0;
+        let maxD0 = 0;
+        for (let i = 0; i < N * N; i++) if (dist[i] > maxD0) maxD0 = dist[i];
+        const minR = Math.max(2.2, maxD0 * 0.3);
+
+        for (let k2 = 0; k2 < 6; k2++) {
+          let bi = -1, bd = 0;
+          for (let i = 0; i < N * N; i++) {
+            if (mask[i] && !covered[i] && dist[i] > bd) { bd = dist[i]; bi = i; }
+          }
+          if (bi < 0 || bd < minR) break;
+          const px = bi % N, py = (bi / N) | 0;
+          circlesPx.push({ x: px, y: py, r: bd });
+          const rr = bd * 0.85;
+          const x0 = Math.max(0, Math.floor(px - rr)), x1 = Math.min(N - 1, Math.ceil(px + rr));
+          const y0 = Math.max(0, Math.floor(py - rr)), y1 = Math.min(N - 1, Math.ceil(py + rr));
+          for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+              const i = y * N + x;
+              if (mask[i] && !covered[i] && (x - px) * (x - px) + (y - py) * (y - py) <= rr * rr) {
+                covered[i] = 1;
+                coveredCount++;
+              }
+            }
+          }
+          if (coveredCount / area > 0.9) break;
+        }
+        if (!circlesPx.length) return fallbackShape(baseR);
+
+        // ワールドスケール: 不透明面積 = π baseR² になるように
+        let w = baseR * Math.sqrt(Math.PI / area);
+        let boundPx = 0;
+        for (const s of circlesPx) {
+          boundPx = Math.max(boundPx, Math.hypot(s.x - cx, s.y - cy) + s.r);
+        }
+        if (boundPx * w > baseR * MAX_BOUND_RATIO) w = (baseR * MAX_BOUND_RATIO) / boundPx;
+
+        const circles = circlesPx.map((s) => ({ dx: (s.x - cx) * w, dy: (s.y - cy) * w, r: s.r * w }));
+        let M = 0, I = 0, boundR = 0;
+        for (const s of circles) {
+          const m = s.r * s.r;
+          M += m;
+          I += m * (0.5 * s.r * s.r + s.dx * s.dx + s.dy * s.dy);
+          boundR = Math.max(boundR, Math.hypot(s.dx, s.dy) + s.r);
+        }
+        const iconBox = { x: (0 - cx) * w, y: (0 - cy) * w, s: N * w };
+        const half = Math.max(boundR, Math.abs(iconBox.x), Math.abs(iconBox.y), iconBox.x + iconBox.s, iconBox.y + iconBox.s) + 2 * w;
+        return { circles, boundR, invM: 1 / M, invI: 1 / I, iconBox, half };
+      }
+
+      // ---- チェーン構築（毎ゲームランダム除外）------------------------
+      function buildChain() {
+        const optional = [];
+        FOOD_POOL.forEach((f, i) => { if (f.opt) optional.push(i); });
+        for (let i = optional.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          [optional[i], optional[j]] = [optional[j], optional[i]];
+        }
+        const excluded = new Set(optional.slice(0, EXCLUDE_COUNT));
+        chain = FOOD_POOL.map((_, i) => i).filter((i) => !excluded.has(i));
+        computeRadii(chain.length);
+        visibleTiers = chain.indexOf(HERB_POOL_IDX) + 1;
+        refreshActiveShapes();
+      }
+
+      function refreshActiveShapes() {
+        activeShapes = chain.map((fi, t) => scaleShape(UNIT_SHAPES[fi], RADII[t]));
+        // 盤面のすでにある食材にも最新の形状を反映
+        for (const f of fruits) {
+          if (activeShapes[f.tier]) { f.shape = activeShapes[f.tier]; f._wc = null; }
+        }
+      }
+
+      // ---- 食材アイコンの読み込み ------------------------------------
+      const foodImages = FOOD_POOL.map((f, idx) => {
+        const im = new Image();
+        im.addEventListener("load", () => {
+          if (im.naturalWidth > 0) {
+            UNIT_SHAPES[idx] = analyzeIcon(im, 1);
+            if (chain.length) refreshActiveShapes();
+            scheduleSpriteRebuild();
+          }
+        });
+        im.src = `img/foods/svg/${f.img}.svg`;
+        return im;
+      });
+
+      let rebuildTimer = 0;
+      function scheduleSpriteRebuild() {
+        clearTimeout(rebuildTimer);
+        rebuildTimer = setTimeout(() => {
+          if (scale > 0 && canvas.width > 0 && chain.length) {
+            sprites = chain.map((_, t) => makeSprite(t, scale));
+            drawGuide();
+            drawNext();
+          }
+        }, 60);
+      }
+
+      // ---- 描画（スプライト生成）--------------------------------------
+      // px: 1ワールド単位あたりのデバイスピクセル数
+      function makeSprite(tier, px) {
+        const sh = activeShapes[tier];
+        const half = sh.half;
+        const size = Math.max(4, Math.ceil(half * 2 * px));
+        const c = document.createElement("canvas");
+        c.width = size;
+        c.height = size;
+        const g = c.getContext("2d");
+        g.translate(size / 2, size / 2);
+        g.scale(px, px);
+        drawFoodLocal(g, tier);
+        return { canvas: c, half };
+      }
+
+      // ローカル座標（重心原点）に食材を描く
+      function drawFoodLocal(g, tier) {
+        const f = foodOf(tier);
+        const sh = activeShapes[tier];
+        const im = foodImages[chain[tier]];
+        if (sh.iconBox && im && im.complete && im.naturalWidth > 0) {
+          g.drawImage(im, sh.iconBox.x, sh.iconBox.y, sh.iconBox.s, sh.iconBox.s);
+        } else {
+          const r = RADII[tier];
+          g.beginPath();
+          g.arc(0, 0, r, 0, Math.PI * 2);
+          g.fillStyle = "#fffdf8";
+          g.fill();
+          g.beginPath();
+          g.arc(0, 0, r, 0, Math.PI * 2);
+          g.fillStyle = f.color + "33";
+          g.fill();
+          g.strokeStyle = f.color + "aa";
+          g.lineWidth = Math.max(1.4, r * 0.055);
+          g.stroke();
+          g.fillStyle = f.color;
+          g.font = `900 ${r * 0.9}px "M PLUS 1p", sans-serif`;
+          g.textAlign = "center";
+          g.textBaseline = "middle";
+          g.fillText(f.name[0], 0, r * 0.05);
+        }
+      }
+
+      // ---- キャンバスとスプライト管理 --------------------------------
+      let scale = 1;   // world unit -> device px
+      let sprites = [];
+
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        const cssW = boardWrap.clientWidth;
+        const cssH = cssW * (WORLD.h / WORLD.w);
+        canvas.style.height = `${cssH}px`;
+        canvas.width = Math.round(cssW * dpr);
+        canvas.height = Math.round(cssH * dpr);
+        scale = canvas.width / WORLD.w;
+        if (chain.length) {
+          sprites = chain.map((_, t) => makeSprite(t, scale));
+          drawGuide();
+          drawNext();
+        }
+      }
+
+      function drawSprite(g, tier, x, y, angle) {
+        const sp = sprites[tier];
+        if (!sp) return;
+        g.save();
+        g.translate(x, y);
+        g.rotate(angle);
+        g.drawImage(sp.canvas, -sp.half, -sp.half, sp.half * 2, sp.half * 2);
+        g.restore();
+      }
+
+      function drawIconInBox(g, tier, cx, cy, box) {
+        const im = foodImages[chain[tier]];
+        if (im && im.complete && im.naturalWidth > 0) {
+          const iw = im.naturalWidth, ih = im.naturalHeight;
+          const k = Math.min(box / iw, box / ih);
+          g.drawImage(im, cx - (iw * k) / 2, cy - (ih * k) / 2, iw * k, ih * k);
+        } else {
+          const f = foodOf(tier);
+          g.beginPath();
+          g.arc(cx, cy, box / 2, 0, Math.PI * 2);
+          g.fillStyle = f.color + "33";
+          g.fill();
+          g.strokeStyle = f.color;
+          g.lineWidth = 1.4;
+          g.stroke();
+        }
+      }
+
+      function drawGuide() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        const cssW = guideCanvas.clientWidth || guideCanvas.parentElement.clientWidth;
+        const cssH = 34;
+        guideCanvas.width = Math.round(cssW * dpr);
+        guideCanvas.height = Math.round(cssH * dpr);
+        const g = guideCanvas.getContext("2d");
+        g.scale(dpr, dpr);
+        const n = visibleTiers;
+        const slot = cssW / (n + 1); // +1 はシークレット枠
+        const cy = cssH / 2 + 1;
+        for (let t = 0; t < n; t++) {
+          const cx = slot * (t + 0.5);
+          const box = Math.min(slot * 0.74, 11 + t * 2.2);
+          drawIconInBox(g, t, cx, cy, box);
+          g.fillStyle = "#c9b998";
+          g.font = `700 ${Math.max(8, slot * 0.24)}px sans-serif`;
+          g.textAlign = "center";
+          g.textBaseline = "middle";
+          g.fillText("›", slot * (t + 1), cy);
+        }
+        // シークレット枠（この先はおたのしみ）
+        const sx = slot * (n + 0.5);
+        const sr = Math.min(slot * 0.37, 11);
+        g.save();
+        g.setLineDash([3, 3]);
+        g.strokeStyle = "#b3a184";
+        g.lineWidth = 1.4;
+        g.beginPath();
+        g.arc(sx, cy, sr, 0, Math.PI * 2);
+        g.stroke();
+        g.restore();
+        g.fillStyle = "#a3937c";
+        g.font = `900 ${sr * 1.15}px "M PLUS 1p", sans-serif`;
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText("？", sx, cy + 0.5);
+        // はっけん済みバッジ
+        if (discovered.size > 0) {
+          const bx = sx + sr * 0.95;
+          const by = cy - sr * 0.85;
+          g.beginPath();
+          g.arc(bx, by, 6.5, 0, Math.PI * 2);
+          g.fillStyle = "#e0403c";
+          g.fill();
+          g.strokeStyle = "#fff";
+          g.lineWidth = 1.4;
+          g.stroke();
+          g.fillStyle = "#fff";
+          g.font = `900 8.5px "M PLUS 1p", sans-serif`;
+          g.fillText(String(discovered.size), bx, by + 0.5);
+        }
+      }
+
+      function drawNext() {
+        const g = nextCanvas.getContext("2d");
+        g.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+        drawIconInBox(g, nextTier, nextCanvas.width / 2, nextCanvas.height / 2, nextCanvas.width * 0.86);
+      }
+
+      // ---- きろく -----------------------------------------------------
+      const iconTag = (poolIdx) => `<img src="img/foods/svg/${FOOD_POOL[poolIdx].img}.svg" alt="">`;
+      const timeTag = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+
+      function logEvent(html, pts, skill = false) {
+        history.push({ t: playTime, html, pts, skill });
+        if (history.length > HISTORY_MAX) history.shift();
+      }
+
+      function renderHistory() {
+        const fb = fbPercent();
+        historySummary.innerHTML =
+          `エナジー <strong>${fmt(score)}</strong> ／ しんか <strong>${mergeCount}</strong>回 ／ 料理 <strong>${gameDishes}</strong>品 ／ じかん <strong>${timeTag(playTime)}</strong>` +
+          (fb > 0 ? ` ／ FB <strong>+${fb}%</strong>` : "");
+        historyList.innerHTML = "";
+        if (history.length === 0) {
+          const empty = document.createElement("p");
+          empty.className = "history-empty";
+          empty.textContent = "まだ きろくがないよ。食材をくっつけてみよう！";
+          historyList.append(empty);
+          return;
+        }
+        // 新しい順に表示
+        for (let i = history.length - 1; i >= 0; i--) {
+          const e = history[i];
+          const row = document.createElement("div");
+          row.className = "history-row" + (e.skill ? " skill" : "");
+          row.innerHTML =
+            `<span class="history-time">${timeTag(e.t)}</span>` +
+            `<span class="history-text">${e.html}</span>` +
+            `<strong class="history-pts">${e.pts > 0 ? "+" + fmt(e.pts) : ""}</strong>`;
+          historyList.append(row);
+        }
+      }
+
+      // ---- ちゅうもん（料理）------------------------------------------
+      // 今ゲームのチェーンにある食材だけ＆シークレットは発見済みのみ出題
+      function recipeAvailable(recipe) {
+        return Object.keys(recipe.needs).every((name) => {
+          const pi = POOL_IDX_BY_NAME[name];
+          if (pi === undefined || pi > ORDER_MAX_POOL_IDX || !chain.includes(pi)) return false;
+          if (pi > HERB_POOL_IDX && !discovered.has(pi)) return false;
+          return true;
+        });
+      }
+
+      function buildOrder() {
+        const candidates = RECIPES.filter(recipeAvailable);
+        if (!candidates.length) { order = null; renderOrder(); return; }
+        let pick = candidates[(Math.random() * candidates.length) | 0];
+        if (candidates.length > 1 && pick.name === lastRecipeName) {
+          pick = candidates[(candidates.indexOf(pick) + 1) % candidates.length];
+        }
+        lastRecipeName = pick.name;
+        const got = {};
+        Object.keys(pick.needs).forEach((name) => { got[POOL_IDX_BY_NAME[name]] = 0; });
+        order = { recipe: pick, got };
+        renderOrder();
+      }
+
+      function renderOrder() {
+        if (!order) {
+          orderName.textContent = "きょうの ちゅうもんは おやすみ";
+          orderNeeds.innerHTML = "";
+          orderReward.textContent = "";
+          return;
+        }
+        const lv = recipeLevel(order.recipe.name);
+        orderName.innerHTML = `${order.recipe.name}${lv > 1 ? ` <span class="order-lv">Lv${lv}</span>` : ""}`;
+        orderReward.textContent = "+" + fmt(withFb(recipeReward(order.recipe)));
+        orderNeeds.innerHTML = Object.entries(order.recipe.needs).map(([name, need]) => {
+          const pi = POOL_IDX_BY_NAME[name];
+          const got = order.got[pi];
+          return `<span class="order-need${got >= need ? " done" : ""}">${iconTag(pi)}${got}/${need}</span>`;
+        }).join("");
+      }
+
+      // 食材が盤面に生まれた（ドロップ or 合体）ときのちゅうもん進行
+      function onIngredient(poolIdx) {
+        if (!order || gameOver) return;
+        const need = order.recipe.needs[FOOD_POOL[poolIdx].name];
+        if (need === undefined || order.got[poolIdx] >= need) return;
+        order.got[poolIdx] += 1;
+        const complete = Object.entries(order.recipe.needs).every(([name, n]) => order.got[POOL_IDX_BY_NAME[name]] >= n);
+        if (!complete) { renderOrder(); return; }
+        const name = order.recipe.name;
+        const lv = recipeLevel(name);
+        const reward = withFb(recipeReward(order.recipe));
+        const fbBefore = fbPercent();
+        addScore(reward);
+        recipeLv[name] = Math.min(RECIPE_LV_MAX, lv + 1);
+        dishesCooked += 1;
+        gameDishes += 1;
+        persistCooking();
+        logEvent(`🍳 ${name} かんせい！（レシピLv${lv}${lv < RECIPE_LV_MAX ? "→" + (lv + 1) : ""}）`, reward, true);
+        showBanner(`🍳 ${name} かんせい！ +${fmt(reward)}`);
+        addPopup(WORLD.w / 2, 240, "🍳 料理かんせい！", "#d96f2f", 22);
+        spawnParticles(WORLD.w / 2, 260, "#f2c060", 26, 240);
+        const fbAfter = fbPercent();
+        if (fbAfter > fbBefore) {
+          logEvent(`🎪 フィールドボーナスが +${fbAfter}% になった！`, 0, true);
+          addPopup(WORLD.w / 2, 290, `🎪 FB +${fbAfter}%！`, "#7a5fbf", 20);
+        }
+        orderCard.classList.remove("completed");
+        void orderCard.offsetWidth;
+        orderCard.classList.add("completed");
+        sfx.feast();
+        buildOrder();
+      }
+
+      // ---- 料理ノート -------------------------------------------------
+      let noteSort = "energy"; // "energy" | "lv"
+
+      function renderRecipeNote() {
+        const fb = fbPercent();
+        const nextIn = FB_STEP_DISHES - (dishesCooked % FB_STEP_DISHES);
+        document.getElementById("recipeFb").innerHTML =
+          `フィールドボーナス <strong>+${fb}%</strong> ／ つくった料理 通算<strong>${fmt(dishesCooked)}</strong>品` +
+          (fb < 85 ? `<br>あと<strong>${nextIn}</strong>品つくると FB+${Math.min(85, fb + 5)}% ！` : "");
+        document.getElementById("sortEnergy").classList.toggle("active", noteSort === "energy");
+        document.getElementById("sortLv").classList.toggle("active", noteSort === "lv");
+        const sorted = [...RECIPES].sort(
+          noteSort === "lv"
+            ? (a, b) => recipeLevel(b.name) - recipeLevel(a.name) || a.bonus - b.bonus
+            : (a, b) => a.bonus - b.bonus
+        );
+        const list = document.getElementById("recipeList");
+        list.innerHTML = "";
+        for (const r of sorted) {
+          // 未発見シークレット食材をふくむレシピはまだ見せない
+          const hidden = Object.keys(r.needs).some((n) => {
+            const pi = POOL_IDX_BY_NAME[n];
+            return pi > HERB_POOL_IDX && !discovered.has(pi);
+          });
+          if (hidden) continue;
+          const lv = recipeLevel(r.name);
+          const row = document.createElement("div");
+          row.className = "recipe-row";
+          row.style.setProperty("--lv-progress", `${(((lv - 1) / (RECIPE_LV_MAX - 1)) * 100).toFixed(1)}%`);
+          const needsHtml = Object.entries(r.needs)
+            .map(([n, c]) => `<span>${iconTag(POOL_IDX_BY_NAME[n])}×${c}</span>`)
+            .join("");
+          const isMax = lv >= RECIPE_LV_MAX;
+          row.innerHTML =
+            `<div class="recipe-row-main">` +
+            `<span class="recipe-row-name">${r.name} <span class="order-lv${isMax ? " max" : ""}">${isMax ? "LvMAX" : `Lv${lv}/${RECIPE_LV_MAX}`}</span></span>` +
+            `<span class="recipe-row-needs">${needsHtml}</span>` +
+            `</div>` +
+            `<strong class="recipe-row-reward">+${fmt(withFb(recipeReward(r)))}</strong>`;
+          list.append(row);
+        }
+      }
+
+      // ---- スキルUI ---------------------------------------------------
+      function showBanner(text) {
+        skillBanner.textContent = text;
+        skillBanner.classList.remove("show");
+        void skillBanner.offsetWidth;
+        skillBanner.classList.add("show");
+      }
+
+      function flashChip(chip) {
+        chip.classList.remove("fired");
+        void chip.offsetWidth;
+        chip.classList.add("fired");
+      }
+
+      function updateSkillChips() {
+        chipChargeState.innerHTML = combo > 0 && !chargeFired
+          ? `いま <strong>${combo}</strong>/${CHARGE_COMBO}コンボ`
+          : `<strong>${CHARGE_COMBO}</strong>コンボで発動`;
+        chipFood.style.setProperty("--meter-progress", `${Math.min(foodGauge / FOODGET_GAUGE_MAX, 1) * 100}%`);
+        chipFoodState.innerHTML = `しんか <strong>${foodGauge}/${FOODGET_GAUGE_MAX}</strong>`;
+        chipCheerState.innerHTML = cheerUsed ? "きょうは出動ずみ" : "ピンチで発動";
+        chipCheer.classList.toggle("spent", cheerUsed);
+      }
+
+      // エナジーチャージS: 4コンボめのしんかで発動
+      function trySkillCharge(mx, my) {
+        if (combo !== CHARGE_COMBO || chargeFired) return;
+        chargeFired = true;
+        const g = withFb(CHARGE_BONUS);
+        addScore(g);
+        logEvent(`⚡ エナジーチャージS発動（${combo}コンボ）`, g, true);
+        showBanner(`⚡ エナジーチャージS発動！ +${fmt(g)}`);
+        addPopup(mx, my - 60, `+${fmt(g)}`, "#d99a12", 24);
+        spawnParticles(mx, my, "#facd45", 20, 240);
+        flashChip(chipCharge);
+        sfx.skill();
+      }
+
+      // 食材ゲットS: しんか10回で「つぎ」がレア食材に
+      function trySkillFoodGet() {
+        if (foodGauge < FOODGET_GAUGE_MAX) return;
+        foodGauge = 0;
+        // 見えている中の上位3ティアからランダム（シークレットはネタバレしない）
+        nextTier = Math.max(0, visibleTiers - 3) + Math.floor(Math.random() * 3);
+        drawNext();
+        logEvent(`🌽 食材ゲットS発動 → つぎが ${iconTag(chain[nextTier])}${foodOf(nextTier).name} に`, 0, true);
+        showBanner(`🌽 食材ゲットS発動！ つぎは「${foodOf(nextTier).name}」！`);
+        flashChip(chipFood);
+        sfx.skill();
+      }
+
+      // げんきオールS: ピンチのとき1回だけ、小さい食材をおかたづけ
+      function trySkillCheer() {
+        if (cheerUsed || warn < OVER_TIME * CHEER_WARN_RATIO) return;
+        const targets = fruits.filter((f) => f.tier <= 2);
+        cheerUsed = true;
+        warn = 0;
+        let recovered = 0;
+        for (const f of targets) {
+          f.dead = true;
+          recovered += foodOf(f.tier).energy; // 回収した食材も基礎エナジー分
+          spawnParticles(f.x, f.y, foodOf(f.tier).color, 8, 140);
+        }
+        fruits = fruits.filter((f) => !f.dead);
+        const gain = withFb(recovered);
+        if (gain > 0) addScore(gain);
+        logEvent(`📣 げんきオールS発動 → 小さい食材を${targets.length}個おかたづけ`, gain, true);
+        showBanner(`📣 げんきオールS発動！ 小さい食材を${targets.length}個おかたづけ！`);
+        addPopup(WORLD.w / 2, 200, "がんばれ〜！", "#35804d", 22);
+        flashChip(chipCheer);
+        sfx.cheer();
+      }
+
+      // ---- ゲームロジック --------------------------------------------
+      function randTier() {
+        const total = DROP_WEIGHTS.reduce((a, b) => a + b, 0);
+        let v = Math.random() * total;
+        for (let i = 0; i < DROP_WEIGHTS.length; i++) {
+          v -= DROP_WEIGHTS[i];
+          if (v < 0) return i;
+        }
+        return 0;
+      }
+
+      function makeFruit(tier, x, y, vx = 0, vy = 0) {
+        return {
+          id: fruitSeq++,
+          tier,
+          shape: activeShapes[tier],
+          x, y, vx, vy,
+          angle: (Math.random() - 0.5) * 0.5,
+          av: (Math.random() - 0.5) * 0.6,
+          dead: false,
+          entered: false, // 一度ラインの下に入ったか
+          age: 0,
+          _wc: null,      // ワールド座標の円キャッシュ
+        };
+      }
+
+      // ワールド座標のサブ円を計算してキャッシュ
+      function updateWorldCircles(b) {
+        const cos = Math.cos(b.angle), sin = Math.sin(b.angle);
+        const cs = b.shape.circles;
+        if (!b._wc || b._wc.length !== cs.length) {
+          b._wc = cs.map(() => ({ x: 0, y: 0, r: 0 }));
+        }
+        for (let i = 0; i < cs.length; i++) {
+          const s = cs[i];
+          const w = b._wc[i];
+          w.x = b.x + s.dx * cos - s.dy * sin;
+          w.y = b.y + s.dx * sin + s.dy * cos;
+          w.r = s.r;
+        }
+      }
+
+      function topYOf(b) {
+        updateWorldCircles(b);
+        let top = Infinity;
+        for (const w of b._wc) top = Math.min(top, w.y - w.r);
+        return top;
+      }
+
+      function reset() {
+        clearSave();
+        buildChain();
+        fruits = [];
+        particles = [];
+        popups = [];
+        score = 0;
+        maxTierReached = 0;
+        combo = 0;
+        comboTimer = 0;
+        warn = 0;
+        shake = 0;
+        gameOver = false;
+        cooldown = 0;
+        dropX = WORLD.w / 2;
+        foodGauge = 0;
+        cheerUsed = false;
+        chargeFired = false;
+        history = [];
+        playTime = 0;
+        mergeCount = 0;
+        gameDishes = 0;
+        buildOrder();
+        nextTier = randTier();
+        current = { tier: randTier() };
+        scoreValue.textContent = "0";
+        result.hidden = true;
+        boardWrap.classList.remove("over");
+        updateSkillChips();
+        if (scale > 0 && canvas.width > 0) {
+          sprites = chain.map((_, t) => makeSprite(t, scale));
+          drawGuide();
+        }
+        drawNext();
+      }
+
+      // ---- プレイ途中のセーブ（リロードしても続きから）----------------
+      function saveGame() {
+        if (gameOver) return;
+        try {
+          localStorage.setItem("kabocha.save", JSON.stringify({
+            v: 1,
+            chain,
+            score, maxTierReached, foodGauge, cheerUsed,
+            playTime, mergeCount, gameDishes,
+            nextTier,
+            currentTier: current ? current.tier : null,
+            order: order ? { name: order.recipe.name, got: order.got } : null,
+            history,
+            fruits: fruits.map((f) => ({
+              t: f.tier,
+              x: Math.round(f.x * 10) / 10,
+              y: Math.round(f.y * 10) / 10,
+              a: Math.round(f.angle * 1000) / 1000,
+              en: f.entered ? 1 : 0,
+            })),
+          }));
+        } catch (_) {}
+      }
+
+      function clearSave() {
+        try { localStorage.removeItem("kabocha.save"); } catch (_) {}
+      }
+
+      function loadGame() {
+        let d;
+        try { d = JSON.parse(localStorage.getItem("kabocha.save") || "null"); } catch (_) { return false; }
+        if (!d || d.v !== 1 || !Array.isArray(d.chain) || !Array.isArray(d.fruits)) return false;
+        if (d.chain.length !== FOOD_POOL.length - EXCLUDE_COUNT) return false;
+        if (!d.chain.every((i) => Number.isInteger(i) && i >= 0 && i < FOOD_POOL.length)) return false;
+        chain = d.chain;
+        computeRadii(chain.length);
+        visibleTiers = chain.indexOf(HERB_POOL_IDX) + 1;
+        score = Math.max(0, Math.floor(Number(d.score) || 0));
+        maxTierReached = Math.min(MAX_TIER, Math.max(0, Math.floor(Number(d.maxTierReached) || 0)));
+        foodGauge = Math.min(FOODGET_GAUGE_MAX, Math.max(0, Math.floor(Number(d.foodGauge) || 0)));
+        cheerUsed = !!d.cheerUsed;
+        playTime = Math.max(0, Number(d.playTime) || 0);
+        mergeCount = Math.max(0, Math.floor(Number(d.mergeCount) || 0));
+        gameDishes = Math.max(0, Math.floor(Number(d.gameDishes) || 0));
+        history = Array.isArray(d.history) ? d.history.slice(-HISTORY_MAX) : [];
+        nextTier = Number.isInteger(d.nextTier) && d.nextTier >= 0 && d.nextTier <= MAX_TIER ? d.nextTier : randTier();
+        fruits = [];
+        refreshActiveShapes();
+        for (const s of d.fruits) {
+          if (!Number.isInteger(s.t) || s.t < 0 || s.t > MAX_TIER) continue;
+          if (!isFinite(s.x) || !isFinite(s.y)) continue;
+          const nf = makeFruit(s.t, s.x, s.y);
+          nf.angle = isFinite(s.a) ? s.a : 0;
+          nf.av = 0;
+          nf.entered = !!s.en;
+          nf.age = 5;
+          fruits.push(nf);
+        }
+        current = Number.isInteger(d.currentTier) && d.currentTier >= 0 && d.currentTier <= MAX_TIER
+          ? { tier: d.currentTier }
+          : null;
+        if (!current) cooldown = 0.3;
+        if (d.order && d.order.name) {
+          const recipe = RECIPES.find((r) => r.name === d.order.name);
+          if (recipe && recipeAvailable(recipe)) {
+            const got = {};
+            Object.keys(recipe.needs).forEach((n) => {
+              const pi = POOL_IDX_BY_NAME[n];
+              got[pi] = Math.min(recipe.needs[n], Math.max(0, Math.floor(Number(d.order.got?.[pi]) || 0)));
+            });
+            order = { recipe, got };
+            lastRecipeName = recipe.name;
+          } else {
+            buildOrder();
+          }
+        } else {
+          buildOrder();
+        }
+        scoreValue.textContent = fmt(score);
+        updateSkillChips();
+        renderOrder();
+        return true;
+      }
+
+      function addScore(v) {
+        score += v;
+        scoreValue.textContent = fmt(score);
+        scoreValue.classList.remove("score-bump");
+        void scoreValue.offsetWidth;
+        scoreValue.classList.add("score-bump");
+      }
+
+      function spawnParticles(x, y, color, count, power) {
+        if (reducedMotion) count = Math.min(count, 4);
+        for (let i = 0; i < count; i++) {
+          const a = Math.random() * Math.PI * 2;
+          const sp = power * (0.4 + Math.random() * 0.8);
+          particles.push({
+            x, y,
+            vx: Math.cos(a) * sp,
+            vy: Math.sin(a) * sp - power * 0.4,
+            r: 2.5 + Math.random() * 4,
+            color,
+            life: 0.55 + Math.random() * 0.3,
+            t: 0,
+          });
+        }
+      }
+
+      function addPopup(x, y, text, color = "#d34744", size = 20) {
+        popups.push({ x, y, text, color, size, t: 0, life: 0.9 });
+      }
+
+      function doMerge(a, b) {
+        a.dead = true;
+        b.dead = true;
+        const mx = (a.x + b.x) / 2;
+        const my = (a.y + b.y) / 2;
+        const f = foodOf(a.tier);
+
+        if (comboTimer > 0) { combo += 1; } else { combo = 1; chargeFired = false; }
+        comboTimer = 1.2;
+        // 消した食材の基礎エナジーがそのまま得点。コンボ数に応じて倍化（2コンボ=×2…）＋FB
+        const base = f.energy;
+        const bonus = withFb(base * combo);
+        foodGauge = Math.min(foodGauge + 1, FOODGET_GAUGE_MAX);
+
+        mergeCount += 1;
+
+        if (a.tier === MAX_TIER) {
+          // おいしいシッポ×おいしいシッポ → でんせつのごちそう完成（バカボーナス）
+          const total = bonus + withFb(TAIL_BONUS);
+          addScore(total);
+          logEvent(`${iconTag(chain[MAX_TIER])}×2 <span class="history-arrow">›</span> 👑 でんせつのごちそう完成！！`, total, true);
+          addPopup(mx, my - 60, "👑 でんせつのごちそう完成！！", "#2d7a4a", 26);
+          addPopup(mx, my - 24, "+" + fmt(total), "#d9679a", 30);
+          spawnParticles(mx, my, f.color, 60, 380);
+          spawnParticles(mx, my, "#ffe9a8", 40, 320);
+          shake = 20;
+          sfx.legend();
+          trySkillCharge(mx, my);
+          trySkillFoodGet();
+          updateSkillChips();
+          return;
+        }
+
+        const t = a.tier + 1;
+        const isNewTier = t > maxTierReached;
+        maxTierReached = Math.max(maxTierReached, t);
+        recordDiscovery(chain[t]);
+        const nf = makeFruit(t, mx, my, (a.vx + b.vx) * 0.25, (a.vy + b.vy) * 0.25 - 40);
+        nf.entered = a.entered || b.entered;
+        const rr = nf.shape.boundR;
+        nf.x = Math.min(Math.max(nf.x, rr), WORLD.w - rr);
+        nf.y = Math.min(nf.y, WORLD.h - rr);
+        fruits.push(nf);
+
+        addScore(bonus);
+        logEvent(
+          `${iconTag(chain[a.tier])}×2 <span class="history-arrow">›</span> ${iconTag(chain[t])}${foodOf(t).name}` +
+          (combo >= 2 ? ` <span class="history-arrow">${combo}コンボ</span>` : ""),
+          bonus
+        );
+        onIngredient(chain[t]);
+        addPopup(mx, my - RADII[t] - 12, "+" + bonus, "#d34744", 15 + t * 1.6);
+        if (combo >= 2) addPopup(mx, my - RADII[t] - 34, combo + " コンボ！", "#f7a325", 14);
+        spawnParticles(mx, my, f.color, 8 + t * 2, 130 + t * 22);
+        if (t === MAX_TIER) {
+          addPopup(WORLD.w / 2, 180, "✨ シークレット！おいしいシッポ！！", "#d9679a", 24);
+          spawnParticles(mx, my, "#f7c6d3", 30, 280);
+          shake = 12;
+          sfx.feast();
+        } else if (t === MAX_TIER - 1) {
+          addPopup(WORLD.w / 2, 180, "🎃 ずっしりカボチャ かんせい！！", "#2d7a4a", 24);
+          spawnParticles(mx, my, "#f5c96b", 30, 280);
+          shake = 12;
+          sfx.feast();
+        } else {
+          if (isNewTier && t >= visibleTiers) {
+            addPopup(WORLD.w / 2, 150, "✨ シークレット食材はっけん！", "#9a6bc7", 18);
+          }
+          shake = Math.max(shake, t * 0.9);
+          sfx.merge(t);
+        }
+
+        trySkillCharge(mx, my);
+        trySkillFoodGet();
+        updateSkillChips();
+      }
+
+      // 静的な壁・床との接触解決（角度も考慮した剛体レスポンス）
+      function resolveStatic(b, wx, wy, wr, nx, ny, overlap) {
+        const invM = b.shape.invM, invI = b.shape.invI;
+        b.x += nx * overlap * 0.8;
+        b.y += ny * overlap * 0.8;
+        // 接触点
+        const px = wx - nx * wr;
+        const py = wy - ny * wr;
+        const rax = px - b.x, ray = py - b.y;
+        const vax = b.vx - b.av * ray, vay = b.vy + b.av * rax;
+        const vn = vax * nx + vay * ny;
+        if (vn < 0) {
+          const raXn = rax * ny - ray * nx;
+          const k = invM + raXn * raXn * invI;
+          const j = (-(1 + RESTITUTION) * vn) / k;
+          b.vx += j * nx * invM;
+          b.vy += j * ny * invM;
+          b.av += j * raXn * invI;
+          // 摩擦
+          const tx = -ny, ty = nx;
+          const vt = vax * tx + vay * ty;
+          const raXt = rax * ty - ray * tx;
+          const kt = invM + raXt * raXt * invI;
+          let jt = -vt / kt;
+          const maxF = Math.abs(j) * (FRICTION + 0.15);
+          jt = Math.max(-maxF, Math.min(maxF, jt));
+          b.vx += jt * tx * invM;
+          b.vy += jt * ty * invM;
+          b.av += jt * raXt * invI;
+        }
+      }
+
+      function physicsStep(dt) {
+        // 積分
+        for (const f of fruits) {
+          f.age += dt;
+          f.vy += GRAVITY * dt;
+          f.x += f.vx * dt;
+          f.y += f.vy * dt;
+          f.angle += f.av * dt;
+          f.av *= 0.995;
+          if (f.av > 12) f.av = 12;
+          if (f.av < -12) f.av = -12;
+        }
+
+        const mergePairs = [];
+
+        for (let iter = 0; iter < SOLVER_ITERS; iter++) {
+          for (const f of fruits) updateWorldCircles(f);
+
+          // 壁と床（サブ円ごと）
+          for (const f of fruits) {
+            for (const w of f._wc) {
+              if (w.x < w.r) resolveStatic(f, w.x, w.y, w.r, 1, 0, w.r - w.x);
+              if (w.x > WORLD.w - w.r) resolveStatic(f, w.x, w.y, w.r, -1, 0, w.x - (WORLD.w - w.r));
+              if (w.y > WORLD.h - w.r) resolveStatic(f, w.x, w.y, w.r, 0, -1, w.y - (WORLD.h - w.r));
+            }
+          }
+
+          // 食材同士（バウンディング → サブ円ペア）
+          for (let i = 0; i < fruits.length; i++) {
+            const a = fruits[i];
+            if (a.dead) continue;
+            const invMa = a.shape.invM, invIa = a.shape.invI;
+            for (let j = i + 1; j < fruits.length; j++) {
+              const b = fruits[j];
+              if (b.dead) continue;
+              const bx = b.x - a.x, by = b.y - a.y;
+              const br = a.shape.boundR + b.shape.boundR;
+              if (bx * bx + by * by >= br * br) continue;
+
+              const invMb = b.shape.invM, invIb = b.shape.invI;
+              for (const wa of a._wc) {
+                for (const wb of b._wc) {
+                  const dx = wb.x - wa.x;
+                  const dy = wb.y - wa.y;
+                  const minD = wa.r + wb.r;
+                  const d2 = dx * dx + dy * dy;
+                  if (d2 >= minD * minD) continue;
+                  if (a.dead || b.dead) break;
+                  const d = Math.sqrt(d2) || 0.01;
+                  const nx = dx / d;
+                  const ny = dy / d;
+                  const overlap = minD - d;
+
+                  // 位置補正（質量比で分配、回転は速度側でのみ扱う）
+                  const imSum = invMa + invMb;
+                  const corr = (Math.max(overlap - 0.4, 0) / imSum) * 0.8;
+                  a.x -= nx * corr * invMa;
+                  a.y -= ny * corr * invMa;
+                  b.x += nx * corr * invMb;
+                  b.y += ny * corr * invMb;
+
+                  // 接触点
+                  const px = wa.x + nx * (wa.r - overlap / 2);
+                  const py = wa.y + ny * (wa.r - overlap / 2);
+                  const rax = px - a.x, ray = py - a.y;
+                  const rbx = px - b.x, rby = py - b.y;
+                  const vax = a.vx - a.av * ray, vay = a.vy + a.av * rax;
+                  const vbx = b.vx - b.av * rby, vby = b.vy + b.av * rbx;
+                  const rvx = vbx - vax, rvy = vby - vay;
+                  const rvn = rvx * nx + rvy * ny;
+                  if (rvn < 0) {
+                    const raXn = rax * ny - ray * nx;
+                    const rbXn = rbx * ny - rby * nx;
+                    const k = invMa + invMb + raXn * raXn * invIa + rbXn * rbXn * invIb;
+                    const jimp = (-(1 + RESTITUTION) * rvn) / k;
+                    a.vx -= jimp * nx * invMa;
+                    a.vy -= jimp * ny * invMa;
+                    a.av -= jimp * raXn * invIa;
+                    b.vx += jimp * nx * invMb;
+                    b.vy += jimp * ny * invMb;
+                    b.av += jimp * rbXn * invIb;
+
+                    // 摩擦
+                    const tx = -ny, ty = nx;
+                    const rvt = rvx * tx + rvy * ty;
+                    const raXt = rax * ty - ray * tx;
+                    const rbXt = rbx * ty - rby * tx;
+                    const kt = invMa + invMb + raXt * raXt * invIa + rbXt * rbXt * invIb;
+                    let jt = -rvt / kt;
+                    const maxF = Math.abs(jimp) * FRICTION;
+                    jt = Math.max(-maxF, Math.min(maxF, jt));
+                    a.vx -= jt * tx * invMa;
+                    a.vy -= jt * ty * invMa;
+                    a.av -= jt * raXt * invIa;
+                    b.vx += jt * tx * invMb;
+                    b.vy += jt * ty * invMb;
+                    b.av += jt * rbXt * invIb;
+                  }
+
+                  // 同じ食材なら合体（最初の反復でのみ判定）
+                  if (iter === 0 && a.tier === b.tier) {
+                    a.dead = true;
+                    b.dead = true;
+                    mergePairs.push([a, b]);
+                  }
+                }
+                if (a.dead || b.dead) break;
+              }
+            }
+          }
+        }
+
+        if (mergePairs.length) {
+          fruits = fruits.filter((f) => !f.dead);
+          for (const [a, b] of mergePairs) doMerge(a, b);
+          fruits = fruits.filter((f) => !f.dead);
+        }
+      }
+
+      function triggerGameOver() {
+        gameOver = true;
+        clearSave();
+        boardWrap.classList.add("over");
+        logEvent(`🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
+        sfx.over();
+        const prevRank = rankIndex(best);
+        const isBest = score > best;
+        if (isBest) {
+          best = score;
+          try { localStorage.setItem("kabocha.best", String(best)); } catch (_) {}
+          bestValue.textContent = fmt(best);
+          updateRankLabel();
+        }
+        const newRank = rankIndex(best);
+        const resultRank = document.getElementById("resultRank");
+        if (newRank > prevRank) {
+          resultRank.textContent = `🎖 ランクアップ！「${RANKS[newRank].name}」になった！`;
+        } else if (newRank >= RANKS.length - 1) {
+          resultRank.textContent = "👑 さいこうランク「ごちそう でんせつ」！";
+        } else {
+          resultRank.textContent = "";
+        }
+        const topName = foodOf(maxTierReached).name;
+        resultScore.textContent = fmt(score);
+        resultBestBadge.classList.toggle("show", isBest && score > 0);
+        resultMax.textContent = maxTierReached > 0 ? `いちばん大きな食材は「${topName}」！` : "";
+        if (maxTierReached >= MAX_TIER) {
+          resultEmoji.textContent = "👑";
+          resultSub.textContent = "まさかの おいしいシッポ！？ でんせつ級！！";
+        } else if (maxTierReached >= MAX_TIER - 1) {
+          resultEmoji.textContent = "🎃";
+          resultSub.textContent = "ずっしりカボチャまで育った！すごい！！";
+        } else if (maxTierReached >= visibleTiers) {
+          resultEmoji.textContent = "✨";
+          resultSub.textContent = "シークレット食材までたどりついた！";
+        } else {
+          resultEmoji.textContent = "🍳";
+          resultSub.textContent = "食材が あふれちゃった…";
+        }
+        const shareText = `ごちそうできるかな！！ でエナジー ${fmt(score)} をためたよ🍲（いちばん大きな食材は ${topName}）#ごちそうできるかな`;
+        xShare.href = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n${SHARE_URL}`)}`;
+        result.hidden = false;
+      }
+
+      function update(dt) {
+        if (gameOver) {
+          // 演出だけ進める
+          updateFx(dt);
+          return;
+        }
+
+        playTime += dt;
+
+        if (comboTimer > 0) {
+          comboTimer -= dt;
+          if (comboTimer <= 0) { combo = 0; chargeFired = false; updateSkillChips(); }
+        }
+
+        if (cooldown > 0) {
+          cooldown -= dt;
+          if (cooldown <= 0 && !current) {
+            current = { tier: nextTier };
+            nextTier = randTier();
+            drawNext();
+          }
+        }
+
+        // 押しっぱなしで連続ドロップ
+        if (aiming) {
+          holdTime += dt;
+          if (holdTime >= HOLD_DELAY && current) {
+            drop();
+            heldDrop = true;
+          }
+        }
+
+        const sub = dt / SUBSTEPS;
+        for (let s = 0; s < SUBSTEPS; s++) physicsStep(sub);
+
+        // 危険ライン判定
+        let danger = false;
+        for (const f of fruits) {
+          const top = topYOf(f);
+          if (top > LINE_Y) f.entered = true;
+          const slow = Math.abs(f.vy) < 120;
+          if ((f.entered || f.age > 2.5) && slow && top < LINE_Y) danger = true;
+        }
+        if (danger) {
+          warn += dt;
+          trySkillCheer(); // げんきオールS: ピンチで自動発動
+          if (warn >= OVER_TIME) { triggerGameOver(); return; }
+        } else {
+          warn = Math.max(0, warn - dt * 1.6);
+        }
+
+        updateFx(dt);
+      }
+
+      function updateFx(dt) {
+        if (shake > 0) shake = Math.max(0, shake - dt * 46);
+        for (const p of particles) {
+          p.t += dt;
+          p.vy += 900 * dt;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+        }
+        particles = particles.filter((p) => p.t < p.life);
+        for (const p of popups) p.t += dt;
+        popups = popups.filter((p) => p.t < p.life);
+      }
+
+      // ---- 描画 -------------------------------------------------------
+      function render() {
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.clearRect(0, 0, WORLD.w, WORLD.h);
+
+        if (shake > 0 && !reducedMotion) {
+          ctx.translate((Math.random() - 0.5) * shake * 0.6, (Math.random() - 0.5) * shake * 0.6);
+        }
+
+        // 危険ライン
+        const warnRatio = Math.min(warn / OVER_TIME, 1);
+        ctx.save();
+        ctx.setLineDash([9, 8]);
+        ctx.lineWidth = warnRatio > 0 ? 2.5 : 1.6;
+        if (warnRatio > 0) {
+          const blink = 0.45 + 0.55 * Math.abs(Math.sin(performance.now() / 110));
+          ctx.strokeStyle = `rgba(220, 70, 65, ${0.35 + 0.65 * warnRatio * blink})`;
+        } else {
+          ctx.strokeStyle = "rgba(190, 160, 110, .55)";
+        }
+        ctx.beginPath();
+        ctx.moveTo(6, LINE_Y);
+        ctx.lineTo(WORLD.w - 6, LINE_Y);
+        ctx.stroke();
+        ctx.restore();
+
+        if (warnRatio > 0.12) {
+          ctx.font = "900 15px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillStyle = `rgba(211, 71, 68, ${0.5 + warnRatio * 0.5})`;
+          ctx.fillText("⚠ あふれそう！", WORLD.w / 2, LINE_Y - 10);
+        }
+
+        // 落下ガイドとつかんでいる食材
+        if (current && !gameOver) {
+          const bound = activeShapes[current.tier].boundR;
+          const x = Math.min(Math.max(dropX, bound + 2), WORLD.w - bound - 2);
+          ctx.save();
+          ctx.setLineDash([4, 7]);
+          ctx.strokeStyle = "rgba(150, 120, 80, .35)";
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(x, DROP_Y + bound);
+          ctx.lineTo(x, WORLD.h - 4);
+          ctx.stroke();
+          ctx.restore();
+          const bob = reducedMotion ? 0 : Math.sin(performance.now() / 300) * 2;
+          drawSprite(ctx, current.tier, x, DROP_Y + bob, 0);
+        }
+
+        // 食材
+        for (const f of fruits) {
+          // 影
+          const bound = f.shape.boundR;
+          ctx.beginPath();
+          ctx.ellipse(f.x, f.y + bound * 0.88, bound * 0.68, bound * 0.15, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(90, 60, 30, .1)";
+          ctx.fill();
+          drawSprite(ctx, f.tier, f.x, f.y, f.angle);
+        }
+
+        // コライダー表示（デバッグ用: window.__showColliders = true）
+        if (window.__showColliders) {
+          ctx.strokeStyle = "rgba(30, 120, 200, .75)";
+          ctx.lineWidth = 1.4;
+          for (const f of fruits) {
+            updateWorldCircles(f);
+            for (const w of f._wc) {
+              ctx.beginPath();
+              ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // パーティクル
+        for (const p of particles) {
+          const a = 1 - p.t / p.life;
+          ctx.globalAlpha = a;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * (0.5 + a * 0.5), 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // スコアポップ
+        for (const p of popups) {
+          const k = p.t / p.life;
+          ctx.globalAlpha = k < 0.75 ? 1 : 1 - (k - 0.75) / 0.25;
+          ctx.font = `900 ${p.size}px "M PLUS 1p", sans-serif`;
+          ctx.textAlign = "center";
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "rgba(255,255,255,.9)";
+          ctx.strokeText(p.text, p.x, p.y - k * 30);
+          ctx.fillStyle = p.color;
+          ctx.fillText(p.text, p.x, p.y - k * 30);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // ---- 入力 -------------------------------------------------------
+      function pointerX(ev) {
+        const rect = canvas.getBoundingClientRect();
+        return ((ev.clientX - rect.left) / rect.width) * WORLD.w;
+      }
+
+      function drop() {
+        if (!current || gameOver) return;
+        const bound = activeShapes[current.tier].boundR;
+        const x = Math.min(Math.max(dropX, bound + 2), WORLD.w - bound - 2);
+        const nf = makeFruit(current.tier, x, DROP_Y);
+        nf.angle = 0;
+        nf.av = (Math.random() - 0.5) * 0.4;
+        fruits.push(nf);
+        onIngredient(chain[nf.tier]);
+        current = null;
+        cooldown = DROP_COOLDOWN;
+        sfx.drop();
+      }
+
+      canvas.addEventListener("pointerdown", (ev) => {
+        ensureAudio();
+        if (gameOver) return;
+        aiming = true;
+        holdTime = 0;
+        heldDrop = false;
+        dropX = pointerX(ev);
+        try { canvas.setPointerCapture(ev.pointerId); } catch (_) {}
+        ev.preventDefault();
+      });
+
+      canvas.addEventListener("pointermove", (ev) => {
+        if (gameOver) return;
+        if (aiming || ev.pointerType === "mouse") dropX = pointerX(ev);
+      });
+
+      canvas.addEventListener("pointerup", (ev) => {
+        if (!aiming) return;
+        aiming = false;
+        if (!heldDrop) {
+          // みじかいタップは いままでどおり「はなした位置に落とす」
+          dropX = pointerX(ev);
+          drop();
+        }
+      });
+
+      canvas.addEventListener("pointercancel", () => { aiming = false; });
+
+      window.addEventListener("keydown", (ev) => {
+        if (gameOver) {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); reset(); }
+          return;
+        }
+        if (ev.key === "ArrowLeft") { dropX = Math.max(10, dropX - 14); ev.preventDefault(); }
+        else if (ev.key === "ArrowRight") { dropX = Math.min(WORLD.w - 10, dropX + 14); ev.preventDefault(); }
+        else if (ev.key === " " || ev.key === "ArrowDown" || ev.key === "Enter") { ensureAudio(); drop(); ev.preventDefault(); }
+      });
+
+      restartButton.addEventListener("click", () => { ensureAudio(); reset(); });
+
+      rulesButton.addEventListener("click", () => rulesDialog.showModal());
+      rulesClose.addEventListener("click", () => rulesDialog.close());
+      rulesDialog.addEventListener("click", (ev) => {
+        if (ev.target === rulesDialog) rulesDialog.close();
+      });
+
+      guideBox.addEventListener("click", () => {
+        renderSecretList();
+        secretDialog.showModal();
+      });
+
+      document.getElementById("orderChange").addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        if (gameOver) return;
+        ensureAudio();
+        buildOrder();
+      });
+
+      const recipeDialog = document.getElementById("recipeDialog");
+      orderCard.addEventListener("click", () => {
+        renderRecipeNote();
+        recipeDialog.showModal();
+      });
+      orderCard.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); renderRecipeNote(); recipeDialog.showModal(); }
+      });
+      document.getElementById("sortEnergy").addEventListener("click", () => { noteSort = "energy"; renderRecipeNote(); });
+      document.getElementById("sortLv").addEventListener("click", () => { noteSort = "lv"; renderRecipeNote(); });
+      document.getElementById("recipeClose").addEventListener("click", () => recipeDialog.close());
+      recipeDialog.addEventListener("click", (ev) => {
+        if (ev.target === recipeDialog) recipeDialog.close();
+      });
+
+      const rankDialog = document.getElementById("rankDialog");
+      const rankLabelEl = document.getElementById("rankLabel");
+      const openRankDialog = () => { renderRankList(); rankDialog.showModal(); };
+      rankLabelEl.addEventListener("click", openRankDialog);
+      rankLabelEl.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openRankDialog(); }
+      });
+      document.getElementById("rankClose").addEventListener("click", () => rankDialog.close());
+      rankDialog.addEventListener("click", (ev) => {
+        if (ev.target === rankDialog) rankDialog.close();
+      });
+
+      historyButton.addEventListener("click", () => {
+        renderHistory();
+        historyDialog.showModal();
+      });
+      historyClose.addEventListener("click", () => historyDialog.close());
+      historyDialog.addEventListener("click", (ev) => {
+        if (ev.target === historyDialog) historyDialog.close();
+      });
+      secretClose.addEventListener("click", () => secretDialog.close());
+      secretDialog.addEventListener("click", (ev) => {
+        if (ev.target === secretDialog) secretDialog.close();
+      });
+
+      // ---- メインループ -----------------------------------------------
+      let lastTime = performance.now();
+      let saveAcc = 0;
+      let resumePending = false; // 再開ポップアップの選択待ちの間はセーブしない
+
+      function frame(now) {
+        let dt = (now - lastTime) / 1000;
+        lastTime = now;
+        if (dt > 0.05) dt = 0.05;
+        if (dt < 0) dt = 0;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        const cssW = boardWrap.clientWidth;
+        if (cssW > 0 && Math.abs(canvas.width - cssW * dpr) > 1) resize();
+        update(dt);
+        if (canvas.width > 0) render();
+        if (!gameOver && !resumePending) {
+          saveAcc += dt;
+          if (saveAcc >= 4) { saveAcc = 0; saveGame(); }
+        }
+        if (window.__suikaDebugHook) window.__suikaDebugHook({ fruits, current, cooldown, warn, gameOver, score, nextTier, dropX, foodGauge, cheerUsed, combo, chain, visibleTiers, activeShapes });
+        requestAnimationFrame(frame);
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) lastTime = performance.now();
+        else if (!resumePending) saveGame();
+      });
+      window.addEventListener("pagehide", () => { if (!resumePending) saveGame(); });
+
+      let resizeTimer = 0;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 120);
+      });
+
+      buildChain();
+      // reset() がセーブを消す前に退避しておく
+      let savedRaw = null;
+      try { savedRaw = localStorage.getItem("kabocha.save"); } catch (_) {}
+      resize();
+      reset();
+
+      // 途中セーブがあれば「つづきから / さいしょから」を選んでもらう
+      let savedData = null;
+      try {
+        const d = JSON.parse(savedRaw || "null");
+        if (d && d.v === 1 && Array.isArray(d.fruits)) savedData = d;
+      } catch (_) {}
+      if (savedData) {
+        try { localStorage.setItem("kabocha.save", savedRaw); } catch (_) {}
+        const resumeDialog = document.getElementById("resumeDialog");
+        document.getElementById("resumeInfo").innerHTML =
+          `エナジー <strong>${fmt(Math.floor(Number(savedData.score) || 0))}</strong> ／ ` +
+          `じかん <strong>${timeTag(Math.max(0, Number(savedData.playTime) || 0))}</strong> ／ ` +
+          `食材 <strong>${savedData.fruits.length}</strong>個`;
+        const applyResume = () => {
+          if (loadGame()) {
+            if (scale > 0 && canvas.width > 0) {
+              sprites = chain.map((_, t) => makeSprite(t, scale));
+              drawGuide();
+            }
+            drawNext();
+          }
+        };
+        document.getElementById("resumeContinue").addEventListener("click", () => {
+          resumeDialog.close();
+          applyResume();
+          resumePending = false;
+        });
+        document.getElementById("resumeReset").addEventListener("click", () => {
+          resumeDialog.close();
+          clearSave();
+          resumePending = false;
+        });
+        // Escなどで閉じようとしたら「つづきから」あつかい
+        resumeDialog.addEventListener("cancel", (ev) => {
+          ev.preventDefault();
+        });
+        resumePending = true;
+        resumeDialog.showModal();
+      }
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
