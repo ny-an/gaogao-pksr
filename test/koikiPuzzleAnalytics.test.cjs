@@ -13,11 +13,21 @@ const survivalSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-lega
 function runAnalytics({ protocol = 'https:', hostname = 'ny-an.github.io', gtag } = {}) {
   const appendedScripts = [];
   const createdScripts = [];
+  const documentElement = { dataset: {} };
   const document = {
+    documentElement,
     head: { append: script => appendedScripts.push(script) },
     querySelector: () => null,
     createElement: tagName => {
-      const element = { tagName, async: false, src: '', dataset: {} };
+      const listeners = {};
+      const element = {
+        tagName,
+        async: false,
+        src: '',
+        dataset: {},
+        listeners,
+        addEventListener: (name, listener) => { listeners[name] = listener; }
+      };
       createdScripts.push(element);
       return element;
     }
@@ -47,8 +57,12 @@ test('V2とサバイバルが同じGA4共通処理を読み込む', () => {
 test('GA4は本番GitHub Pagesだけで初期化する', () => {
   const production = runAnalytics();
   assert.equal(production.context.KoikiPuzzleAnalytics.enabled, true);
+  assert.equal(production.context.document.documentElement.dataset.puzzleAnalytics, 'enabled');
   assert.equal(production.appendedScripts.length, 1);
   assert.equal(production.appendedScripts[0].src, 'https://www.googletagmanager.com/gtag/js?id=G-Q5BGCQDCV6');
+  assert.equal(production.context.document.documentElement.dataset.puzzleGa4, 'loading');
+  production.appendedScripts[0].listeners.load();
+  assert.equal(production.context.document.documentElement.dataset.puzzleGa4, 'loaded');
   const initializationCalls = Array.from(production.context.dataLayer, call => Array.from(call).slice(0, 2));
   assert.deepEqual(initializationCalls, [['js', initializationCalls[0][1]], ['config', 'G-Q5BGCQDCV6']]);
 
@@ -60,6 +74,7 @@ test('GA4は本番GitHub Pagesだけで初期化する', () => {
     const calls = [];
     const local = runAnalytics({ ...location, gtag: (...args) => calls.push(args) });
     assert.equal(local.context.KoikiPuzzleAnalytics.enabled, false);
+    assert.equal(local.context.document.documentElement.dataset.puzzleAnalytics, 'disabled');
     assert.equal(local.appendedScripts.length, 0);
     local.context.KoikiPuzzleAnalytics.startPlay({ game_version: 'v2', game_mode: 'normal', category: 'curry' });
     assert.deepEqual(calls, []);
@@ -70,6 +85,7 @@ test('開始・再開・料理・終了・シェアを固定パラメータで�
   const { context } = runAnalytics();
   const analytics = context.KoikiPuzzleAnalytics;
   assert.equal(analytics.startPlay({ game_version: 'v2', game_mode: 'normal', category: 'salad' }), true);
+  assert.equal(context.document.documentElement.dataset.puzzleAnalyticsEvent, 'puzzle_play_start');
   assert.equal(analytics.startPlay({ game_version: 'v2', game_mode: 'normal', category: 'salad' }), false);
   assert.equal(analytics.completeMeal({
     game_version: 'v2', game_mode: 'normal', category: 'salad', dish_number: 2,

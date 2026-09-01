@@ -35,12 +35,22 @@
   let playOpen = false;
   let playEndSent = false;
 
+  function setPageMarker(name, value) {
+    try {
+      document.documentElement.dataset[name] = value;
+    } catch (_) {}
+  }
+
   function isProductionLocation(location = window.location) {
     return location?.protocol === PRODUCTION_PROTOCOL && location?.hostname === PRODUCTION_HOSTNAME;
   }
 
   function initializeAnalytics() {
-    if (!isProductionLocation()) return false;
+    if (!isProductionLocation()) {
+      setPageMarker('puzzleAnalytics', 'disabled');
+      return false;
+    }
+    setPageMarker('puzzleAnalytics', 'initializing');
     try {
       window.dataLayer = window.dataLayer || [];
       window.gtag = window.gtag || function gtag() { window.dataLayer.push(arguments); };
@@ -51,10 +61,15 @@
         script.async = true;
         script.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
         script.dataset.koikiGa4 = 'true';
+        script.addEventListener('load', () => setPageMarker('puzzleGa4', 'loaded'), { once: true });
+        script.addEventListener('error', () => setPageMarker('puzzleGa4', 'failed'), { once: true });
+        setPageMarker('puzzleGa4', 'loading');
         document.head.append(script);
       }
+      setPageMarker('puzzleAnalytics', 'enabled');
       return true;
     } catch (_) {
+      setPageMarker('puzzleAnalytics', 'failed');
       return false;
     }
   }
@@ -80,6 +95,7 @@
     try {
       if (typeof window.gtag !== 'function') return false;
       window.gtag('event', eventName, normalizeParameters(eventName, parameters));
+      setPageMarker('puzzleAnalyticsEvent', eventName);
       return true;
     } catch (_) {
       return false;
