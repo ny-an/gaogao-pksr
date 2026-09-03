@@ -1442,6 +1442,10 @@
       let gameDishes = 0;
       const HISTORY_MAX = 200;
 
+      // 隠し機能「1000個おとし」の投下待ち行列（tierの配列）
+      let dropQueue = [];
+      let dropQueueTimer = 0;
+
       // ちゅうもん状態
       let order = null;          // { recipe, got: { poolIdx: n } }
       let lastRecipeName = "";
@@ -1510,6 +1514,20 @@
         document.getElementById("rankLabel").textContent = RANKS[rankIndex(best)].name;
       }
       updateRankLabel();
+
+      // タイトルはスコアがしきい値に届いた瞬間に解放（ゲームオーバーを待たない）
+      let bestBefore = best;          // このゲーム開始時点のベスト（リザルトの更新判定用）
+      let shownRank = rankIndex(best);
+      function checkRankUnlock() {
+        const r = rankIndex(best);
+        if (r <= shownRank) return;
+        shownRank = r;
+        updateRankLabel();
+        showBanner(`🎖 タイトルかくとく「${RANKS[r].name}」`);
+        addPopup(WORLD.w / 2, 150, "🎖 タイトルかくとく！", "#d96f2f", 20);
+        logEvent(`🎖 タイトル「${RANKS[r].name}」をかくとく！`, 0, true);
+        sfx.skill();
+      }
 
       // タイトルいちらん（獲得ずみ＋つぎの1つだけ名前が見える）
       function renderRankList() {
@@ -2268,7 +2286,9 @@
       function reset() {
         clearSave();
         buildChain();
+        bestBefore = best;
         fruits = [];
+        dropQueue = [];
         particles = [];
         popups = [];
         score = 0;
@@ -2391,6 +2411,13 @@
         scoreValue.classList.remove("score-bump");
         void scoreValue.offsetWidth;
         scoreValue.classList.add("score-bump");
+        // ベストはプレイ中にリアルタイム更新（タイトル解放判定もここで）
+        if (score > best) {
+          best = score;
+          try { localStorage.setItem("kabocha.best", String(best)); } catch (_) {}
+          bestValue.textContent = fmt(best);
+          checkRankUnlock();
+        }
       }
 
       function spawnParticles(x, y, color, count, power) {
@@ -2648,14 +2675,8 @@
         boardWrap.classList.add("over");
         logEvent(`🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
         sfx.over();
-        const prevRank = rankIndex(best);
-        const isBest = score > best;
-        if (isBest) {
-          best = score;
-          try { localStorage.setItem("kabocha.best", String(best)); } catch (_) {}
-          bestValue.textContent = fmt(best);
-          updateRankLabel();
-        }
+        const prevRank = rankIndex(bestBefore);
+        const isBest = score > bestBefore;
         const newRank = rankIndex(best);
         const resultRank = document.getElementById("resultRank");
         if (newRank > prevRank) {
@@ -2707,6 +2728,21 @@
             current = { tier: nextTier };
             nextTier = randTier();
             drawNext();
+          }
+        }
+
+        // 隠し機能「1000個おとし」: 大きいものから順に上から降らせる
+        if (dropQueue.length) {
+          dropQueueTimer -= dt;
+          if (dropQueueTimer <= 0) {
+            dropQueueTimer = 0.18;
+            const t = dropQueue.shift();
+            const bound = activeShapes[t].boundR;
+            const nf = makeFruit(t, bound + 4 + Math.random() * (WORLD.w - bound * 2 - 8), -bound - 10);
+            nf.angle = (Math.random() - 0.5) * 0.6;
+            fruits.push(nf);
+            recordDiscovery(chain[t]);
+            sfx.drop();
           }
         }
 
@@ -2914,6 +2950,35 @@
       });
 
       restartButton.addEventListener("click", () => { ensureAudio(); reset(); });
+
+      // 隠し機能: 画面右下の何もないところを3秒以内に10連打、盤面が空なら
+      // 「食材を1000個落として全部合体した状態」の山を降らせる（スコアは入らない）
+      let cornerTaps = [];
+      document.addEventListener("pointerdown", (ev) => {
+        if (ev.target.closest("button, a, canvas, dialog, input, .stat, .guide, .skill-chip, .order, .title, .topbar")) return;
+        if (ev.clientX < window.innerWidth * 0.7 || ev.clientY < window.innerHeight * 0.7) return;
+        const now = performance.now();
+        cornerTaps = cornerTaps.filter((t) => now - t < 3000);
+        cornerTaps.push(now);
+        if (cornerTaps.length < 10) return;
+        cornerTaps = [];
+        if (gameOver || fruits.length > 0 || dropQueue.length) return;
+        // 1000個ぶんを「完全合体モデル」で圧縮（2個そろうたび1段上へ繰り上げ）
+        const counts = new Array(MAX_TIER + 1).fill(0);
+        for (let i = 0; i < 1000; i++) {
+          let t = randTier();
+          counts[t] += 1;
+          while (t < MAX_TIER && counts[t] >= 2) { counts[t] -= 2; t += 1; counts[t] += 1; }
+        }
+        if (counts[MAX_TIER] > 1) counts[MAX_TIER] = 1; // シッポ×2の即消滅ボーナスは渡さない
+        dropQueue = [];
+        for (let t = MAX_TIER; t >= 0; t--) for (let c = 0; c < counts[t]; c++) dropQueue.push(t);
+        dropQueueTimer = 0;
+        ensureAudio();
+        showBanner(`🎁 食材を1000こ おとした！（${dropQueue.length}こに合体）`);
+        logEvent(`🎁 食材を1000こ おとした → ${dropQueue.length}こに合体`, 0, true);
+        sfx.feast();
+      });
 
       // 隠し機能: マスコットを1.5秒以内に5連打で食材をシャッフル（除外セットを引き直して新ゲーム）
       let mascotTaps = [];
