@@ -11,6 +11,7 @@ const legacySource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-sur
 const indexSource = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
 const gamesSource = fs.readFileSync(path.join(projectRoot, 'games.html'), 'utf8');
 const suikaSource = fs.readFileSync(path.join(projectRoot, 'suika-game.html'), 'utf8');
+const shooterSource = fs.readFileSync(path.join(projectRoot, 'dopagaki.html'), 'utf8');
 const v2Source = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-v2.js'), 'utf8');
 const survivalModeSource = legacySource;
 const survivalStyleSource = fs.readFileSync(path.join(projectRoot, 'css/koiki-puzzle-survival.css'), 'utf8');
@@ -824,9 +825,12 @@ test('各ゲームはゲーム一覧を経由して献立表へ戻れる', () =>
   assert.match(gamesSource, /href="index\.html">← 献立表に戻る<\/a>/);
   assert.match(gamesSource, /href="koiki-puzzle\.html"/);
   assert.match(gamesSource, /href="suika-game\.html"/);
+  assert.match(gamesSource, /href="dopagaki\.html"[\s\S]*?食材とれるかな！！[\s\S]*?食材をうちおとすシューティング/);
   assert.match(source, /href="games\.html">← ゲーム一覧へ<\/a>/);
   assert.match(legacySource, /href="games\.html">← ゲーム一覧へ<\/a>/);
   assert.match(suikaSource, /href="games\.html">← ゲーム一覧へ<\/a>/);
+  assert.match(shooterSource, /href="games\.html">← ゲーム一覧へ<\/a>/);
+  assert.match(shooterSource, /<title>食材とれるかな！！<\/title>/);
 });
 
 test('食材ゲットは盤面候補ではなく全食材から3種類を抽選する', () => {

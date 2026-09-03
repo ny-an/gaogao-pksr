@@ -1,0 +1,3798 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#fff7e5">
+  <meta name="description" content="食材をうって、あつめて、料理をつくるお料理シューティング。21食つくって1週間かんそうをめざせ！">
+  <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/dopagaki.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="食材とれるかな！！">
+  <meta property="og:description" content="食材をうって、あつめて、料理をつくるお料理シューティング。21食つくって1週間かんそうをめざせ！">
+  <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/dopagaki.html">
+  <meta name="twitter:card" content="summary">
+  <title>食材とれるかな！！</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpath%20d='M14%2040h72v8c0%2028-14%2042-36%2042S14%2076%2014%2048z'%20fill='%23555049'/%3E%3Crect%20x='8'%20y='36'%20width='84'%20height='10'%20rx='5'%20fill='%23777069'/%3E%3Cpath%20d='M30%2032c0-12%2040-12%2040%200z'%20fill='%23e8a13b'/%3E%3Ccircle%20cx='50'%20cy='22'%20r='6'%20fill='%23a3541e'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #40372f;
+      --muted: #7d7269;
+      --cream: #fff7e5;
+      --paper: #fffdf8;
+      --line: #eadbc5;
+      --green: #4d9e66;
+      --green-dark: #35804d;
+      --orange: #ef8f4f;
+      --orange-dark: #d96f2f;
+      --red: #e85f5c;
+      --red-dark: #d34744;
+      --purple: #7a5fbf;
+      --shadow: 0 12px 34px rgba(88, 62, 38, .12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--cream); }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 4%, rgba(255, 210, 117, .35), transparent 26rem),
+        radial-gradient(circle at 90% 12%, rgba(178, 232, 154, .24), transparent 20rem),
+        linear-gradient(180deg, #fffaf0 0%, #fff3d8 100%);
+      font-family: "M PLUS 1p", "Hiragino Kaku Gothic ProN", "Yu Gothic", system-ui, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    button, a { font: inherit; }
+    button { touch-action: manipulation; }
+
+    .page {
+      width: min(100%, 480px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px 14px 34px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      margin-bottom: 2px;
+    }
+
+    .back {
+      padding: 10px 4px;
+      border: 0;
+      color: var(--ink);
+      background: transparent;
+      font-size: .8rem;
+      font-weight: 800;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .topbar-actions { display: flex; gap: 5px; }
+
+    .chip-button {
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .7);
+      font-size: .76rem;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .chip-button:active { transform: translateY(1px); }
+    .chip-button.chip-icon { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; }
+    .chip-button.chip-icon img { width: 22px; height: 22px; filter: grayscale(1) opacity(.72); }
+
+    .chip-button.muted {
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+    }
+
+    .title {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 10px;
+      align-items: center;
+      margin: 0 6px 8px;
+    }
+
+    .title-mascot {
+      display: grid;
+      width: 46px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 3px solid #f2c06c;
+      border-radius: 50%;
+      /* @GaoGaoPuuun提供の操作アイコン（koiki-puzzle・suikaと同じ） */
+      background: url("img/icons/gaogaopuuun-koiki.png") center / cover no-repeat;
+      box-shadow: 0 6px 0 rgba(216, 142, 57, .18);
+      cursor: pointer;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.1rem, 4.8vw, 1.45rem);
+      line-height: 1.16;
+      letter-spacing: .02em;
+    }
+
+    h1 small {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      margin-bottom: 1px;
+      color: var(--orange-dark);
+      font-size: .66em;
+      cursor: pointer;
+    }
+
+    h1 .title-sub {
+      display: block;
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: .5em;
+      font-weight: 800;
+      letter-spacing: .14em;
+    }
+
+    .game-card {
+      padding: 9px 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .stat {
+      display: grid;
+      grid-auto-flow: column;
+      align-items: baseline;
+      justify-content: start;
+      padding: 5px 10px;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 900;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .01em;
+    }
+
+    .stat-best .stat-value { font-size: .8rem; color: var(--muted); }
+
+    .stat-hearts { align-content: center; }
+
+    .hearts { display: flex; gap: 3px; }
+
+    .hearts svg { width: 20px; height: 20px; display: block; }
+
+    .hearts .heart-off path { fill: #e6dccb; }
+    .hearts img { width: 22px; height: 22px; display: block; }
+    .hearts .shield-empty {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border: 1.5px dashed var(--line);
+      border-radius: 50%;
+      color: var(--line);
+      font-size: .6rem;
+      font-weight: 1000;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .meta-chip {
+      padding: 3px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font-size: .66rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meta-chip.accent { color: var(--orange-dark); border-color: #f2ce96; background: #fff6e6; }
+    .meta-chip.fb { color: var(--purple); border-color: #d9cdf2; background: #f6f1ff; }
+    .meta-chip[hidden] { display: none; }
+
+    .power-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .power {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    /* レシピLvのメーター（背景の塗り） */
+    .power::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--meter-progress, 0%);
+      background: linear-gradient(90deg, rgba(255, 213, 128, .5), rgba(255, 185, 92, .5));
+      transition: width .25s ease;
+    }
+
+    .power > * { position: relative; }
+
+    .power-lv {
+      font-size: .72rem;
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+
+    .power-lv strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .power-desc {
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .power.levelup { animation: orderPulse .55s ease; }
+    .power.leveldown { animation: shakeX .4s ease; }
+
+    @keyframes shakeX {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .power-bombs {
+      align-self: center;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .buff-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .buff-slot {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 6px;
+      min-height: 40px;
+      padding: 5px 7px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .buff-slot::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--t, 0%);
+      background: var(--c, transparent);
+      opacity: .22;
+      transition: width .1s linear;
+    }
+
+    .buff-slot > * { position: relative; }
+    .buff-slot img { width: 24px; height: 24px; }
+    .buff-slot.empty { opacity: .45; cursor: default; }
+    .buff-slot.empty .buff-slot-name { color: var(--muted); }
+    .buff-slot.equipped { border-color: #cfc4e6; }
+    .buff-slot.locked { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(122, 95, 191, .3); }
+    .buff-slot-remove {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      z-index: 1;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(64, 55, 47, .12);
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 1000;
+      line-height: 18px;
+      cursor: pointer;
+    }
+    .buff-slot.empty .buff-slot-remove { display: none; }
+    .buff-slot.fresh { animation: freshPulse .9s ease-in-out infinite alternate; }
+
+    @keyframes freshPulse {
+      from { box-shadow: 0 0 0 0 rgba(239, 143, 79, 0); }
+      to { box-shadow: 0 0 0 3px rgba(239, 143, 79, .55); }
+    }
+
+    .buff-slot-main { display: grid; gap: 1px; min-width: 0; }
+
+    .buff-slot-name {
+      font-size: .58rem;
+      font-weight: 1000;
+      line-height: 1.25;
+    }
+
+    .buff-slot-time {
+      color: var(--muted);
+      font-size: .6rem;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .buff-slot.locked .buff-slot-time { color: var(--purple); }
+
+    .buff-bar-label {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: var(--muted);
+      font-size: .62rem;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .order {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      margin: 0 0 8px;
+      padding: 6px 10px;
+      border: 1px solid #f2ce96;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff8ea, #ffefd2);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .order.cooked { animation: orderPulse .55s ease; }
+
+    @keyframes orderPulse {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.04); box-shadow: 0 0 0 4px rgba(77, 158, 102, .3); }
+      100% { transform: scale(1); }
+    }
+
+    .order-label {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #f2ce96;
+      color: var(--orange-dark);
+      font-size: .6rem;
+      font-weight: 1000;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .order-main { display: grid; gap: 3px; min-width: 0; }
+
+    .order-name {
+      font-size: .84rem;
+      font-weight: 1000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .order-name .order-lv {
+      margin-left: 4px;
+      color: var(--purple);
+      font-size: .82em;
+      font-weight: 900;
+    }
+
+    .order-needs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      align-items: center;
+    }
+
+    .order-need {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: .72rem;
+      font-weight: 900;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .order-need img { width: 17px; height: 17px; }
+
+    .order-need.done { color: var(--green-dark); }
+
+    .order-reward {
+      color: var(--orange-dark);
+      font-size: .84rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .board-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffbee;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .skill-banner {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      z-index: 4;
+      width: max-content;
+      max-width: 92%;
+      padding: 8px 16px;
+      border-radius: 16px;
+      background: rgba(64, 55, 47, .88);
+      color: #ffe9bd;
+      font-size: .8rem;
+      font-weight: 1000;
+      line-height: 1.45;
+      text-align: center;
+      transform: translate(-50%, -90px);
+      transition: transform .28s cubic-bezier(.2, .9, .3, 1.2);
+      pointer-events: none;
+    }
+
+    .skill-banner.show { transform: translate(-50%, 0); }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: flex;
+      padding: 18px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: rgba(64, 55, 47, .42);
+      backdrop-filter: blur(2px);
+    }
+
+    .overlay[hidden] { display: none; }
+
+    .overlay-card {
+      width: min(100%, 320px);
+      margin: auto;
+      padding: 20px 18px;
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .overlay-card h2 {
+      margin: 0 0 6px;
+      font-size: 1.22rem;
+      letter-spacing: .03em;
+    }
+
+    .overlay-icon { display: grid; place-items: center; margin-bottom: 8px; }
+    .overlay-icon svg { width: 74px; height: 74px; }
+
+    .overlay-sub {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+      line-height: 1.65;
+    }
+
+    .overlay-sub strong { color: var(--orange-dark); }
+
+    .primary-button {
+      display: grid;
+      width: 100%;
+      min-height: 50px;
+      place-items: center;
+      border: 0;
+      border-radius: 14px;
+      color: #fff;
+      background: linear-gradient(180deg, var(--green), var(--green-dark));
+      box-shadow: 0 4px 0 #2a6a3e;
+      font-size: 1rem;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .primary-button:active { transform: translateY(2px); box-shadow: none; }
+
+    .result-score-box {
+      display: grid;
+      gap: 2px;
+      margin: 0 0 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .result-score-box span { color: var(--muted); font-size: .7rem; font-weight: 900; }
+    .result-score-box strong { font-size: 1.5rem; font-weight: 1000; font-variant-numeric: tabular-nums; }
+
+    .result-best {
+      display: none;
+      color: var(--orange-dark);
+      font-size: .74rem !important;
+      font-weight: 1000 !important;
+    }
+
+    .result-best.show { display: block; }
+
+    .result-meals, .result-rank {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 900;
+    }
+
+    .result-rank { color: var(--purple); margin-bottom: 12px; }
+    .result-meals strong, .result-rank strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .result-actions { display: grid; gap: 8px; }
+
+    .x-share {
+      display: grid;
+      min-height: 46px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 1000;
+      text-decoration: none;
+    }
+
+    .x-share:active { transform: translateY(1px); }
+
+    .ghost-button {
+      display: grid;
+      width: 100%;
+      min-height: 44px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      background: transparent;
+      font-size: .88rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .hint {
+      margin: 10px 2px 0;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    dialog {
+      width: min(92vw, 420px);
+      max-height: 84vh;
+      padding: 0;
+      border: 0;
+      border-radius: 20px;
+      background: var(--paper);
+      box-shadow: 0 24px 60px rgba(64, 45, 24, .3);
+    }
+
+    dialog::backdrop { background: rgba(64, 55, 47, .45); }
+
+    .rules-content { padding: 20px 18px; overflow-y: auto; max-height: 84vh; }
+
+    .rules-content h2 {
+      margin: 0 0 12px;
+      font-size: 1.14rem;
+      letter-spacing: .03em;
+    }
+
+    .rules-list {
+      display: grid;
+      gap: 10px;
+      margin: 0 0 14px;
+      padding: 0 0 0 22px;
+    }
+
+    .rules-list li::marker { color: var(--orange-dark); font-weight: 1000; }
+
+    .rules-list strong { display: block; font-size: .86rem; }
+    .rules-list span { color: var(--muted); font-size: .76rem; font-weight: 700; line-height: 1.6; }
+
+    .rules-section-title {
+      margin: 0 0 7px;
+      color: var(--orange-dark);
+      font-size: .8rem;
+      font-weight: 1000;
+    }
+
+    .rules-skills, .rules-tips { display: grid; gap: 7px; margin: 0 0 14px; }
+
+    .rules-skill, .rules-tip {
+      display: grid;
+      margin: 0;
+      padding: 8px 10px;
+      gap: 2px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .rules-skill strong, .rules-tip strong { font-size: .8rem; }
+    .rules-skill span, .rules-tip span { color: var(--muted); font-size: .73rem; font-weight: 700; line-height: 1.55; }
+
+    .rules-close {
+      display: grid;
+      width: 100%;
+      min-height: 46px;
+      place-items: center;
+      border: 0;
+      border-radius: 13px;
+      color: #fff;
+      background: linear-gradient(180deg, var(--orange), var(--orange-dark));
+      box-shadow: 0 4px 0 #b95a22;
+      font-weight: 1000;
+      cursor: pointer;
+    }
+
+    .rules-close:active { transform: translateY(2px); box-shadow: none; }
+
+    .recipe-fb {
+      margin: -4px 0 10px;
+      color: var(--muted);
+      font-size: .74rem;
+      font-weight: 900;
+      line-height: 1.65;
+    }
+
+    .recipe-fb strong { color: var(--purple); font-variant-numeric: tabular-nums; }
+
+    .recipe-list, .rank-list, .secret-list { display: grid; gap: 5px; margin-bottom: 14px; }
+
+    .recipe-row {
+      position: relative;
+      display: flex;
+      min-width: 0;
+      padding: 6px 9px;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    /* レシピLvのメーター（背景の塗り） */
+    .recipe-row::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--lv-progress, 0%);
+      background: linear-gradient(90deg, rgba(216, 196, 255, .38), rgba(178, 150, 240, .38));
+    }
+
+    .recipe-row > * { position: relative; }
+
+    .recipe-row-main { display: grid; gap: 1px; min-width: 0; flex: 1; }
+
+    .recipe-row-name {
+      font-size: .78rem;
+      font-weight: 1000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recipe-row-name .order-lv { margin-left: 4px; color: var(--purple); font-size: .84em; }
+    .recipe-row-name .order-lv.max { color: var(--orange-dark); }
+
+    .recipe-row-needs { display: flex; align-items: center; gap: 5px; }
+    .recipe-row-needs img { width: 15px; height: 15px; }
+    .recipe-row-needs span { color: var(--muted); font-size: .68rem; font-weight: 900; }
+
+    .recipe-row-reward {
+      color: var(--orange-dark);
+      font-size: .76rem;
+      font-weight: 1000;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .recipe-row.secret { border-color: #e6c7f2; background: #fdf6ff; }
+
+    .rank-progress, .secret-progress {
+      margin: -6px 0 10px;
+      color: var(--muted);
+      font-size: .72rem;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .rank-progress strong, .secret-progress strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .rank-row {
+      display: flex;
+      min-width: 0;
+      padding: 6px 9px;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      font-size: .78rem;
+      font-weight: 900;
+    }
+
+    .rank-row .rank-no {
+      width: 34px;
+      color: var(--muted);
+      font-size: .68rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-row .rank-name { flex: 1; font-weight: 1000; }
+    .rank-row .rank-t { color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
+
+    .rank-row.got { border-color: #cfe6c8; background: #f4fbf1; }
+    .rank-row.now { border-color: #f2c06c; background: #fff6e2; box-shadow: 0 0 0 2px rgba(242, 192, 108, .3); }
+    .rank-row.locked { opacity: .6; }
+    .rank-row.locked .rank-name { color: var(--muted); letter-spacing: .2em; }
+
+    .secret-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .secret-row img { width: 30px; height: 30px; }
+
+    .secret-row .secret-mark {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #f1e8d8;
+      color: var(--muted);
+      font-weight: 1000;
+    }
+
+    .secret-row-main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+    .secret-row-name { font-size: .78rem; font-weight: 1000; }
+    .secret-row-desc { color: var(--muted); font-size: .68rem; font-weight: 700; line-height: 1.5; }
+    .secret-row.found { border-color: #e6c7f2; background: #fdf6ff; }
+
+    .secret-note {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .order.boss {
+      border-color: #e6a3a3;
+      background: linear-gradient(180deg, #fff1ef, #ffe2dc);
+    }
+
+    .order.boss .order-label { border-color: #e6a3a3; color: var(--red-dark); }
+
+    .order-hp {
+      position: relative;
+      width: 100%;
+      height: 7px;
+      margin-top: 2px;
+      overflow: hidden;
+      border-radius: 4px;
+      background: rgba(64, 55, 47, .16);
+    }
+
+    .order-hp::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      width: var(--hp, 100%);
+      background: linear-gradient(90deg, #e85f5c, #d34744);
+      transition: width .12s linear;
+    }
+
+    .skill-banner.ach { background: rgba(122, 95, 191, .92); color: #fff; }
+
+    .ach-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .ach-mark {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #f1e8d8;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 1000;
+    }
+
+    .ach-row.got { border-color: #d9cdf2; background: #f8f4ff; }
+    .ach-row.got .ach-mark { background: var(--purple); color: #fff; }
+    .ach-row.locked { opacity: .72; }
+    .ach-row.now { box-shadow: 0 0 0 2px rgba(122, 95, 191, .35); }
+
+    .ach-main { display: grid; gap: 1px; flex: 1; min-width: 0; }
+    .ach-name { font-size: .78rem; font-weight: 1000; }
+    .ach-desc { color: var(--muted); font-size: .68rem; font-weight: 700; line-height: 1.5; }
+    .ach-row.locked.hidden-ach .ach-name { letter-spacing: .2em; color: var(--muted); }
+
+    .ach-row.settable { cursor: pointer; }
+    .ach-row.settable:active { transform: translateY(1px); }
+    .ach-set {
+      flex: none;
+      padding: 3px 8px;
+      border: 1px solid #d9cdf2;
+      border-radius: 999px;
+      color: var(--purple);
+      font-size: .62rem;
+      font-weight: 1000;
+      white-space: nowrap;
+    }
+    .ach-row.now .ach-set { background: var(--purple); color: #fff; }
+
+    .ach-section {
+      margin: 10px 0 6px;
+      color: var(--purple);
+      font-size: .74rem;
+      font-weight: 1000;
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .food-cell {
+      display: grid;
+      justify-items: center;
+      gap: 3px;
+      padding: 8px 4px 6px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: .62rem;
+      font-weight: 1000;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .food-cell img { width: 34px; height: 34px; }
+    .food-cell:active { transform: translateY(1px); }
+    .food-cell.unknown { opacity: .5; cursor: default; }
+    .food-cell.unknown .food-cell-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #f1e8d8;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    .food-cell.equipped-now { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(122, 95, 191, .3); }
+
+    .food-detail { text-align: center; }
+    .food-detail img { width: 72px; height: 72px; }
+    .food-detail h2 { margin: 6px 0 2px; font-size: 1.1rem; }
+    .food-detail .food-energy { margin: 0 0 10px; color: var(--muted); font-size: .72rem; font-weight: 900; }
+    .food-detail .food-shot-name {
+      display: inline-block;
+      margin: 0 0 10px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: .8rem;
+      font-weight: 1000;
+    }
+    .food-bars { display: grid; gap: 5px; margin: 0 0 10px; text-align: left; }
+    .food-bar {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      align-items: center;
+      gap: 8px;
+      font-size: .7rem;
+      font-weight: 900;
+      color: var(--muted);
+    }
+    .food-bar-track { height: 9px; overflow: hidden; border-radius: 5px; background: #f1e8d8; }
+    .food-bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, #f2c06c, #ef8f4f); }
+    .food-bar strong { color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+    .food-spec { display: grid; gap: 5px; margin: 0 0 12px; text-align: left; }
+    .food-spec-row {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      font-size: .74rem;
+      font-weight: 800;
+    }
+    .food-spec-row span:first-child { color: var(--muted); font-weight: 900; }
+    .food-spec-row strong { color: var(--orange-dark); }
+    .food-spec-row.special strong { color: var(--purple); }
+
+    .week-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: rgba(255, 255, 255, .0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <a class="back" href="games.html">← ゲーム一覧へ</a>
+      <div class="topbar-actions">
+        <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
+        <button type="button" class="chip-button chip-icon" id="foodDexButton" aria-label="食材図鑑をひらく"><img src="img/foods/svg/FancyApple.svg" alt=""></button>
+        <button type="button" class="chip-button" id="rulesButton">あそびかた</button>
+      </div>
+    </div>
+
+    <header class="title">
+      <div class="title-mascot" id="mascot" aria-hidden="true"></div>
+      <h1>
+        <small id="titleLabel" role="button" tabindex="0" aria-label="アチーブメントいちらんをひらく">おなべ みならい</small>
+        食材とれるかな！！
+      </h1>
+    </header>
+
+    <main class="game-card">
+      <div class="hud">
+        <div class="stat stat-score">
+          <span class="stat-label">エナジー</span>
+          <span class="stat-value" id="scoreValue">0</span>
+        </div>
+        <div class="stat stat-best">
+          <span class="stat-label">ベスト</span>
+          <span class="stat-value" id="bestValue">0</span>
+        </div>
+      </div>
+
+      <div class="meta-row" aria-label="週間の進行">
+        <span class="meta-chip accent" id="dayChip">月ようびのあさ</span>
+        <span class="meta-chip" id="mealChip">1/21食</span>
+        <span class="meta-chip fb" id="fbChip">FB+0%</span>
+        <span class="meta-chip" id="weekChip">1週目</span>
+      </div>
+
+      <div class="power-row">
+        <div class="power" id="powerBox" style="--meter-progress: 0%" aria-live="polite">
+          <span class="power-lv">レシピ <strong id="powerLv">Lv1</strong></span>
+          <span class="power-desc" id="powerDesc">エナジーチャージS</span>
+        </div>
+      </div>
+
+      <div class="order" id="orderCard" aria-live="polite" role="button" tabindex="0" aria-label="いまのちゅうもん。タップで料理ノートをひらく">
+        <span class="order-label" id="orderLabel">ちゅう<br>もん</span>
+        <div class="order-main">
+          <span class="order-name" id="orderName"></span>
+          <span class="order-needs" id="orderNeeds"></span>
+          <span class="order-hp" id="orderHp" hidden></span>
+        </div>
+        <strong class="order-reward" id="orderReward"></strong>
+      </div>
+
+      <div class="board-wrap" id="boardWrap">
+        <canvas id="gameCanvas" aria-label="ゲームフィールド"></canvas>
+        <div class="skill-banner" id="skillBanner" aria-live="polite"></div>
+
+        <div class="overlay" id="startOverlay">
+          <div class="overlay-card">
+            <div class="overlay-icon" aria-hidden="true">
+              <svg viewBox="0 0 100 100">
+                <path d="M14 42h72v8c0 26-14 40-36 40S14 76 14 50z" fill="#555049"/>
+                <rect x="8" y="38" width="84" height="10" rx="5" fill="#777069"/>
+                <path d="M30 34c0-13 40-13 40 0z" fill="#e8a13b"/>
+                <circle cx="50" cy="23" r="6" fill="#a3541e"/>
+                <circle cx="40" cy="62" r="4" fill="#fff7e5"/>
+                <circle cx="60" cy="62" r="4" fill="#fff7e5"/>
+                <path d="M44 74c4 3 8 3 12 0" stroke="#fff7e5" stroke-width="3" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <h2 id="startTitle">よおこそ！</h2>
+            <p class="overlay-sub" id="startSub">
+              空とぶおなべで 食材をうって しゅうかく！<br>
+              ちゅうもんの食材をそろえて <strong>料理かんせい</strong>。<br>
+              よるには <strong>ぬし</strong>がやってくる。<br>
+              食材はおこってる。弾も体当たりも ようしゃなし。
+            </p>
+            <button type="button" class="primary-button" id="startButton">スタート！</button>
+          </div>
+        </div>
+
+        <div class="overlay" id="resultOverlay" hidden>
+          <div class="overlay-card">
+            <div class="overlay-icon" id="resultIcon" aria-hidden="true"></div>
+            <h2 id="resultTitle">おしまい！</h2>
+            <p class="overlay-sub" id="resultSub"></p>
+            <div class="result-score-box">
+              <span>ためたエナジー</span>
+              <strong id="resultScore">0</strong>
+              <span class="result-best" id="resultBestBadge">ベスト記録こうしん！</span>
+            </div>
+            <p class="result-meals" id="resultMeals"></p>
+            <p class="result-rank" id="resultAch"></p>
+            <div class="result-actions">
+              <button type="button" class="primary-button" id="restartButton">もういちど！</button>
+              <a class="x-share" id="xShare" href="#" target="_blank" rel="noopener">𝕏 でシェア</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="buff-bar" id="buffBar" aria-label="直近の食材弾（タップでロック）"></div>
+      <p class="hint">そうびしてやっつけろ！</p>
+    </main>
+  </div>
+
+  <dialog id="rulesDialog" aria-labelledby="rulesTitle">
+    <div class="rules-content">
+      <h2 id="rulesTitle">あそびかた</h2>
+      <ol class="rules-list">
+        <li><div><strong>おなべをうごかす</strong><span>画面を指でスライド（パソコンはマウスか矢印キー）。弾はずっとオートで発射！あたり判定はおなべのまんなかの白い点だけ。</span></div></li>
+        <li><div><strong>食材をしゅうかく</strong><span>とんでくる食材をうちおとすと、おなべにイン。食材の基礎エナジーぶんスコアが入る。おなじ食材をたおしつづけると その食材の弾Lvがあがる。いつも降ってくるのは リンゴ・ミルク・大豆。ほかの食材は ちゅうもんに必要なときだけ すこし降ってくる。</span></div></li>
+        <li><div><strong>料理をつくる</strong><span>あさ・ひるはちゅうもんの食材をそろえて料理かんせい。よるは「ぬし」が食材をもってあらわれる。たおして料理をつくれ！</span></div></li>
+        <li><div><strong>ぶつかったら 食材がきえる</strong><span>おなべのたいりょくは1。でも装備した食材が たてになって かわりに1つきえる。装備がないときに あたると しずんじゃう。</span></div></li>
+      </ol>
+      <p class="rules-section-title">レシピLvと食材弾のLv</p>
+      <div class="rules-skills">
+        <p class="rules-skill"><strong>レシピLv（さいだい75）</strong><span>料理をつくるたびにアップ（さいしょは1品ごと、だんだん たくさん必要になる）。10Lvごとに きほんの弾が 連射・2連・3連・ゆらゆらとぶ弾・貫通するおおきな弾・おいかける星と強くなる。レシピLv1ごとに ぜんぶの食材弾に150expが上乗せされる。ぬしをたおすと かならず1あがる。スキル名は エナジーチャージS級→ゆめのかけらゲットS級→…→エナジーチャージM級 と強そうになっていくけど、とくにいみはない。</span></p>
+        <p class="rules-skill"><strong>食材弾のLv（さいだい10）</strong><span>食材をたおすと、その食材の基礎エナジーぶんの経験値がたまって弾のLvがあがる。めったに出ないレアな食材（基礎エナジー101以上）は2倍もらえる。Lvがあがると連射が速くなり、Lv4・7・10で弾がふえ、Lv8からは左右にひろがる弾幕になる。たてになったり交代したりして装備を失っても、あがったLvは そのまま。</span></p>
+        <p class="rules-skill"><strong>食材弾（装備）</strong><span>うちおとした食材は、装備に空きがあれば そのまま装備される。基礎エナジー150以上の食材（カカオ・コーヒー・アボカド・キノコ・ながねぎ・カボチャ・シッポ）は、その食材のぬしをたおすまでロック（カボチャは日ようびのぬし）。一度たおせば ずっと装備できる。3つ埋まっているときは画面の左右の端に8秒うかび、タップで古いのと交代。装備した食材は ぜんぶ同時に、それぞれのペースで弾をうつ！どれも長所と短所がはっきり：リンゴは超はやい単発、エッグはスナイパー、コーンは近距離ショットガン、カカオは全弾追尾、コーヒーは超連射だけどぶれる、ハーブは燃やす、カボチャはばくだん…19種ぜんぶちがう。たてになったり交代したりで失うのは、基礎エナジーがひくい食材から。画面下のバーをタップすると1つだけロック（たてに使われるのは最後・交代もされない）。×ではずせる。</span></p>
+        <p class="rules-skill"><strong>なべぶた（ボム）</strong><span>装備した食材を1つなげて（エナジーのひくいものから。ロック中はさいご）画面ぜんたいの弾をはらい、食材ぜんぶに大ダメージ。装備がないと つかえない。画面をすばやくダブルタップ、またはスペースキー。</span></p>
+      </div>
+      <p class="rules-section-title">おこった食材たち</p>
+      <div class="rules-tips">
+        <p class="rules-tip"><strong>ふつうの食材の弾はかるい</strong><span>ふつうの食材の弾は2発うけて はじめて たて1つぶん。ぬしの弾と体当たりは1発でたて1つ。</span></p>
+        <p class="rules-tip"><strong>体当たり組</strong><span>リンゴ・ミルク・ミツ・マメミートは、ときどき おなべめがけて急降下。ふといながねぎは ねぎミサイル。</span></p>
+        <p class="rules-tip"><strong>おとしてくる組</strong><span>大豆・トマト・エッグ・オイル・ポテトは タネをぽろぽろ落とす。</span></p>
+        <p class="rules-tip"><strong>ねらってくる組</strong><span>ハーブ・ジンジャーは とうがらしをねらいうち。コーン・カカオ・アボカドは3方向。コーヒーは とにかくはやい。</span></p>
+        <p class="rules-tip"><strong>キノコのほうし</strong><span>たおすと ほうしが まわりにひろがる。近くでたおすな！</span></p>
+        <p class="rules-tip"><strong>ぬし（曜日ごとに7種）</strong><span>よるにあらわれる巨大食材。登場から5秒は なにもしてこないし ダメージもうけない。月のハーブから 日のシッポまで だんだん強くなり、2週目からは 雑魚もぬしも 週ごとに どんどんかたくなる。たおすと レシピLvが かならず1あがる。</span></p>
+      </div>
+      <div class="rules-tips">
+        <p class="rules-tip"><strong>コンボ</strong><span>つづけてたおすとエナジー倍増（さいだい×5）。ダメージでリセット。</span></p>
+        <p class="rules-tip"><strong>レシピLvとFB</strong><span>おなじ料理をつくるとレシピLvアップ（報酬+5%ずつ）。通算21品ごとにフィールドボーナス+5%。どっちもずっと残る。</span></p>
+        <p class="rules-tip"><strong>アチーブメント</strong><span>いろんな条件でタイトルをかくとく。かくれたものも たくさん…。</span></p>
+      </div>
+      <button type="button" class="rules-close" id="rulesClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="recipeDialog" aria-labelledby="recipeTitle">
+    <div class="rules-content">
+      <h2 id="recipeTitle">料理ノート</h2>
+      <p class="recipe-fb" id="recipeFb"></p>
+      <div class="recipe-list" id="recipeList"></div>
+      <button type="button" class="rules-close" id="recipeClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="achDialog" aria-labelledby="achTitle">
+    <div class="rules-content">
+      <h2 id="achTitle">アチーブメント</h2>
+      <p class="rank-progress" id="achProgress"></p>
+      <div class="rank-list" id="achList"></div>
+      <button type="button" class="rules-close" id="achClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="foodDexDialog" aria-labelledby="foodDexTitle">
+    <div class="rules-content">
+      <h2 id="foodDexTitle">食材図鑑</h2>
+      <p class="rank-progress" id="foodDexProgress"></p>
+      <div class="food-grid" id="foodGrid"></div>
+      <p class="secret-note">タップで弾のとくちょうを解説！ほかの食材は うちおとすと図鑑にのる。</p>
+      <button type="button" class="rules-close" id="foodDexClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="foodDetailDialog" aria-labelledby="foodDetailName">
+    <div class="rules-content food-detail" id="foodDetail"></div>
+  </dialog>
+
+  <dialog id="secretDialog" aria-labelledby="secretTitle">
+    <div class="rules-content">
+      <h2 id="secretTitle">シークレット図鑑</h2>
+      <p class="secret-progress" id="secretProgress"></p>
+      <div class="secret-list" id="secretList"></div>
+      <p class="secret-note">見つけたひみつは ずっと図鑑にのこるよ。<br>このページのひらきかたも…もう ひみつだね。</p>
+      <button type="button" class="rules-close" id="secretClose">とじる</button>
+    </div>
+  </dialog>
+  <script>
+    (() => {
+      "use strict";
+
+      // ---- 定数 -------------------------------------------------------
+      const WORLD = { w: 420, h: 600 };
+      const SHARE_URL = "https://ny-an.github.io/gaogao-pksr/dopagaki.html";
+
+      const fmt = (n) => n.toLocaleString("ja-JP");
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const rand = (a, b) => a + Math.random() * (b - a);
+      const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+      // ポケモンスリープの全19食材（エナジー順、js/data/foods.js 参照）
+      // energy は基礎エナジーそのまま。HPは energy/30（かたい＝おいしい）
+      // attack はおこったときの攻撃パターン
+      const FOODS = [
+        { name: "とくせんリンゴ",     img: "FancyApple",         color: "#EF3930", energy: 90,  attack: "dive" },
+        { name: "モーモーミルク",     img: "MoomooMilk",         color: "#4C6DC1", energy: 98,  attack: "dive" },
+        { name: "ワカクサ大豆",       img: "GreengrassSoybeans", color: "#F9D79B", energy: 100, attack: "drop" },
+        { name: "あまいミツ",         img: "Honey",              color: "#FAC801", energy: 101, attack: "dive" },
+        { name: "マメミート",         img: "BeanSausage",        color: "#EA9E6A", energy: 103, attack: "dive" },
+        { name: "あったかジンジャー", img: "WarmingGinger",      color: "#FCC56B", energy: 109, attack: "aimed" },
+        { name: "あんみんトマト",     img: "SnoozyTomato",       color: "#ED4F4F", energy: 110, attack: "drop" },
+        { name: "とくせんエッグ",     img: "FancyEgg",           color: "#F4BF7A", energy: 115, attack: "drop" },
+        { name: "ピュアなオイル",     img: "PureOil",            color: "#E5DF6C", energy: 121, attack: "drop2" },
+        { name: "ほっこりポテト",     img: "SoftPotato",         color: "#C9A227", energy: 124, attack: "drop" },
+        { name: "げきからハーブ",     img: "FieryHerb",          color: "#E84B4B", energy: 130, attack: "aimed" },
+        { name: "ワカクサコーン",     img: "GreengrassCorn",     color: "#FFE36C", energy: 140, attack: "fan" },
+        { name: "リラックスカカオ",   img: "SoothingCacao",      color: "#E0945C", energy: 151, attack: "fan" },
+        { name: "めざましコーヒー",   img: "RousingCoffee",      color: "#A37D55", energy: 153, attack: "dash" },
+        { name: "つやつやアボカド",   img: "ShinyAvocado",       color: "#87A96B", energy: 162, attack: "fan" },
+        { name: "あじわいキノコ",     img: "TastyMushroom",      color: "#B27054", energy: 167, attack: "spore" },
+        { name: "ふといながねぎ",     img: "LargeLeek",          color: "#37A56B", energy: 185, attack: "lance" },
+        { name: "ずっしりカボチャ",   img: "ChunkyPumpkin",      color: "#E5A323", energy: 250, attack: "none" },
+        { name: "おいしいシッポ",     img: "SlowpokeTail",       color: "#F2BBC4", energy: 342, attack: "none" },
+      ];
+      const FOOD_BY_NAME = {};
+      FOODS.forEach((f, i) => { FOOD_BY_NAME[f.name] = i; });
+      const RANDOM_POOL_MAX = 2;
+      const RANDOM_POOL_ENERGY = 100; // これ以下の基礎エナジーが 雑魚として ふつうに出る    // 雑魚＝基礎エナジー101未満（リンゴ・ミルク・大豆）。それ以外は注文とぬしからだけ
+      const TAIL_IDX = FOOD_BY_NAME["おいしいシッポ"];
+      const MUSHROOM_IDX = FOOD_BY_NAME["あじわいキノコ"];
+      // 雑魚のHPは日がすすむほど固くなる（週末で約1.6倍、4週目末で約3.5倍）
+      const weekHpMult = () => 1 + 0.3 * (week - 1); // 2週目から どんどんかたくなる
+      const foodHp = (idx) => Math.max(3, Math.round((FOODS[idx].energy / 18) * (1 + diff() * 0.04) * weekHpMult()));
+
+      // 曜日ごとの「ぬし」（よるに登場する巨大食材。上位食材はここと注文でしか手に入らない）
+      const BOSSES = [
+        { food: "げきからハーブ",   hp: 220, pattern: "fan",    title: "ぬしの巨大ハーブ",     desc: "月ようびのぬし。5方向のとうがらしと 小ハーブの護衛。" },
+        { food: "リラックスカカオ", hp: 240, pattern: "spiral", title: "ぬしの巨大カカオ",     desc: "火ようびのぬし。画面を周回しながら うずまきのタネをまく。" },
+        { food: "めざましコーヒー", hp: 260, pattern: "dash",   title: "ぬしの巨大コーヒー",   desc: "水ようびのぬし。カフェイン全開で ジグザグダッシュ。" },
+        { food: "つやつやアボカド", hp: 280, pattern: "split",  title: "ぬしの巨大アボカド",   desc: "木ようびのぬし。下までせまってきて、おおきなタネが とちゅうではじける。" },
+        { food: "あじわいキノコ",   hp: 300, pattern: "spore",  title: "ぬしの巨大キノコ",     desc: "金ようびのぬし。ほうしのわっかをまいて ワープする。" },
+        { food: "ふといながねぎ",   hp: 330, pattern: "lance",  title: "ぬしの巨大ながねぎ",   desc: "土ようびのぬし。ずっと突進してくる。" },
+        { food: "おいしいシッポ",   hp: 1400, pattern: "legend", title: "ぬしの巨大シッポ",     desc: "日ようびのぬし。でんせつの食材そのもの。カボチャの護衛つきで ぜんぶやってくる。ほぼ むりゲー。" },
+      ];
+
+      // ちゅうもん（ポケモンスリープの実在料理。needs はミニ化した必要数、
+      // bonus は js/data/dishes.js の基礎エナジーそのまま）
+      const RECIPES = [
+        { name: "とくせんリンゴカレー", needs: { "とくせんリンゴ": 4 }, bonus: 748 },
+        { name: "とくせんリンゴジュース", needs: { "とくせんリンゴ": 5 }, bonus: 855 },
+        { name: "ねがいごとアップルパイ", needs: { "とくせんリンゴ": 3, "モーモーミルク": 2 }, bonus: 1748 },
+        { name: "ひのこのジンジャーティー", needs: { "あったかジンジャー": 2, "とくせんリンゴ": 2 }, bonus: 1913 },
+        { name: "クラフトサイコソーダ", needs: { "あまいミツ": 3 }, bonus: 1079 },
+        { name: "ベイビィハニーカレー", needs: { "あまいミツ": 3, "とくせんリンゴ": 1 }, bonus: 839 },
+        { name: "マメバーグカレー", needs: { "マメミート": 4 }, bonus: 856 },
+        { name: "ゆきかきシーザーサラダ", needs: { "モーモーミルク": 3, "マメミート": 2 }, bonus: 1898 },
+        { name: "うるおいとうふサラダ", needs: { "ワカクサ大豆": 3, "あんみんトマト": 2 }, bonus: 3113 },
+        { name: "じゅくせいスイートポテト", needs: { "ほっこりポテト": 3, "モーモーミルク": 2 }, bonus: 1907 },
+        { name: "あくまのキッスフルーツオレ", needs: { "とくせんリンゴ": 2, "あまいミツ": 2, "モーモーミルク": 2, "リラックスカカオ": 1 }, bonus: 4734 },
+        { name: "ムラっけチョコミートサラダ", needs: { "リラックスカカオ": 2, "マメミート": 2 }, bonus: 3665 },
+        { name: "サンパワートマトカレー", needs: { "げきからハーブ": 2, "あんみんトマト": 3 }, bonus: 2078 },
+        { name: "オーバーヒートサラダ", needs: { "げきからハーブ": 2, "あったかジンジャー": 2, "あんみんトマト": 2 }, bonus: 5225 },
+        { name: "ぜったいねむりバターカレー", needs: { "あんみんトマト": 2, "リラックスカカオ": 2, "あまいミツ": 2, "モーモーミルク": 2 }, bonus: 9010 },
+        { name: "キノコのほうしサラダ", needs: { "あじわいキノコ": 2, "あんみんトマト": 2, "ピュアなオイル": 1 }, bonus: 5859 },
+        { name: "ニンジャカレー", needs: { "ワカクサ大豆": 3, "あじわいキノコ": 2, "ふといながねぎ": 1 }, bonus: 9445 },
+        { name: "とけるオムカレー", needs: { "とくせんエッグ": 2, "あんみんトマト": 1 }, bonus: 2150 },
+        { name: "ビルドアップマメカレー", needs: { "ワカクサ大豆": 2, "マメミート": 2, "げきからハーブ": 1, "とくせんエッグ": 1 }, bonus: 3372 },
+        { name: "ふくつのジンジャークッキー", needs: { "あまいミツ": 2, "あったかジンジャー": 2, "リラックスカカオ": 1, "とくせんエッグ": 1 }, bonus: 4921 },
+        { name: "じゅうなんコーンシチュー", needs: { "ワカクサコーン": 2, "ほっこりポテト": 1, "モーモーミルク": 2 }, bonus: 4670 },
+        { name: "くいしんぼうポテトサラダ", needs: { "ほっこりポテト": 2, "とくせんエッグ": 2, "マメミート": 1, "とくせんリンゴ": 1 }, bonus: 5040 },
+        { name: "ネロリのデトックスティー", needs: { "とくせんリンゴ": 3, "あったかジンジャー": 2, "あじわいキノコ": 1 }, bonus: 5065 },
+        { name: "ピヨピヨパンチ辛口カレー", needs: { "あまいミツ": 2, "げきからハーブ": 2, "めざましコーヒー": 1 }, bonus: 5702 },
+        { name: "プリンのプリンアラモード", needs: { "あまいミツ": 3, "とくせんエッグ": 2, "とくせんリンゴ": 2, "モーモーミルク": 2 }, bonus: 7594 },
+        { name: "めいそうスイートサラダ", needs: { "とくせんリンゴ": 4, "あまいミツ": 3, "ワカクサコーン": 2 }, bonus: 7675 },
+        { name: "クロスチョップドサラダ", needs: { "とくせんエッグ": 2, "マメミート": 2, "ワカクサコーン": 2, "あんみんトマト": 1 }, bonus: 8755 },
+        { name: "ワカクササラダ", needs: { "ピュアなオイル": 2, "ワカクサコーン": 2, "あんみんトマト": 2, "ほっこりポテト": 1 }, bonus: 11393 },
+        { name: "ニンジャサラダ", needs: { "ワカクサ大豆": 2, "ふといながねぎ": 1, "あじわいキノコ": 2, "あったかジンジャー": 2 }, bonus: 11659 },
+        { name: "れんごくコーンキーマカレー", needs: { "げきからハーブ": 3, "マメミート": 3, "ワカクサコーン": 2, "あったかジンジャー": 2 }, bonus: 13690 },
+        { name: "めざめるパワーシチュー", needs: { "ワカクサ大豆": 3, "あんみんトマト": 3, "あじわいキノコ": 2, "めざましコーヒー": 1 }, bonus: 19061 },
+        { name: "まけんきコーヒーサラダ", needs: { "マメミート": 3, "めざましコーヒー": 2, "ピュアなオイル": 2, "ほっこりポテト": 2 }, bonus: 20218 },
+        { name: "いあいぎりすき焼きカレー", needs: { "ふといながねぎ": 2, "あまいミツ": 3, "マメミート": 3, "とくせんエッグ": 2 }, bonus: 20655 },
+        { name: "はやおきコーヒーゼリー", needs: { "めざましコーヒー": 2, "モーモーミルク": 2, "あまいミツ": 1 }, bonus: 6793 },
+        { name: "かたやぶりコーンティラミス", needs: { "めざましコーヒー": 2, "ワカクサコーン": 2, "モーモーミルク": 1 }, bonus: 7125 },
+        { name: "くだけるアボカドサラダ", needs: { "ワカクサ大豆": 2, "つやつやアボカド": 1, "ピュアなオイル": 1 }, bonus: 7125 },
+        { name: "グラスミキサースムージー", needs: { "つやつやアボカド": 2, "あんみんトマト": 2, "モーモーミルク": 1 }, bonus: 8165 },
+        { name: "おちゃかいコーンスコーン", needs: { "あったかジンジャー": 2, "とくせんリンゴ": 2, "ワカクサコーン": 2, "モーモーミルク": 1 }, bonus: 10925 },
+        { name: "ワカクサカレーパン", needs: { "あったかジンジャー": 2, "げきからハーブ": 2, "ピュアなオイル": 2, "ワカクサ大豆": 1 }, bonus: 10945 },
+        { name: "はなふぶきミモザサラダ", needs: { "とくせんエッグ": 3, "ピュアなオイル": 2, "ほっこりポテト": 1, "マメミート": 1 }, bonus: 11811 },
+        { name: "フラワーギフトマカロン", needs: { "とくせんエッグ": 2, "リラックスカカオ": 2, "あまいミツ": 2, "モーモーミルク": 1 }, bonus: 13834 },
+        { name: "スパークスパイスコーラ", needs: { "とくせんリンゴ": 3, "あったかジンジャー": 2, "ふといながねぎ": 2, "めざましコーヒー": 1 }, bonus: 17494 },
+        { name: "りんごさんヨーグルトサラダ", needs: { "とくせんエッグ": 3, "とくせんリンゴ": 3, "あんみんトマト": 2, "モーモーミルク": 2 }, bonus: 19293 },
+        { name: "ドオーのエクレア", needs: { "リラックスカカオ": 3, "モーモーミルク": 3, "めざましコーヒー": 2, "あまいミツ": 2 }, bonus: 20885 },
+        { name: "しんりょくアボカドグラタン", needs: { "モーモーミルク": 4, "ピュアなオイル": 3, "つやつやアボカド": 2, "ほっこりポテト": 2 }, bonus: 24802 },
+        { name: "じならしワカモレチップス", needs: { "げきからハーブ": 3, "つやつやアボカド": 3, "ワカクサコーン": 2, "ワカクサ大豆": 2 }, bonus: 25162 },
+        { name: "みつあつめチョコワッフル", needs: { "あまいミツ": 4, "ピュアなオイル": 3, "ワカクサコーン": 3, "リラックスカカオ": 2 }, bonus: 25484 },
+        { name: "とびはねるカレーうどん", needs: { "あったかジンジャー": 3, "あじわいキノコ": 3, "げきからハーブ": 2, "マメミート": 2 }, bonus: 25539 },
+        // シークレット（おいしいシッポを手に入れると解放）
+        { name: "あぶりテールカレー", needs: { "おいしいシッポ": 1, "げきからハーブ": 2 }, bonus: 7483, secret: true },
+        { name: "ヤドンテールのペッパーサラダ", needs: { "おいしいシッポ": 1, "げきからハーブ": 1, "ピュアなオイル": 1 }, bonus: 8169, secret: true },
+      ];
+      const BASE_RECIPES = RECIPES.filter((r) => !r.secret);
+      const SECRET_RECIPES = RECIPES.filter((r) => r.secret);
+      const totalNeeds = (r) => Object.values(r.needs).reduce((a, b) => a + b, 0);
+
+      // レシピLv（この回でつくった料理の数でアップ。最大75）。10Lvごとに きほんの弾がつよくなり、食材弾には経験値として上乗せされる
+      const RUN_LV_MAX = 75;
+      const runLvXp = (lv) => Math.round(1.2 * Math.pow(Math.max(0, lv - 1), 1.35)); // そのLvになるのに必要な料理の数
+      const RECIPE_FOOD_EXP = 150; // レシピLv1ごとに 全食材弾にはいる経験値
+      const tierOf = (lv) => Math.min(WEAPON.length - 1, Math.floor((lv - 1) / 10));
+      // 食材ごとの弾Lv（その食材をたおすと 基礎エナジーぶんの経験値。レアな食材（基礎エナジー101以上）は2倍。装備を失ってもLvはのこる）
+      const FOOD_LV_EXP = [0, 900, 2400, 4800, 8000, 12000, 17000, 23000, 30000, 38000];
+      const FOOD_LV_MAX = 10;
+      const WEAPON = [
+        { interval: 0.42, spread: 1, wave: 0, homing: 0, big: 0, desc: "エナジーチャージS級" },
+        { interval: 0.40, spread: 1, wave: 0, homing: 0, big: 0, desc: "ゆめのかけらゲットS級" },
+        { interval: 0.38, spread: 1, wave: 0, homing: 0, big: 6, desc: "食材ゲットS級" },
+        { interval: 0.36, spread: 2, wave: 0, homing: 0, big: 6, desc: "げんきチャージS級" },
+        { interval: 0.34, spread: 2, wave: 1, homing: 0, big: 6, desc: "料理パワーアップS級" },
+        { interval: 0.32, spread: 2, wave: 1, homing: 1, big: 5, desc: "げんきエールS級" },
+        { interval: 0.30, spread: 2, wave: 1, homing: 1, big: 5, desc: "げんきオールS級" },
+        { interval: 0.28, spread: 3, wave: 1, homing: 1, big: 4, desc: "エナジーチャージM級" },
+      ];
+      const BIG_DMG = 5;
+      const PBULLET_CAP = 56;      // 画面上の自弾はこれ以上ふえない（弾幕化ふせぎ）
+
+      // 装備した食材ごとの弾（同時発射・それぞれの間隔でうつ）
+      // count=一度にうつ数 / scatter=ぶれ / life=射程(秒) / burn=もえる / split2=2回はじける
+      const EQUIP_MAX = 3;
+      const PICKUP_LIFE = 8;
+      const FOOD_SHOT = {
+        "とくせんリンゴ":     { color: "#EF3930", count: 1, speed: 2.2, rate: 1.3, desc: "リンゴ弾：超速の単発" },
+        "モーモーミルク":     { color: "#f4f6ff", count: 1, size: 2.6, speed: 0.5, rate: 1.1, desc: "ミルク弾：巨大でおそい" },
+        "ワカクサ大豆":       { color: "#F9D79B", count: 3, spreadAngle: 0.26, speed: 0.9, rate: 2.2, desc: "大豆弾：3方向ばらまき" },
+        "あまいミツ":         { color: "#FAC801", count: 1, speed: 0.4, pierce: true, dmg: 2, rate: 2.5, desc: "ミツ弾：とろとろ貫通" },
+        "マメミート":         { color: "#EA9E6A", count: 1, dmg: 3, size: 1.4, rate: 2.85, speed: 0.9, desc: "ミート弾：重い一撃" },
+        "あったかジンジャー": { color: "#FCC56B", count: 1, kind: "wave", amp: 60, speed: 0.8, dmg: 2, rate: 1.4, desc: "ジンジャー弾：ジグザグ" },
+        "あんみんトマト":     { color: "#ED4F4F", count: 1, split2: true, rate: 2.05, desc: "トマト弾：はじけて4つ" },
+        "とくせんエッグ":     { color: "#FCFAF0", count: 1, dmg: 5, size: 2, speed: 0.5, rate: 4, desc: "エッグ弾：スナイパー" },
+        "ピュアなオイル":     { color: "#E5DF6C", count: 1, speed: 2.5, rate: 0.95, desc: "オイル弾：マシンガン" },
+        "ほっこりポテト":     { color: "#C9A227", count: 1, dmg: 3, speed: 0.55, size: 1.6, rate: 2.2, desc: "ポテト弾：重量級" },
+        "げきからハーブ":     { color: "#E84B4B", count: 1, burn: true, speed: 1.1, rate: 2.85, desc: "ハーブ弾：燃やす" },
+        "ワカクサコーン":     { color: "#FFE36C", count: 2, spreadAngle: 0.36, dmg: 2, speed: 1.3, rate: 1.5, life: 0.55, desc: "コーン弾：ショットガン" },
+        "リラックスカカオ":   { color: "#8b5a3c", count: 0, homing: 1, speed: 0.8, rate: 0.75, desc: "カカオ弾：全部追尾" },
+        "めざましコーヒー":   { color: "#A37D55", count: 1, rate: 0.5, scatter: 0.18, speed: 1.2, desc: "コーヒー弾：超連射" },
+        "つやつやアボカド":   { color: "#87A96B", count: 0, big: true, rate: 3.85, speed: 0.6, desc: "アボカド弾：大玉だけ" },
+        "あじわいキノコ":     { color: "#a06ec8", count: 2, kind: "spiral", amp: 55, speed: 0.7, rate: 0.9, desc: "キノコ弾：大うずまき" },
+        "ふといながねぎ":     { color: "#37A56B", count: 1, dmg: 4, tall: true, pierce: true, rate: 2.85, desc: "ねぎ弾：貫通レーザー" },
+        "ずっしりカボチャ":   { color: "#E5A323", count: 1, dmg: 8, size: 2.6, speed: 0.4, rate: 3.1, desc: "カボチャ弾：ばくだん" },
+        "おいしいシッポ":     { color: "#F2BBC4", count: 1, dmg: 2, speed: 1.3, homing: 1, pierce: true, rate: 1.3, desc: "シッポ弾：全部のせ" },
+      };
+      const BOMB_MAX = 3;
+      const BOSS_INTRO = 5;
+      const BOMB_DMG = 40;
+
+      const COMBO_WINDOW = 2.0;
+      const COMBO_MULT_CAP = 5;
+      const MEALS_PER_WEEK = 21;     // 21食で1週間（koiki-puzzle-v2 と共通）
+      const WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"];
+      const MEAL_SLOTS = ["あさ", "ひる", "よる"];
+      const INTERLUDE_TIME = 2.8;    // 週末のひとやすみ
+
+      // レシピLvとフィールドボーナス（ゲームをまたいで永続、他2作と同式）
+      const RECIPE_LV_MAX = 70;
+      const FB_STEP_DISHES = 21;
+
+      // アチーブメント（達成型のタイトル）
+      const ACHS = [
+        { id: "first_harvest", name: "はじめての しゅうかく", desc: "食材を1つ しゅうかくする" },
+        { id: "first_dish", name: "はじめての ごちそう", desc: "料理を1品つくる" },
+        { id: "day1", name: "1日 かんそう", desc: "あさ・ひる・よるの3食をつくる" },
+        { id: "week1", name: "1週間 かんそう", desc: "21食つくりきる" },
+        { id: "month1", name: "1か月 かんそう", desc: "1回のプレイで4週かんそう" },
+        { id: "combo10", name: "れんしゃの こつ", desc: "10コンボ" },
+        { id: "combo30", name: "だんまく ソムリエ", desc: "30コンボ" },
+        { id: "lv5", name: "レシピ じょうたつ", desc: "レシピLv5になる" },
+        { id: "lv8", name: "ぜんぶのせ", desc: "レシピLv50になる" },
+        { id: "boss_first", name: "ぬしと ごたいめん", desc: "ぬしを1体たおす" },
+        { id: "boss_all", name: "ぬし ハンター", desc: "7種のぬしを ぜんぶたおす" },
+        { id: "foods_all", name: "食材 コンプ", desc: "19種の食材を ぜんぶしゅうかく" },
+        { id: "dishes20", name: "やたいの エース", desc: "20種類の料理をつくる" },
+        { id: "dishes50", name: "全レシピ コンプ", desc: "ぜんぶの料理をつくる" },
+        { id: "lv10", name: "おはこ りょうり", desc: "ひとつの料理をレシピLv10にする" },
+        { id: "lv30", name: "こんろの おうじゃ", desc: "ひとつの料理をレシピLv30にする" },
+        { id: "energy100k", name: "いぶくろ ぶそう", desc: "累計10万エナジー" },
+        { id: "energy1m", name: "カレーは のみもの", desc: "累計100万エナジー" },
+        { id: "nodmg_day", name: "キズひとつ ない", desc: "ノーダメージで1日かんそう" },
+        { id: "week2", name: "2週目 とうたつ", desc: "2週目にはいる" },
+        { id: "week5", name: "エンドレス かいどう", desc: "5週目にはいる" },
+        { id: "richweek", name: "もりもり 週間", desc: "1週間のあいだに10万エナジー" },
+        { id: "combo60", name: "だんまくの むこうがわ", desc: "60コンボ", hidden: true, hint: "コンボを もっともっと" },
+        { id: "nodmg_week", name: "てつの おなべ", desc: "ノーダメージで1週間かんそう", hidden: true, hint: "1週間 キズひとつなく" },
+        { id: "nobomb_week", name: "なべぶたは かざり", desc: "なべぶたをつかわず1週間かんそう", hidden: true, hint: "あれを つかわずに" },
+        { id: "last_heart_week", name: "まるはだか", desc: "装備なしで週かんそう", hidden: true, hint: "たてのない 週まつ" },
+        { id: "wild_tail", name: "まっかな ナニカ", desc: "野生のおいしいシッポを うちおとす", hidden: true, hint: "空をよこぎる アレ" },
+        { id: "secret_dish", name: "シークレット シェフ", desc: "シークレットレシピをつくる", hidden: true, hint: "レシピノートの ？？？" },
+        { id: "mushroom_escape", name: "ほうしは こわい", desc: "キノコを撃たずに10回にがす", hidden: true, hint: "さわらぬキノコに たたりなし" },
+        { id: "escaped100", name: "にがしすぎ", desc: "食材を100こ にがす", hidden: true, hint: "もったいないおばけ" },
+        { id: "burnt15", name: "こげこげ シェフ", desc: "1週間で15回ダメージをうける", hidden: true, hint: "いたい いたい" },
+        { id: "curry5", name: "カレー じごく", desc: "カレーを5品つづけてつくる", hidden: true, hint: "きいろい れんぞく" },
+        { id: "salad5", name: "サラダ バー", desc: "サラダを5品つづけてつくる", hidden: true, hint: "みどりの れんぞく" },
+        { id: "big_finish", name: "おおきな いちげき", desc: "おおきな弾で ぬしにとどめ", hidden: true, hint: "でかいので しめる" },
+        { id: "bomb_finish", name: "なべぶた アタック", desc: "なべぶたで ぬしにとどめ", hidden: true, hint: "フタで しめる" },
+        { id: "fast_boss", name: "はやわざ", desc: "ぬしを20秒いないにたおす", hidden: true, hint: "よるは みじかく" },
+        { id: "secret_door", name: "ひみつの とびら", desc: "シークレット図鑑をみつける", hidden: true, hint: "だれかを つついてみる" },
+        { id: "silent", name: "サイレント シェフ", desc: "おとを消して料理をつくる", hidden: true, hint: "しずかに つくる" },
+        { id: "night", name: "よふかし シェフ", desc: "深夜0〜4時に料理をつくる", hidden: true, hint: "みんな ねてる" },
+        { id: "early", name: "はやおき シェフ", desc: "朝5〜7時に料理をつくる", hidden: true, hint: "めざましより はやく" },
+        { id: "pause10", name: "ひとやすみの たつじん", desc: "10回ひとやすみする", hidden: true, hint: "やすむのも だいじ" },
+        { id: "okawari", name: "おかわり", desc: "おなじ日に おなじ料理を2回つくる", hidden: true, hint: "きょうも あれ" },
+        { id: "wasted_combo", name: "もったいない", desc: "20コンボちゅうに ダメージをうける", hidden: true, hint: "ちょうしに のると" },
+        { id: "week10", name: "ぎんがの りょうりばん", desc: "10週目にはいる", hidden: true, hint: "はるか さきの週" },
+        { id: "million_run", name: "カンスト？", desc: "1回のプレイで100万エナジー", hidden: true, hint: "けたが たりない" },
+        { id: "tail_boss_nobomb", name: "でんせつ ごろし", desc: "日ようびのぬしを なべぶたなしでたおす", hidden: true, hint: "日ようびに フタをしないで" },
+        { id: "legend", name: "怒破餓鬼 でんせつ", desc: "ほかのアチーブメントを ぜんぶかくとく", hidden: true, hint: "すべてを こえたさきに" },
+      ];
+      const ACH_BY_ID = {};
+      ACHS.forEach((a) => { ACH_BY_ID[a.id] = a; });
+
+      // ---- DOM --------------------------------------------------------
+      const $ = (id) => document.getElementById(id);
+      const canvas = $("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const scoreValue = $("scoreValue");
+      const bestValue = $("bestValue");
+      const dayChip = $("dayChip");
+      const mealChip = $("mealChip");
+      const fbChip = $("fbChip");
+      const weekChip = $("weekChip");
+      const powerBox = $("powerBox");
+      const powerLv = $("powerLv");
+      const powerDesc = $("powerDesc");
+      const buffBar = $("buffBar");
+      const orderCard = $("orderCard");
+      const orderLabel = $("orderLabel");
+      const orderName = $("orderName");
+      const orderNeeds = $("orderNeeds");
+      const orderHp = $("orderHp");
+      const orderReward = $("orderReward");
+      const skillBanner = $("skillBanner");
+      const startOverlay = $("startOverlay");
+      const startTitle = $("startTitle");
+      const startSub = $("startSub");
+      const startButton = $("startButton");
+      const resultOverlay = $("resultOverlay");
+      const resultIcon = $("resultIcon");
+      const resultTitle = $("resultTitle");
+      const resultSub = $("resultSub");
+      const resultScore = $("resultScore");
+      const resultBestBadge = $("resultBestBadge");
+      const resultMeals = $("resultMeals");
+      const resultAch = $("resultAch");
+      const restartButton = $("restartButton");
+      const xShare = $("xShare");
+      const soundButton = $("soundButton");
+      const rulesButton = $("rulesButton");
+      const rulesDialog = $("rulesDialog");
+      const rulesClose = $("rulesClose");
+      const recipeDialog = $("recipeDialog");
+      const recipeFb = $("recipeFb");
+      const recipeList = $("recipeList");
+      const recipeClose = $("recipeClose");
+      const titleLabel = $("titleLabel");
+      const achDialog = $("achDialog");
+      const achProgress = $("achProgress");
+      const achList = $("achList");
+      const achClose = $("achClose");
+      const mascot = $("mascot");
+      const secretDialog = $("secretDialog");
+      const secretProgress = $("secretProgress");
+      const secretList = $("secretList");
+      const secretClose = $("secretClose");
+
+      const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // ---- 永続データ -------------------------------------------------
+      let best = 0;
+      let recipeLv = {};
+      let dishesCooked = 0;
+      let secrets = { tail: false, wildTail: false, bosses: [], recipes: [] };
+      let muted = false;
+      let achGot = [];
+      let stats = { harvest: 0, energy: 0, maxCombo: 0, foods: [], foodKills: {}, weeks: 0, pauses: 0, escaped: 0, mushroomEscapes: 0 };
+      let currentTitle = "おなべ みならい";
+      // 永続データのキー。?debug のときは別の名前空間に保存して、ほんもののセーブをさわらない
+      const LS = (k) => (location.search.includes("debug") ? "dopagaki-debug." : "dopagaki.") + k;
+      const loadJson = (key, fallback) => {
+        try { const v = JSON.parse(localStorage.getItem(key) || "null"); return v == null ? fallback : v; } catch (_) { return fallback; }
+      };
+      try { best = Number(localStorage.getItem(LS("best"))) || 0; } catch (_) {}
+      try { dishesCooked = Number(localStorage.getItem(LS("dishes"))) || 0; } catch (_) {}
+      try { muted = localStorage.getItem(LS("muted")) === "1"; } catch (_) {}
+      try { currentTitle = localStorage.getItem(LS("title")) || currentTitle; } catch (_) {}
+      recipeLv = loadJson(LS("recipeLv"), {}) || {};
+      {
+        const s = loadJson(LS("secrets"), null);
+        if (s && typeof s === "object") {
+          secrets = { tail: !!s.tail, wildTail: !!s.wildTail, bosses: Array.isArray(s.bosses) ? s.bosses : [], recipes: Array.isArray(s.recipes) ? s.recipes : [] };
+        }
+        const a = loadJson(LS("ach"), null);
+        if (Array.isArray(a)) achGot = a.filter((id) => ACH_BY_ID[id]);
+        const st = loadJson(LS("stats"), null);
+        if (st && typeof st === "object") stats = Object.assign(stats, st);
+        if (!Array.isArray(stats.foods)) stats.foods = [];
+        if (!stats.foodKills || typeof stats.foodKills !== "object") stats.foodKills = {};
+      }
+
+      function persistCooking() {
+        try {
+          localStorage.setItem(LS("recipeLv"), JSON.stringify(recipeLv));
+          localStorage.setItem(LS("dishes"), String(dishesCooked));
+        } catch (_) {}
+      }
+      function persistSecrets() {
+        try { localStorage.setItem(LS("secrets"), JSON.stringify(secrets)); } catch (_) {}
+      }
+      function persistBest() {
+        try { localStorage.setItem(LS("best"), String(best)); } catch (_) {}
+      }
+      function persistAch() {
+        try {
+          localStorage.setItem(LS("ach"), JSON.stringify(achGot));
+          localStorage.setItem(LS("stats"), JSON.stringify(stats));
+          localStorage.setItem(LS("title"), currentTitle);
+        } catch (_) {}
+      }
+
+      const recipeLevel = (name) => Math.min(RECIPE_LV_MAX, Math.max(1, Number(recipeLv[name]) || 1));
+      // 食材弾のLv：経験値によるLvに、いまのレシピLvぶんを上乗せ（最大8）
+      const foodExp = {};
+      const foodExpGain = (name) => { const e = FOOD_BY_NAME[name] != null ? FOODS[FOOD_BY_NAME[name]].energy : 100; return e * (e > RANDOM_POOL_ENERGY ? 2 : 1); };
+      const foodTotalExp = (name) => (foodExp[name] || 0) + (runLv - 1) * RECIPE_FOOD_EXP;
+      const foodKillLv = (name) => { const k = foodTotalExp(name); let lv = 1; for (let i = 1; i < FOOD_LV_EXP.length; i++) if (k >= FOOD_LV_EXP[i]) lv = i + 1; return lv; };
+      const foodShotLv = (name) => foodKillLv(name);
+      const recipeReward = (recipe) => Math.round(recipe.bonus * (1 + 0.05 * (recipeLevel(recipe.name) - 1)));
+      const fbPercent = () => Math.min(75, Math.floor(dishesCooked / FB_STEP_DISHES) * 5);
+      const withFb = (v) => Math.round(v * (1 + fbPercent() / 100));
+
+      // ---- サウンド ---------------------------------------------------
+      let audioCtx = null;
+      function ensureAudio() {
+        if (!audioCtx) {
+          try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+        }
+        if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      }
+      function tone(freq, dur, opts = {}) {
+        if (muted || !audioCtx) return;
+        const t0 = audioCtx.currentTime + (opts.delay || 0);
+        const osc = audioCtx.createOscillator();
+        const amp = audioCtx.createGain();
+        osc.type = opts.type || "triangle";
+        osc.frequency.setValueAtTime(freq, t0);
+        if (opts.slide) osc.frequency.exponentialRampToValueAtTime(opts.slide, t0 + dur);
+        amp.gain.setValueAtTime(opts.gain || 0.06, t0);
+        amp.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(amp).connect(audioCtx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      }
+      let shootSfxTick = 0;
+      const sfxShoot = () => { if (++shootSfxTick % 4 === 0) tone(1040, 0.04, { gain: 0.015 }); };
+      const sfxHit = () => tone(300, 0.05, { type: "square", gain: 0.022 });
+      const sfxHarvest = () => { tone(523, 0.08, { gain: 0.05 }); tone(784, 0.1, { gain: 0.05, delay: 0.06 }); };
+      const sfxCook = () => { tone(523, 0.12, { gain: 0.07 }); tone(659, 0.12, { gain: 0.07, delay: 0.09 }); tone(784, 0.2, { gain: 0.08, delay: 0.18 }); };
+      const sfxDamage = () => { tone(130, 0.25, { type: "sawtooth", gain: 0.09 }); tone(90, 0.3, { type: "square", gain: 0.06, delay: 0.05 }); };
+      const sfxLevel = () => { tone(880, 0.1, { gain: 0.06 }); tone(1175, 0.16, { gain: 0.06, delay: 0.08 }); };
+      const sfxTail = () => { tone(1568, 0.09, { gain: 0.06 }); tone(2093, 0.14, { gain: 0.06, delay: 0.07 }); };
+      const sfxBoss = () => { tone(98, 0.4, { type: "sawtooth", gain: 0.09 }); tone(110, 0.4, { type: "sawtooth", gain: 0.09, delay: 0.3 }); };
+      const sfxClear = () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, { gain: 0.08, delay: i * 0.13 })); };
+      const sfxBomb = () => { tone(60, 0.6, { type: "sawtooth", gain: 0.12, slide: 30 }); tone(1200, 0.3, { gain: 0.05, slide: 200 }); };
+      const sfxAch = () => { [784, 988, 1319].forEach((f, i) => tone(f, 0.18, { gain: 0.06, delay: i * 0.09 })); };
+      const sfxEnemyShot = () => tone(420, 0.04, { type: "square", gain: 0.012 });
+
+      // ---- 画像 -------------------------------------------------------
+      const foodImages = FOODS.map((f) => {
+        const im = new Image();
+        im.src = `img/foods/svg/${f.img}.svg`;
+        return im;
+      });
+      const iconTag = (name) => `<img src="img/foods/svg/${FOODS[FOOD_BY_NAME[name]].img}.svg" alt="">`;
+
+      // ---- ゲーム状態 -------------------------------------------------
+      let mode = "title";        // title / play / pause / over
+      let score = 0;
+      let week = 1;
+      let mealsRun = 0;          // この週につくった料理数（21で週かんそう）
+      let bombs = 2;
+      let xp = 0;
+      let weaponIdx = 0;
+      let runLv = 1;
+      let volley = 0;
+      let equippedFoods = [];    // 装備中の食材名（古い順・さいだい3つ・たてにもなる）
+      let lockedFood = null;     // ロック中の食材（たてでも最後・交代の対象外）
+      const foodFire = {};       // 食材ごとの発射タイマー
+      let pickups = [];          // 画面端にうかぶ食材 { name, x, y, tx, ty, t, side, slot }
+      let combo = 0;
+      let comboTimer = 0;
+      let order = null;          // { recipe, got, boss? }
+      let sideOrder = null;      // ぬしのあいだにつくれる ふつうのちゅうもん { recipe, got }
+      let lastRecipeName = "";
+      let pendingSecret = null;
+      let enemies = [];
+      let pbullets = [];
+      let ebullets = [];
+      let particles = [];
+      let popups = [];
+      let player = { x: WORLD.w / 2, y: WORLD.h - 80, tx: WORLD.w / 2, ty: WORLD.h - 80 };
+      let fireT = 0;
+      let spawnT = 0.8;
+      let shake = 0;
+      let flash = 0;
+      let invuln = 0;
+      let interlude = 0;
+      let interludeText = "";
+      let tGlobal = 0;
+      let tailsSpawned = 0;
+      let bossRef = null;
+      let bossTime = 0;
+      let bombsThisBoss = 0;
+      let bossLvBonus = 0;
+      let chip = 0;              // 雑魚の弾のかるいダメージ（2でたて1つ）
+      let enemySeq = 0;
+      let runKills = 0;
+      let runAch = [];
+      let weeksThisRun = 0;
+      let hitsThisDay = 0;
+      let hitsThisWeek = 0;
+      let bombsThisWeek = 0;
+      let weekEnergy = 0;
+      let dishHistory = [];      // このプレイでつくった料理名（直近）
+      let todayDishes = [];
+      const keys = {};
+
+      const diff = () => Math.min(84, (week - 1) * MEALS_PER_WEEK + mealsRun);
+      const comboMult = () => Math.max(1, Math.min(combo, COMBO_MULT_CAP));
+      const mealSlot = () => mealsRun % 3;
+      const weekday = () => Math.floor(Math.min(mealsRun, MEALS_PER_WEEK - 1) / 3);
+
+      // ---- HUD --------------------------------------------------------
+      const HEART_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C7 16.6 2.5 13 2.5 8.6 2.5 5.6 4.9 3.5 7.6 3.5c1.8 0 3.4.9 4.4 2.4 1-1.5 2.6-2.4 4.4-2.4 2.7 0 5.1 2.1 5.1 5.1 0 4.4-4.5 8-9.5 12.4z" fill="#e85f5c"/></svg>';
+      function renderBombs() { /* 残数はおなべのまわりを回るフタで表示 */ }
+      // 装備バー（画面下）：装備中の食材。タップではずす
+      const buffSlots = [];
+      {
+        const label = document.createElement("p");
+        label.className = "buff-bar-label";
+        label.textContent = "";
+        label.hidden = true;
+        buffBar.appendChild(label);
+      }
+      for (let i = 0; i < EQUIP_MAX; i++) {
+        const el = document.createElement("div");
+        el.className = "buff-slot empty";
+        el.innerHTML = `<span class="buff-slot-icon"></span><div class="buff-slot-main"><span class="buff-slot-name">―</span><span class="buff-slot-time"></span></div><button type="button" class="buff-slot-remove" aria-label="はずす">×</button>`;
+        el.addEventListener("click", () => toggleLock(i));
+        el.querySelector(".buff-slot-remove").addEventListener("click", (ev) => { ev.stopPropagation(); unequipFood(i); });
+        buffBar.appendChild(el);
+        buffSlots.push(el);
+      }
+      function renderBuffBar() {
+        for (let i = 0; i < EQUIP_MAX; i++) {
+          const el = buffSlots[i];
+          const name = equippedFoods[i];
+          if (!name) {
+            el.className = "buff-slot empty";
+            el.querySelector(".buff-slot-icon").innerHTML = "";
+            el.querySelector(".buff-slot-icon").dataset.name = "";
+            el.querySelector(".buff-slot-name").textContent = "―";
+            el.querySelector(".buff-slot-time").textContent = "";
+            el.style.setProperty("--t", "0%");
+            continue;
+          }
+          const mod = FOOD_SHOT[name];
+          const locked = lockedFood === name;
+          el.className = `buff-slot equipped${locked ? " locked" : ""}`;
+          const icon = el.querySelector(".buff-slot-icon");
+          if (icon.dataset.name !== name) { icon.innerHTML = iconTag(name); icon.dataset.name = name; }
+          el.querySelector(".buff-slot-name").innerHTML = mod.desc.replace("：", "<br>");
+          el.querySelector(".buff-slot-time").textContent = `Lv${foodShotLv(name)}${locked ? " ロック中" : ""}`;
+          el.style.setProperty("--t", "100%");
+          el.style.setProperty("--c", mod.color);
+        }
+      }
+      function toggleLock(i) {
+        const name = equippedFoods[i];
+        if (!name) return;
+        lockedFood = lockedFood === name ? null : name;
+        ensureAudio();
+        tone(lockedFood ? 988 : 520, 0.07, { gain: 0.05 });
+        renderBuffBar();
+      }
+      // 基礎エナジーがいちばん低い装備（ロック中はそれしか残っていないときだけ）
+      function weakestEquipIndex() {
+        let idx = -1;
+        let minE = Infinity;
+        equippedFoods.forEach((f, i) => {
+          if (f === lockedFood) return;
+          const e = FOODS[FOOD_BY_NAME[f]].energy;
+          if (e < minE) { minE = e; idx = i; }
+        });
+        return idx < 0 ? equippedFoods.length - 1 : idx;
+      }
+      function equipFood(name) {
+        if (!FOOD_SHOT[name] || equippedFoods.includes(name) || foodLocked(name)) return false;
+        if (equippedFoods.length >= EQUIP_MAX) {
+          // ロック中のものは交代しない（いちばん古い ロックなしと交代）
+          const idx = weakestEquipIndex();
+          const old = equippedFoods.splice(idx, 1)[0];
+          delete foodFire[old];
+          showBanner(`${old}と こうたい！`);
+        }
+        equippedFoods.push(name);
+        foodFire[name] = 0.1;
+        pickups = pickups.filter((pk) => pk.name !== name);
+        addPopup(player.x, player.y - 46, `${FOOD_SHOT[name].desc}！`, "#7a5fbf", 13);
+        tone(880, 0.08, { gain: 0.05 }); tone(1175, 0.1, { gain: 0.05, delay: 0.07 });
+        renderBuffBar();
+        return true;
+      }
+      function unequipFood(i) {
+        const name = equippedFoods[i];
+        if (!name) return;
+        equippedFoods.splice(i, 1);
+        delete foodFire[name];
+        if (lockedFood === name) lockedFood = null;
+        ensureAudio();
+        tone(440, 0.07, { gain: 0.05 });
+        renderBuffBar();
+      }
+      // うちおとした食材が画面の左右にうかぶ
+      const PICKUP_YS = [250, 322, 394];
+      // 基礎エナジー150以上の食材弾は、その食材のぬしをたおすまでロック（カボチャは日ようびのぬし）
+      const FOOD_LOCK_ENERGY = 150;
+      function foodLockBoss(name) {
+        const f = FOODS[FOOD_BY_NAME[name]];
+        if (!f || f.energy < FOOD_LOCK_ENERGY) return null;
+        const i = BOSSES.findIndex((b) => b.food === name);
+        return BOSSES[i >= 0 ? i : BOSSES.length - 1];
+      }
+      const foodLocked = (name) => { const b = foodLockBoss(name); return !!b && !secrets.bosses.includes(BOSSES.indexOf(b)); };
+      function spawnPickup(name, x, y) {
+        if (!FOOD_SHOT[name] || equippedFoods.includes(name)) return;
+        if (foodLocked(name)) { addPopup(x, y - 22, `${foodLockBoss(name).title}を たおすと装備できる`, "#7d7269", 11); return; }
+        if (equippedFoods.length < EQUIP_MAX && mode === "play") { equipFood(name); return; } // 空き枠があれば そのまま装備
+        const same = pickups.find((pk) => pk.name === name);
+        if (same) { same.t = 0; return; }
+        const side = x < WORLD.w / 2 ? -1 : 1;
+        const used = pickups.filter((pk) => pk.side === side);
+        let slot = PICKUP_YS.findIndex((_, i) => !used.some((pk) => pk.slot === i));
+        if (slot < 0) {
+          let oldest = used[0];
+          for (const pk of used) if (pk.t > oldest.t) oldest = pk;
+          pickups.splice(pickups.indexOf(oldest), 1);
+          slot = oldest.slot;
+        }
+        pickups.push({ name, x, y, tx: side < 0 ? 26 : WORLD.w - 26, ty: PICKUP_YS[slot], t: 0, side, slot });
+      }
+      function tapPickup(wx, wy) {
+        let best = null;
+        let bestD = 34 * 34;
+        for (const pk of pickups) {
+          const dx = pk.x - wx, dy = pk.y - wy;
+          const dd = dx * dx + dy * dy;
+          if (dd < bestD) { bestD = dd; best = pk; }
+        }
+        if (!best) return false;
+        equipFood(best.name);
+        return true;
+      }
+      function renderPower() {
+        const w = WEAPON[weaponIdx];
+        const from = runLvXp(runLv);
+        const next = runLv >= RUN_LV_MAX ? null : runLvXp(runLv + 1);
+        const ratio = next == null ? 1 : (xp - from) / (next - from);
+        renderBuffBar();
+        powerBox.style.setProperty("--meter-progress", `${(clamp(ratio, 0, 1) * 100).toFixed(1)}%`);
+        powerLv.textContent = runLv >= RUN_LV_MAX ? "LvMAX" : `Lv${runLv}`;
+        powerDesc.textContent = w.desc;
+      }
+      function updateScoreUI() {
+        scoreValue.textContent = fmt(score);
+      }
+      function updateMeta() {
+        dayChip.textContent = `${WEEKDAYS[weekday()]}ようびの${MEAL_SLOTS[mealSlot()]}`;
+        mealChip.textContent = `${Math.min(mealsRun + 1, MEALS_PER_WEEK)}/${MEALS_PER_WEEK}食`;
+        fbChip.textContent = `FB+${fbPercent()}%`;
+        weekChip.textContent = `${week}週目`;
+      }
+      function updateTitleLabel() {
+        titleLabel.textContent = currentTitle;
+      }
+
+      // ---- バナー・ポップアップ ---------------------------------------
+      // バナーは上書きせず、順番に表示する（同時にいろいろ起きても読める）
+      const bannerQueue = [];
+      let bannerBusy = false;
+      function showBanner(text, kind = "") {
+        if (bannerQueue.length >= 4) {
+          const i = bannerQueue.findIndex((b) => b.kind !== "ach");
+          if (i >= 0) bannerQueue.splice(i, 1); else return;
+        }
+        bannerQueue.push({ text, kind });
+        if (!bannerBusy) nextBanner();
+      }
+      function nextBanner() {
+        const b = bannerQueue.shift();
+        if (!b) { bannerBusy = false; return; }
+        bannerBusy = true;
+        skillBanner.textContent = b.text;
+        skillBanner.className = `skill-banner show${b.kind ? " " + b.kind : ""}`;
+        const hold = b.kind === "ach" ? 2400 : bannerQueue.length ? 1500 : 2000;
+        setTimeout(() => {
+          skillBanner.classList.remove("show");
+          setTimeout(nextBanner, 260);
+        }, hold);
+      }
+      function addPopup(x, y, text, color = "#d96f2f", size = 15) {
+        popups.push({ x, y, text, color, size, t: 0, life: 1.05 });
+        if (popups.length > 24) popups.shift();
+      }
+      function burst(x, y, color, n = 10, power = 130) {
+        if (reducedMotion) n = Math.min(n, 4);
+        for (let i = 0; i < n; i++) {
+          const a = rand(0, Math.PI * 2);
+          const v = rand(power * 0.35, power);
+          particles.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: rand(2, 4.6), color, t: 0, life: rand(0.35, 0.7) });
+        }
+        if (particles.length > 240) particles.splice(0, particles.length - 240);
+      }
+
+      // ---- アチーブメント ---------------------------------------------
+      const hasAch = (id) => achGot.includes(id);
+      function unlock(id) {
+        if (hasAch(id) || !ACH_BY_ID[id]) return;
+        achGot.push(id);
+        runAch.push(id);
+        currentTitle = ACH_BY_ID[id].name;
+        updateTitleLabel();
+        persistAch();
+        showBanner(`アチーブメント「${ACH_BY_ID[id].name}」！`, "ach");
+        sfxAch();
+        if (id !== "legend" && ACHS.every((a) => a.id === "legend" || hasAch(a.id))) unlock("legend");
+      }
+      function addScore(v) {
+        score += v;
+        weekEnergy += v;
+        stats.energy += v;
+        updateScoreUI();
+        if (stats.energy >= 100000) unlock("energy100k");
+        if (stats.energy >= 1000000) unlock("energy1m");
+        if (score >= 1000000) unlock("million_run");
+      }
+      function noteFoodKill(name, count) {
+        stats.foodKills[name] = (stats.foodKills[name] || 0) + count;
+        const before = foodKillLv(name);
+        foodExp[name] = (foodExp[name] || 0) + foodExpGain(name) * count;
+        const after = foodKillLv(name);
+        if (after > before && FOOD_SHOT[name]) {
+          showBanner(`${FOOD_SHOT[name].desc.split("：")[0]} Lv${after}！`);
+          sfxLevel();
+          renderBuffBar();
+        }
+      }
+      function noteFoodHarvest(idx, count = 1) {
+        stats.harvest += count;
+        const name = FOODS[idx].name;
+        if (!stats.foods.includes(name)) { stats.foods.push(name); persistAch(); }
+        unlock("first_harvest");
+        if (stats.foods.length >= FOODS.length) unlock("foods_all");
+      }
+
+      // ---- ちゅうもん -------------------------------------------------
+      function eligibleRecipes() {
+        const d = diff();
+        const cap = d < 3 ? 5 : d < 9 ? 6 : d < 18 ? 8 : 99;
+        const list = BASE_RECIPES.filter((r) => totalNeeds(r) <= cap && r.name !== lastRecipeName);
+        return list.length ? list : BASE_RECIPES;
+      }
+      function makeOrder() {
+        const got = {};
+        let recipe;
+        if (pendingSecret) {
+          recipe = pendingSecret;
+          pendingSecret = null;
+          got["おいしいシッポ"] = 1;
+          showBanner(`シークレットちゅうもん「${recipe.name}」！`);
+        } else {
+          recipe = pick(eligibleRecipes());
+        }
+        lastRecipeName = recipe.name;
+        return { recipe, got };
+      }
+      function newOrder() {
+        sideOrder = null;
+        if (mealSlot() === 2) {
+          // よる＝ぬし。ぬしが食材をもっているので、たおせば料理がかんせいする。あいだにも ふつうのちゅうもんをつくれる
+          const boss = BOSSES[weekday()];
+          order = { recipe: pick(eligibleRecipes()), got: {}, boss };
+          lastRecipeName = order.recipe.name;
+          sideOrder = makeOrder();
+          spawnBoss(boss);
+        } else {
+          order = makeOrder();
+        }
+        renderOrder();
+      }
+      // いま食材をあつめている ちゅうもん（ぬしのあいだは 横のちゅうもん）
+      const activeOrder = () => (order && order.boss ? sideOrder : order);
+      const needsHtml = (o) => Object.entries(o.recipe.needs).map(([name, need]) => {
+        const got = Math.min(o.got[name] || 0, need);
+        return `<span class="order-need${got >= need ? " done" : ""}">${iconTag(name)}${got}/${need}</span>`;
+      }).join("");
+      function renderOrder() {
+        // ぬしの情報はフィールド下のHPゲージだけ。ちゅうもん枠には いま食材をあつめている料理だけを出す
+        const o = activeOrder();
+        if (!o) return;
+        const r = o.recipe;
+        const lv = recipeLevel(r.name);
+        orderCard.classList.remove("boss");
+        orderLabel.innerHTML = "ちゅう<br>もん";
+        orderName.innerHTML = `${r.name}<span class="order-lv">Lv${lv}</span>`;
+        orderNeeds.innerHTML = needsHtml(o);
+        orderHp.hidden = true;
+        orderReward.textContent = `+${fmt(withFb(recipeReward(r)))}`;
+      }
+      function missingNeeds() {
+        const o = activeOrder();
+        if (!o) return [];
+        const out = [];
+        for (const [name, need] of Object.entries(o.recipe.needs)) {
+          const got = o.got[name] || 0;
+          for (let i = got; i < need; i++) out.push(name);
+        }
+        return out;
+      }
+      function grantIngredient(name) {
+        const o = activeOrder();
+        if (!o) return false;
+        const need = o.recipe.needs[name];
+        if (!need) return false;
+        const got = o.got[name] || 0;
+        if (got >= need) return false;
+        o.got[name] = got + 1;
+        renderOrder();
+        if (Object.entries(o.recipe.needs).every(([n, k]) => (o.got[n] || 0) >= k)) cookDish(o === sideOrder);
+        return true;
+      }
+      // side=true は ぬしのあいだの横のちゅうもん（食事はすすまない。つぎの横ちゅうもんが出る）
+      function cookDish(side = false) {
+        const r = (side ? sideOrder : order).recipe;
+        const reward = withFb(recipeReward(r));
+        const lv = recipeLevel(r.name);
+        recipeLv[r.name] = Math.min(RECIPE_LV_MAX, lv + 1);
+        dishesCooked++;
+        persistCooking();
+        persistAch();
+        gainXp(1);
+        if (r.secret && !secrets.recipes.includes(r.name)) {
+          secrets.recipes.push(r.name);
+          persistSecrets();
+        }
+        addScore(reward);
+        sfxCook();
+        showBanner(`${r.name} かんせい！ +${fmt(reward)}`);
+        addPopup(player.x, player.y - 60, `${r.name}！`, "#35804d", 17);
+        addPopup(player.x, player.y - 36, `+${fmt(reward)}`, "#d96f2f", 20);
+        burst(player.x, player.y - 30, "#f2c06c", 16, 170);
+        orderCard.classList.remove("cooked");
+        void orderCard.offsetWidth;
+        orderCard.classList.add("cooked");
+
+        // 料理系アチーブメント
+        unlock("first_dish");
+        if (r.secret) unlock("secret_dish");
+        const cookedKinds = Object.keys(recipeLv).length;
+        if (cookedKinds >= 20) unlock("dishes20");
+        if (cookedKinds >= RECIPES.length) unlock("dishes50");
+        if (lv + 1 >= 10) unlock("lv10");
+        if (lv + 1 >= 30) unlock("lv30");
+        if (muted) unlock("silent");
+        const hour = new Date().getHours();
+        if (hour >= 0 && hour < 4) unlock("night");
+        if (hour >= 5 && hour < 8) unlock("early");
+        dishHistory.push(r.name);
+        if (dishHistory.length > 8) dishHistory.shift();
+        const last5 = dishHistory.slice(-5);
+        if (last5.length === 5 && last5.every((n) => n.includes("カレー"))) unlock("curry5");
+        if (last5.length === 5 && last5.every((n) => n.includes("サラダ"))) unlock("salad5");
+        if (todayDishes.includes(r.name)) unlock("okawari");
+        todayDishes.push(r.name);
+
+        if (side) { sideOrder = makeOrder(); renderOrder(); updateMeta(); return; }
+        const slot = mealSlot();
+        mealsRun++;
+        if (slot === 2) completeDay();
+        if (mealsRun >= MEALS_PER_WEEK) completeWeek();
+        else newOrder();
+        updateMeta();
+      }
+      function completeDay() {
+        unlock("day1");
+        if (hitsThisDay === 0) unlock("nodmg_day");
+        hitsThisDay = 0;
+        todayDishes = [];
+        showBanner("1日おつかれさま！");
+      }
+      function completeWeek() {
+        weeksThisRun++;
+        stats.weeks++;
+        unlock("week1");
+        if (hitsThisWeek === 0) unlock("nodmg_week");
+        if (bombsThisWeek === 0) unlock("nobomb_week");
+        if (equippedFoods.length === 0) unlock("last_heart_week");
+        if (weekEnergy >= 100000) unlock("richweek");
+        if (hitsThisWeek >= 15) unlock("burnt15");
+        if (weeksThisRun >= 4) unlock("month1");
+        persistAch();
+        week++;
+        if (week >= 2) unlock("week2");
+        if (week >= 5) unlock("week5");
+        if (week >= 10) unlock("week10");
+        mealsRun = 0;
+        hitsThisWeek = 0;
+        bombsThisWeek = 0;
+        weekEnergy = 0;
+        tailsSpawned = 0;
+        enemies = [];
+        ebullets = [];
+        bossRef = null;
+        interlude = INTERLUDE_TIME;
+        interludeText = `${week - 1}週目 かんそう！`;
+        invuln = INTERLUDE_TIME + 0.8;
+        sfxClear();
+        showBanner(`${week}週目へ！ 食材たちが もっと おこりだす…`);
+        newOrder();
+      }
+
+      // ---- 敵スポーン -------------------------------------------------
+      function makeEnemy(idx, x, y, opts = {}) {
+        const maxHp = opts.hp || foodHp(idx);
+        const f = FOODS[idx];
+        return {
+          id: ++enemySeq,
+          kind: opts.kind || "drift",
+          attack: opts.attack != null ? opts.attack : f.attack,
+          armed: opts.armed != null ? opts.armed : false,
+          foodIdx: idx,
+          x, y,
+          r: opts.r || (17 + maxHp * 0.9),
+          hp: maxHp,
+          maxHp,
+          energy: opts.energy != null ? opts.energy : f.energy,
+          vx: opts.vx || 0,
+          vy: opts.vy != null ? opts.vy : (34 + diff() * 0.9) * (opts.speed || 1),
+          sineAmp: opts.sineAmp != null ? opts.sineAmp : rand(14, 48),
+          sineFreq: rand(0.8, 1.8),
+          phase: rand(0, Math.PI * 2),
+          baseX: x,
+          t: 0,
+          hitT: 0,
+          fireT: rand(0.9, 2.0),
+          state: 0,
+          touched: false,
+        };
+      }
+      // おとしてくる組は、おこってなくても半分くらいはタネをおとす
+      const armDropper = (e) => { if (!e.armed && (e.attack === "drop" || e.attack === "drop2") && Math.random() < 0.55) e.armed = true; return e; };
+      // 基本は低エナジー食材。注文の不足分は少しだけ追加で出る
+      function pickSpawnFood() {
+        const missing = missingNeeds();
+        if (missing.length && Math.random() < 0.2) return FOOD_BY_NAME[pick(missing)];
+        return (Math.random() * (RANDOM_POOL_MAX + 1)) | 0;
+      }
+      const armChance = () => Math.min(0.95, 0.4 + diff() * 0.012);
+      function spawnDrift() {
+        const e = makeEnemy(pickSpawnFood(), rand(40, WORLD.w - 40), -30, { armed: Math.random() < armChance() });
+        enemies.push(armDropper(e));
+      }
+      function spawnColumn() {
+        const idx = pickSpawnFood();
+        const x = rand(50, WORLD.w - 50);
+        const armed = Math.random() < armChance();
+        for (let i = 0; i < 3; i++) enemies.push(armDropper(makeEnemy(idx, x, -30 - i * 62, { sineAmp: 24, armed: armed && i === 1 })));
+      }
+      function spawnVee() {
+        const idx = pickSpawnFood();
+        const cx = rand(90, WORLD.w - 90);
+        for (let i = -2; i <= 2; i++) {
+          enemies.push(armDropper(makeEnemy(idx, cx + i * 42, -30 - Math.abs(i) * 44, { sineAmp: 10, speed: 1.05, armed: i === 0 && Math.random() < armChance() })));
+        }
+      }
+      function spawnLine() {
+        const idx = pickSpawnFood();
+        for (let i = 0; i < 4; i++) {
+          enemies.push(armDropper(makeEnemy(idx, 60 + (i * (WORLD.w - 120)) / 3, -30, { sineAmp: 36, speed: 0.9, armed: Math.random() < armChance() * 0.7 })));
+        }
+      }
+      function spawnHunters() {
+        // ねらってくる組のペア（注文でたりないときだけ やってくる）
+        const pool = missingNeeds().filter((name) => ["げきからハーブ", "あったかジンジャー", "ワカクサコーン", "リラックスカカオ", "つやつやアボカド"].includes(name));
+        if (!pool.length) { spawnDrift(); return; }
+        const idx = FOOD_BY_NAME[pick(pool)];
+        const x = rand(70, WORLD.w - 70);
+        for (let i = 0; i < 2; i++) enemies.push(makeEnemy(idx, x + (i ? 50 : -50), -30, { armed: true, sineAmp: 0 }));
+      }
+      function spawnTail() {
+        tailsSpawned++;
+        const fromLeft = Math.random() < 0.5;
+        const e = makeEnemy(TAIL_IDX, fromLeft ? -34 : WORLD.w + 34, rand(90, 180), {
+          kind: "tail",
+          hp: 60,
+          vx: (fromLeft ? 1 : -1) * (260 + diff() * 2),
+          vy: 0,
+          sineAmp: 14,
+        });
+        enemies.push(e);
+        showBanner("なにかが ものすごいスピードで とんでいく！");
+        sfxTail();
+      }
+      function spawnBoss(def) {
+        const idx = FOOD_BY_NAME[def.food];
+        const hp = Math.round(def.hp * 1.5 * (1 + 0.7 * (week - 1)));
+        bossRef = makeEnemy(idx, WORLD.w / 2, -80, {
+          kind: "boss", hp, r: 56, vy: 70, sineAmp: 0, energy: FOODS[idx].energy, attack: "none",
+        });
+        bossRef.def = def;
+        bossRef.targetY = 118;
+        bossRef.fireT = 1.6;
+        bossRef.miniT = 5;
+        bossRef.dashT = 6;
+        bossRef.angle = 0;
+        bossRef.dashing = false;
+        bossRef.entered = false;
+        bossRef.dashT = 1.2;
+        bossRef.lastHpShown = -1;
+        bossRef.defeatedBy = null;
+        bossRef.intro = BOSS_INTRO; // 登場から5秒は なにもしない・ダメージもうけない
+        enemies.push(bossRef);
+        ebullets = [];
+        bossTime = 0;
+        bombsThisBoss = 0;
+        showBanner(`${def.title}が あらわれた！`);
+        sfxBoss();
+        shake = Math.max(shake, 0.5);
+      }
+      function spawnMini(name, x, y, extra = {}) {
+        const idx = FOOD_BY_NAME[name];
+        const e = makeEnemy(idx, x, y, Object.assign({ kind: "mini", hp: 6, r: 17, speed: 1.2, sineAmp: 26 }, extra));
+        e.hp = Math.round(e.hp * weekHpMult());
+        enemies.push(e);
+      }
+      function spawnTick(dt) {
+        if (interlude > 0) return;
+        if (bossRef && bossRef.intro > 0) return;
+        spawnT -= dt;
+        if (spawnT > 0) return;
+        const d = diff();
+        const bossMul = bossRef ? 2.1 : 1;
+        spawnT = Math.max(0.42, 1.15 - d * 0.008) * rand(0.8, 1.2) * bossMul;
+        if (!bossRef && mealsRun >= 2 && tailsSpawned < 1 && Math.random() < 0.012) { spawnTail(); return; }
+        const roll = Math.random();
+        if (bossRef) { if (roll < 0.7) spawnDrift(); else spawnColumn(); return; }
+        if (d >= 2 && roll < 0.1) spawnHunters();
+        else if (roll < 0.30) spawnColumn();
+        else if (d >= 6 && roll < 0.44) spawnVee();
+        else if (d >= 10 && roll < 0.56) spawnLine();
+        else spawnDrift();
+      }
+
+      // ---- 弾 ---------------------------------------------------------
+      function enemyShot(x, y, vx, vy, kind = "chili", extra = {}) {
+        ebullets.push(Object.assign({ x, y, vx, vy, kind, r: kind === "big" ? 9 : kind === "spore" ? 4.5 : 5, t: 0, weak: false }, extra));
+      }
+      // 雑魚の弾：おそくて、2発うけて はじめて たて1つぶん
+      function gruntShot(x, y, vx, vy, kind = "chili") {
+        enemyShot(x, y, vx * 0.85, vy * 0.85, kind, { weak: true });
+      }
+      function aimedShot(e, speed, spreadAngle = 0, kind = "chili") {
+        const base = Math.atan2(player.y - e.y, player.x - e.x) + spreadAngle;
+        if (e.kind === "boss") enemyShot(e.x, e.y + e.r * 0.4, Math.cos(base) * speed, Math.sin(base) * speed, kind);
+        else gruntShot(e.x, e.y + e.r * 0.4, Math.cos(base) * speed, Math.sin(base) * speed, kind);
+      }
+      function sporeRing(x, y, n, speed, offset = 0, weak = false) {
+        for (let i = 0; i < n; i++) {
+          const a = offset + (i / n) * Math.PI * 2;
+          if (weak) gruntShot(x, y, Math.cos(a) * speed, Math.sin(a) * speed, "spore");
+          else enemyShot(x, y, Math.cos(a) * speed, Math.sin(a) * speed, "spore");
+        }
+      }
+      // 弾速（基本）。食材弾は speed 倍率がかかる
+      const SHOT_SPEED = 220;
+      function fireVolley() {
+        if (pbullets.length >= PBULLET_CAP) return;
+        const w = WEAPON[weaponIdx];
+        volley++;
+        const px = player.x;
+        const py = player.y - 24;
+        const speed = SHOT_SPEED;
+        const mk = (extra) => {
+          const b = Object.assign({ dmg: 1, size: 1, color: null, t: 0 }, extra);
+          if (b.kind === "big") { b.pierce = true; b.hit = new Set(); }
+          return b;
+        };
+        for (let i = 0; i < w.spread; i++) {
+          const a = (i - (w.spread - 1) / 2) * 0.13;
+          const x = px + (i - (w.spread - 1) / 2) * 8;
+          pbullets.push(mk({ kind: "spoon", x, x0: x, y: py, vx: Math.sin(a) * speed, vy: -Math.cos(a) * speed, side: 1 }));
+        }
+        for (let i = 0; i < w.wave; i++) {
+          const side = i === 0 ? -1 : 1;
+          pbullets.push(mk({ kind: "wave", x: px, x0: px, y: py, vx: 0, vy: -speed * 0.85, side }));
+        }
+        for (let i = 0; i < w.homing; i++) {
+          const side = i % 2 === 0 ? -1 : 1;
+          pbullets.push(mk({ kind: "fork", x: px + side * 16, y: py + 6, vx: side * 70, vy: -speed * 0.75, side }));
+        }
+        if (w.big && volley % w.big === 0) {
+          pbullets.push(mk({ kind: "big", x: px, y: py - 4, vx: 0, vy: -speed * 0.72, dmg: BIG_DMG }));
+        }
+        sfxShoot();
+      }
+      // 装備した食材の弾（食材ごとに独立して発射）
+      function fireFood(name, lv = 1) {
+        if (pbullets.length >= PBULLET_CAP) return;
+        const m = FOOD_SHOT[name];
+        const extra = Math.floor((lv - 1) / 3); // Lv4・Lv7・Lv10で弾がふえる
+        const fan = lv >= 8 ? (lv - 7) * 2 : 0;   // Lv8から弾幕：左右に広がる弾がふえる
+        const px = player.x;
+        const py = player.y - 24;
+        const speed = SHOT_SPEED * (m.speed || 1);
+        const mk = (extra) => {
+          const b = Object.assign({ dmg: m.dmg || 1, size: m.size || 1, color: m.color, t: 0, tall: !!m.tall, life: m.life || 0, burn: !!m.burn, amp: m.amp || 0 }, extra);
+          if (m.pierce || b.kind === "big") { b.pierce = true; b.hit = new Set(); }
+          if (m.split2) { b.split = true; b.splitLeft = 2; }
+          return b;
+        };
+        const count = (m.count || 0) + ((m.count || 0) > 0 ? extra : 0);
+        const homingN = (m.homing || 0) + ((m.count || 0) === 0 && m.homing ? extra : 0);
+        const ang = m.spreadAngle || 0.13;
+        for (let i = 0; i < count; i++) {
+          let a = (i - (count - 1) / 2) * ang;
+          if (m.scatter) a += rand(-m.scatter, m.scatter);
+          const side = i % 2 === 0 ? 1 : -1;
+          const x = px + (i - (count - 1) / 2) * 8;
+          pbullets.push(mk({ kind: m.kind || "spoon", x, x0: x, y: py, vx: Math.sin(a) * speed, vy: -Math.cos(a) * speed, side }));
+        }
+        for (let i = 0; i < homingN; i++) {
+          const side = i % 2 === 0 ? -1 : 1;
+          pbullets.push(mk({ kind: "fork", x: px + side * 16, y: py + 6, vx: side * 70, vy: -speed * 0.75, side }));
+        }
+        if (m.big) pbullets.push(mk({ kind: "big", x: px, y: py - 4, vx: 0, vy: -speed * 0.72, dmg: Math.max(BIG_DMG, (m.dmg || 1) + 3) + extra * 2 }));
+        for (let i = 0; i < fan; i++) {
+          const side = i % 2 === 0 ? 1 : -1;
+          const a = side * (0.35 + Math.floor(i / 2) * 0.28) + (m.scatter ? rand(-m.scatter, m.scatter) : 0);
+          if ((m.count || 0) === 0 && m.homing) pbullets.push(mk({ kind: "fork", x: px + side * 20, y: py + 6, vx: side * 90, vy: -speed * 0.75, side }));
+          else pbullets.push(mk({ kind: m.kind || "spoon", x: px + side * 10, x0: px + side * 10, y: py + 4, vx: Math.sin(a) * speed, vy: -Math.cos(a) * speed, side, dmg: Math.max(1, Math.round((m.dmg || 1) * 0.6)) }));
+        }
+      }
+
+      // ---- なべぶた（ボム） -------------------------------------------
+      function useBomb() {
+        if (mode !== "play" || interlude > 0) return;
+        if (!equippedFoods.length) { addPopup(player.x, player.y - 40, "装備がないと なべぶたは つかえない", "#7d7269", 12); return; }
+        // 装備をひとつ ぎせいにして発動（エナジーのひくいものから。ロック中はさいご）
+        const lost = equippedFoods.splice(weakestEquipIndex(), 1)[0];
+        if (lockedFood === lost) lockedFood = null;
+        delete foodFire[lost];
+        burst(player.x, player.y - 10, FOOD_SHOT[lost].color, 16, 170);
+        addPopup(player.x, player.y - 40, `${lost}を なげた！`, "#7a5fbf", 14);
+        renderBuffBar();
+        bombsThisWeek++;
+        bombsThisBoss++;
+        ebullets = [];
+        flash = 1;
+        shake = 0.8;
+        invuln = Math.max(invuln, 1.6);
+        sfxBomb();
+        showBanner("なべぶた！ ぜんぶ はらいのけた！");
+        for (let i = enemies.length - 1; i >= 0; i--) if (!(enemies[i].kind === "boss" && enemies[i].intro > 0)) damageEnemy(enemies[i], BOMB_DMG, "bomb");
+      }
+
+      // ---- 戦闘 -------------------------------------------------------
+      function damageEnemy(e, dmg, cause) {
+        if (e.kind === "boss" && e.intro > 0) return false; // 登場中は無敵
+        e.hp -= dmg;
+        e.hitT = 0.09;
+        e.touched = true;
+        if (e.kind === "boss") e.defeatedBy = cause;
+        if (e.hp <= 0) {
+          const i = enemies.indexOf(e);
+          if (i >= 0) enemies.splice(i, 1);
+          killEnemy(e, cause);
+          return true;
+        }
+        return false;
+      }
+      function gainXp(v) {
+        xp += v;
+        let lv = runLv;
+        while (lv < RUN_LV_MAX && xp >= runLvXp(lv + 1)) lv++;
+        if (lv !== runLv) {
+          const foodBefore = equippedFoods.map((n) => foodShotLv(n));
+          runLv = lv;
+          weaponIdx = tierOf(lv);
+          sfxLevel();
+          showBanner(`レシピLv${lv}！ ${WEAPON[weaponIdx].desc}`);
+          addPopup(player.x, player.y - 46, `レシピLv${lv}！`, "#7a5fbf", 18);
+          powerBox.classList.remove("levelup");
+          void powerBox.offsetWidth;
+          powerBox.classList.add("levelup");
+          equippedFoods.forEach((n, i) => { if (foodShotLv(n) > foodBefore[i]) showBanner(`${FOOD_SHOT[n].desc.split("：")[0]} Lv${foodShotLv(n)}！`); });
+          if (lv >= 5) unlock("lv5");
+          if (lv >= 50) unlock("lv8");
+        }
+        renderPower();
+      }
+      function killEnemy(e, cause) {
+        if (e.kind === "boss") { defeatBoss(e); return; }
+        runKills++;
+        combo++;
+        comboTimer = COMBO_WINDOW;
+        if (combo > stats.maxCombo) stats.maxCombo = combo;
+        if (combo >= 10) unlock("combo10");
+        if (combo >= 30) unlock("combo30");
+        if (combo >= 60) unlock("combo60");
+        const mult = comboMult();
+        const gain = withFb(e.energy * mult);
+        addScore(gain);
+        addPopup(e.x, e.y - 8, `+${fmt(gain)}`, mult >= COMBO_MULT_CAP ? "#7a5fbf" : "#d96f2f", mult >= 3 ? 16 : 13);
+        burst(e.x, e.y, FOODS[e.foodIdx].color, 10, 130);
+        sfxHarvest();
+        noteFoodHarvest(e.foodIdx);
+        noteFoodKill(FOODS[e.foodIdx].name, 1);
+        spawnPickup(FOODS[e.foodIdx].name, e.x, e.y);
+        if (e.attack === "spore" && cause !== "bomb") {
+          sporeRing(e.x, e.y, e.kind === "mini" ? 5 : 6, 85 + diff() * 0.6, rand(0, Math.PI), true);
+        }
+        if (e.kind === "tail") {
+          secrets.tail = true;
+          secrets.wildTail = true;
+          persistSecrets();
+          if (!pendingSecret && !(activeOrder() && activeOrder().recipe.secret)) pendingSecret = pick(SECRET_RECIPES);
+          unlock("wild_tail");
+          showBanner("野生のおいしいシッポを うちおとした！");
+          addPopup(e.x, e.y - 34, "おいしいシッポ ゲット！", "#d4577e", 17);
+          sfxTail();
+        }
+        grantIngredient(FOODS[e.foodIdx].name);
+      }
+      function defeatBoss(e) {
+        bossRef = null;
+        const def = e.def;
+        const idx = e.foodIdx;
+        const bonus = withFb(FOODS[idx].energy * 10 * week);
+        addScore(bonus);
+        burst(e.x, e.y, FOODS[idx].color, 36, 260);
+        shake = Math.max(shake, 0.7);
+        addPopup(e.x, e.y, `+${fmt(bonus)}`, "#7a5fbf", 22);
+        showBanner(`${def.title}を げきは！ ${FOODS[idx].name}×3 ゲット！`);
+        sfxClear();
+        noteFoodHarvest(idx, 3);
+        noteFoodKill(FOODS[idx].name, 3);
+        bossLvBonus = runLv; // たおしたあとの料理でLvがあがらなければ、かならず1あげる
+        const wd = BOSSES.indexOf(def);
+        if (!secrets.bosses.includes(wd)) {
+          secrets.bosses.push(wd);
+          persistSecrets();
+          const freed = FOODS.filter((f) => foodLockBoss(f.name) === def).map((f) => f.name);
+          if (freed.length) showBanner(`${freed.join("と")}の弾が 装備できるようになった！`);
+        }
+        spawnPickup(FOODS[idx].name, e.x, e.y);
+        if (idx === TAIL_IDX) {
+          if (!secrets.tail) { secrets.tail = true; persistSecrets(); }
+          if (!pendingSecret) pendingSecret = pick(SECRET_RECIPES);
+          if (bombsThisBoss === 0) unlock("tail_boss_nobomb");
+        }
+        unlock("boss_first");
+        if (secrets.bosses.length >= BOSSES.length) unlock("boss_all");
+        if (e.defeatedBy === "big") unlock("big_finish");
+        if (e.defeatedBy === "bomb") unlock("bomb_finish");
+        if (bossTime <= 20) unlock("fast_boss");
+        ebullets = [];
+        cookDish();
+        if (runLv === bossLvBonus && runLv < RUN_LV_MAX) { xp = runLvXp(runLv + 1); gainXp(0); }
+      }
+      function playerHit() {
+        if (invuln > 0) return;
+        hitsThisDay++;
+        hitsThisWeek++;
+        if (combo >= 20) unlock("wasted_combo");
+        if (hitsThisWeek >= 15) unlock("burnt15");
+        combo = 0;
+        comboTimer = 0;
+        invuln = 1.8;
+        shake = 0.6;
+        sfxDamage();
+        burst(player.x, player.y, "#e85f5c", 14, 160);
+        if (equippedFoods.length) {
+          // たてはロックなしから。ロック中はさいごの1つになったときだけ
+          const lost = equippedFoods.splice(weakestEquipIndex(), 1)[0];
+          if (lockedFood === lost) lockedFood = null;
+          delete foodFire[lost];
+          burst(player.x, player.y - 10, FOOD_SHOT[lost].color, 16, 170);
+          addPopup(player.x, player.y - 40, `${lost}が たてになった！`, "#d34744", 15);
+          showBanner(`${lost}が たてになって きえた…`);
+          renderBuffBar();
+          return;
+        }
+        addPopup(player.x, player.y - 40, "あちちっ！", "#d34744", 17);
+        endRun();
+      }
+
+      // ---- 更新 -------------------------------------------------------
+      function updateEnemy(e, dt) {
+        e.t += dt;
+        if (e.hitT > 0) e.hitT -= dt;
+        const d = diff();
+        const shotSpeed = 140 + d * 1.1;
+
+        if (e.kind === "boss") { updateBoss(e, dt); return; }
+        if (e.kind === "tail") {
+          e.x += e.vx * dt;
+          e.y += Math.sin(e.t * 6 + e.phase) * 18 * dt;
+          return;
+        }
+
+        // 攻撃パターン（armed のときだけ）
+        if (e.armed) {
+          switch (e.attack) {
+            case "dive":
+              if (e.state === 0 && e.y > 110 && e.t > 0.9) {
+                e.state = 1;
+                const a = Math.atan2(player.y - e.y, player.x - e.x);
+                const sp = 250 + d * 2;
+                e.vx = Math.cos(a) * sp;
+                e.vy = Math.sin(a) * sp;
+                e.sineAmp = 0;
+              }
+              break;
+            case "lance":
+              if (e.state === 0 && e.y > 90 && e.t > 0.7) {
+                e.state = 1;
+                const a = Math.atan2(player.y - e.y, player.x - e.x);
+                const sp = 320 + d * 2.5;
+                e.vx = Math.cos(a) * sp;
+                e.vy = Math.sin(a) * sp;
+                e.sineAmp = 0;
+                e.angle = a;
+              }
+              break;
+            case "drop":
+            case "drop2":
+              e.fireT -= dt;
+              if (e.fireT <= 0 && e.y > 20 && e.y < WORLD.h - 120) {
+                e.fireT = 1.3;
+                gruntShot(e.x, e.y + e.r * 0.5, 0, 130 + d * 0.8, "seed");
+                if (e.attack === "drop2") { gruntShot(e.x - 10, e.y + e.r * 0.5, -40, 130 + d, "seed"); gruntShot(e.x + 10, e.y + e.r * 0.5, 40, 130 + d, "seed"); }
+                sfxEnemyShot();
+              }
+              break;
+            case "aimed":
+            case "fan":
+              // 画面上部にとどまってねらう
+              if (e.y < e.holdY) { /* 降下中 */ } else if (!e.holding) { e.holding = true; e.vy = 0; }
+              if (e.holding) {
+                e.t2 = (e.t2 || 0) + dt;
+                e.x += Math.cos(e.t * 1.4 + e.phase) * 55 * dt;
+                e.x = clamp(e.x, 30, WORLD.w - 30);
+                e.fireT -= dt;
+                if (e.fireT <= 0) {
+                  e.fireT = Math.max(0.9, 1.6 - d * 0.008);
+                  if (e.attack === "aimed") { aimedShot(e, shotSpeed); if (d >= 15) aimedShot(e, shotSpeed, 0.35); if (d >= 40) aimedShot(e, shotSpeed, -0.35); }
+                  else { for (let k = -1; k <= 1; k++) aimedShot(e, shotSpeed * 0.95, k * 0.3); }
+                  sfxEnemyShot();
+                }
+                if (e.t2 > 7) e.vy = 60 + d; // はたらきおえて帰る
+              }
+              break;
+            case "dash":
+              e.fireT -= dt;
+              if (e.fireT <= 0) {
+                e.fireT = 1.3;
+                e.vx = (player.x > e.x ? 1 : -1) * (260 + d * 2);
+                e.dashLeft = 0.5;
+                aimedShot(e, shotSpeed * 1.2);
+                aimedShot(e, shotSpeed * 1.2, 0.25);
+                sfxEnemyShot();
+              }
+              if (e.dashLeft > 0) { e.dashLeft -= dt; if (e.dashLeft <= 0) e.vx = 0; }
+              break;
+          }
+        }
+
+        if (e.state === 1) {
+          e.x += e.vx * dt;
+          e.y += e.vy * dt;
+        } else {
+          e.y += e.vy * dt;
+          e.baseX += e.vx * dt;
+          e.baseX = clamp(e.baseX, 20, WORLD.w - 20);
+          if (e.sineAmp > 0 && !e.holding) e.x = e.baseX + Math.sin(e.t * e.sineFreq + e.phase) * e.sineAmp;
+          else if (!e.holding) e.x = e.baseX;
+          e.x = clamp(e.x, 20, WORLD.w - 20);
+        }
+      }
+      function updateBoss(e, dt) {
+        bossTime += dt;
+        const d = diff();
+        const wk = week - 1;
+        if (e.intro > 0) e.intro -= dt;
+        if (e.y < e.targetY && !e.entered) { e.y += e.vy * dt * 1.6; if (e.y >= e.targetY) e.entered = true; return; }
+        if (e.intro > 0) { e.x += (WORLD.w / 2 - e.x) * dt; e.y = e.targetY + Math.sin(e.t * 2) * 4; e.fireT = Math.max(e.fireT, 0.8); return; }
+        const amp = WORLD.w / 2 - 84;
+        const pat = e.def.pattern;
+        const shotSpeed = 150 + wk * 14 + d * 0.5;
+        const cx = WORLD.w / 2;
+
+        if (pat === "fan") {
+          // カボチャ：8の字にゆれながら、ときどき下までせりだしてくる
+          e.x = cx + Math.sin(e.t * 0.9) * amp;
+          e.y = e.targetY + Math.abs(Math.sin(e.t * 0.45)) * 150;
+          e.fireT -= dt;
+          if (e.fireT <= 0) {
+            e.fireT = Math.max(1.0, 1.7 - wk * 0.15);
+            for (let k = -2; k <= 2; k++) aimedShot(e, shotSpeed, k * 0.22);
+            sfxEnemyShot();
+          }
+          e.miniT -= dt;
+          if (e.miniT <= 0) { e.miniT = 6; spawnMini("げきからハーブ", e.x - 46, e.y + 30); spawnMini("げきからハーブ", e.x + 46, e.y + 30); }
+        } else if (pat === "lance") {
+          // ながねぎ：ずっと突進。おなべをねらってつっこみ、上にもどってまたつっこむ
+          if (e.dashing) {
+            e.x += e.vx * dt;
+            e.y += e.vy * dt;
+            if (e.y > WORLD.h + 40 || e.x < -60 || e.x > WORLD.w + 60) {
+              e.dashing = false;
+              e.x = clamp(player.x + rand(-80, 80), 60, WORLD.w - 60);
+              e.y = -70;
+              e.dashT = Math.max(0.5, 1.2 - wk * 0.1);
+              e.angle = Math.PI / 2;
+            }
+          } else {
+            if (e.y < e.targetY) e.y += 220 * dt; else e.y = e.targetY;
+            e.x += (player.x - e.x) * Math.min(1, dt * 2.5);
+            e.dashT -= dt;
+            e.fireT -= dt;
+            if (e.fireT <= 0) {
+              e.fireT = 0.45;
+              enemyShot(e.x - 20, e.y + 30, 0, 200 + wk * 20, "seed");
+              enemyShot(e.x + 20, e.y + 30, 0, 200 + wk * 20, "seed");
+              sfxEnemyShot();
+            }
+            if (e.dashT <= 0) {
+              const a = Math.atan2(player.y - e.y, player.x - e.x);
+              const sp = 480 + wk * 50;
+              e.vx = Math.cos(a) * sp;
+              e.vy = Math.sin(a) * sp;
+              e.angle = a;
+              e.dashing = true;
+              sfxBoss();
+            }
+          }
+        } else if (pat === "spore") {
+          // キノコ：ほうしのわっかをまいて、ぱっときえて べつの場所にあらわれる
+          e.fireT -= dt;
+          if (e.fireT <= 0) {
+            e.fireT = Math.max(1.1, 1.8 - wk * 0.2);
+            e.angle += 0.4;
+            sporeRing(e.x, e.y, 14 + wk * 2, 90 + wk * 8, e.angle);
+            sfxEnemyShot();
+            e.warpT = 0.5;
+            e.warpX = rand(70, WORLD.w - 70);
+            e.warpY = rand(90, 260);
+          }
+          if (e.warpT > 0) {
+            e.warpT -= dt;
+            if (e.warpT <= 0) { burst(e.x, e.y, "#a06ec8", 12, 120); e.x = e.warpX; e.y = e.warpY; burst(e.x, e.y, "#a06ec8", 12, 120); }
+          }
+          e.miniT -= dt;
+          if (e.miniT <= 0) { e.miniT = 5; spawnMini("あじわいキノコ", rand(60, WORLD.w - 60), e.y + 40); }
+        } else if (pat === "split") {
+          // アボカド：ゆっくり下までせまってきて、はねかえる。タネはとちゅうではじける
+          if (e.dir == null) e.dir = 1;
+          e.y += e.dir * (45 + wk * 8) * dt;
+          if (e.y > WORLD.h - 150) e.dir = -1;
+          if (e.y < e.targetY) e.dir = 1;
+          e.x += (player.x - e.x) * Math.min(1, dt * 0.8);
+          e.fireT -= dt;
+          if (e.fireT <= 0) {
+            e.fireT = Math.max(1.1, 1.8 - wk * 0.15);
+            for (let k = -1; k <= 1; k++) {
+              const a = Math.atan2(player.y - e.y, player.x - e.x) + k * 0.45;
+              enemyShot(e.x, e.y + 20, Math.cos(a) * 120, Math.sin(a) * 120, "big", { splitAt: 0.9 + wk * 0.05 });
+            }
+            sfxEnemyShot();
+          }
+        } else if (pat === "dash") {
+          // コーヒー：ジグザグに画面じゅうをかけまわる。とまったしゅんかんにねらいうち
+          if (e.moveT == null) { e.moveT = 0; e.mx = e.x; e.my = e.y; e.nx = e.x; e.ny = e.y; }
+          e.moveT -= dt;
+          if (e.moveT <= 0) {
+            e.mx = e.x; e.my = e.y;
+            e.nx = rand(60, WORLD.w - 60);
+            e.ny = rand(80, 320);
+            e.moveT = 0.35;
+            e.moveTotal = 0.35;
+            e.restT = Math.max(0.35, 0.7 - wk * 0.05);
+            for (let k = -2; k <= 2; k++) aimedShot(e, shotSpeed * 1.2, k * 0.24);
+            sfxEnemyShot();
+          }
+          if (e.moveT > 0) {
+            const k = 1 - e.moveT / e.moveTotal;
+            const ease = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+            e.x = e.mx + (e.nx - e.mx) * ease;
+            e.y = e.my + (e.ny - e.my) * ease;
+            if (e.moveT - dt <= 0) e.moveT = -e.restT; // とまる時間（負の値でカウント）
+          } else {
+            e.moveT += dt;
+            if (e.moveT >= 0) e.moveT = 0.0001;
+          }
+        } else if (pat === "spiral") {
+          // カカオ：画面のまんなかを大きく周回しながら うずまきをまく
+          if (e.orbit == null) e.orbit = 0;
+          e.orbit += (0.9 + wk * 0.08) * dt;
+          e.x = cx + Math.cos(e.orbit) * (amp * 0.9);
+          e.y = 230 + Math.sin(e.orbit) * 120;
+          e.fireT -= dt;
+          if (e.fireT <= 0) {
+            e.fireT = Math.max(0.07, 0.1 - wk * 0.01);
+            e.angle += 0.36;
+            const sp = 120 + wk * 12;
+            enemyShot(e.x, e.y, Math.cos(e.angle) * sp, Math.sin(e.angle) * sp, "seed");
+            enemyShot(e.x, e.y, Math.cos(e.angle + Math.PI) * sp, Math.sin(e.angle + Math.PI) * sp, "seed");
+          }
+          e.miniT -= dt;
+          if (e.miniT <= 0) { e.miniT = 4.5; aimedShot(e, shotSpeed * 1.1); sfxEnemyShot(); }
+        } else if (pat === "legend") {
+          // シッポ：6秒ごとに 突進→うずまき→わっか をくりかえす
+          const phase = Math.floor(e.t / 6) % 3;
+          e.fireT -= dt;
+          if (phase === 0) {
+            if (e.dashing) {
+              e.x += e.vx * dt; e.y += e.vy * dt;
+              if (e.y > WORLD.h + 40 || e.x < -60 || e.x > WORLD.w + 60) { e.dashing = false; e.x = clamp(player.x + rand(-100, 100), 60, WORLD.w - 60); e.y = -70; e.dashT = 0.8; }
+            } else {
+              if (e.y < e.targetY) e.y += 260 * dt;
+              e.x += (player.x - e.x) * Math.min(1, dt * 2);
+              e.dashT = (e.dashT == null ? 0.8 : e.dashT) - dt;
+              if (e.fireT <= 0) { e.fireT = 0.5; for (let k = -2; k <= 2; k++) aimedShot(e, shotSpeed * 1.4, k * 0.2); sfxEnemyShot(); }
+              if (e.dashT <= 0) { const a = Math.atan2(player.y - e.y, player.x - e.x); const sp = 720 + wk * 60; e.vx = Math.cos(a) * sp; e.vy = Math.sin(a) * sp; e.dashing = true; sfxBoss(); }
+            }
+          } else {
+            e.dashing = false;
+            if (e.y < e.targetY) e.y += 260 * dt;
+            e.x = cx + Math.sin(e.t * 0.8) * amp;
+            if (phase === 1 && e.fireT <= 0) {
+              e.fireT = 0.06;
+              e.angle += 0.33;
+              const sp = 170 + wk * 14;
+              for (let k = 0; k < 4; k++) enemyShot(e.x, e.y, Math.cos(e.angle + k * 1.571) * sp, Math.sin(e.angle + k * 1.571) * sp, "seed");
+            } else if (phase === 2 && e.fireT <= 0) {
+              e.fireT = 0.8;
+              e.angle += 0.3;
+              sporeRing(e.x, e.y, 26 + wk * 2, 130 + wk * 10, e.angle);
+              aimedShot(e, shotSpeed * 1.5);
+              sfxEnemyShot();
+            }
+          }
+          e.miniT -= dt;
+          if (e.miniT <= 0) {
+            e.miniT = 6;
+            e.miniAlt = !e.miniAlt;
+            // 護衛も むりゲー級：カボチャは3方向にとうがらし、シッポはかたい
+            if (e.miniAlt) spawnMini("ずっしりカボチャ", rand(60, WORLD.w - 60), e.y + 40, { hp: 45, r: 22, energy: 250, attack: "fan", armed: true, speed: 0.6 });
+            else spawnMini("おいしいシッポ", rand(60, WORLD.w - 60), e.y + 40, { hp: 30, energy: 342, speed: 0.8 });
+          }
+        }
+      }
+
+      function update(dt) {
+        tGlobal += dt;
+        if (shake > 0) shake = Math.max(0, shake - dt * 1.6);
+        if (flash > 0) flash = Math.max(0, flash - dt * 2.4);
+        if (invuln > 0) invuln -= dt;
+        if (interlude > 0) interlude -= dt;
+        for (let i = pickups.length - 1; i >= 0; i--) {
+          const pk = pickups[i];
+          pk.t += dt;
+          pk.x += (pk.tx - pk.x) * Math.min(1, dt * 6);
+          pk.y += (pk.ty - pk.y) * Math.min(1, dt * 6);
+          if (pk.t >= PICKUP_LIFE) pickups.splice(i, 1);
+        }
+        if (comboTimer > 0) {
+          comboTimer -= dt;
+          if (comboTimer <= 0) combo = 0;
+        }
+
+        // 入力（キーボード）
+        const kSpeed = 340 * dt;
+        if (keys.ArrowLeft || keys.a) player.tx -= kSpeed;
+        if (keys.ArrowRight || keys.d) player.tx += kSpeed;
+        if (keys.ArrowUp || keys.w) player.ty -= kSpeed;
+        if (keys.ArrowDown || keys.s) player.ty += kSpeed;
+        player.tx = clamp(player.tx, 26, WORLD.w - 26);
+        player.ty = clamp(player.ty, WORLD.h * 0.4, WORLD.h - 46);
+        const maxStep = 560 * dt;
+        player.x += clamp(player.tx - player.x, -maxStep, maxStep);
+        player.y += clamp(player.ty - player.y, -maxStep, maxStep);
+
+        // オート発射
+        fireT -= dt;
+        if (fireT <= 0 && interlude <= 0) {
+          fireVolley();
+          fireT = WEAPON[weaponIdx].interval;
+        }
+        if (interlude <= 0) {
+          for (const name of equippedFoods) {
+            foodFire[name] -= dt;
+            if (foodFire[name] <= 0) {
+              const lv = foodShotLv(name);
+              foodFire[name] = WEAPON[weaponIdx].interval * (FOOD_SHOT[name].rate || 1) * 2.4 * (1 - 0.045 * (lv - 1));
+              fireFood(name, lv);
+            }
+          }
+        }
+
+        spawnTick(dt);
+
+        // 自弾
+        for (let i = pbullets.length - 1; i >= 0; i--) {
+          const b = pbullets[i];
+          b.t += dt;
+          if (b.split && b.splitLeft > 0 && b.t > 0.22) {
+            const a0 = Math.atan2(b.vy, b.vx);
+            const sp = Math.hypot(b.vx, b.vy);
+            const left = b.splitLeft - 1;
+            for (const k of [-0.32, 0.32]) {
+              pbullets.push(Object.assign({}, b, { kind: "spoon", x0: b.x, vx: Math.cos(a0 + k) * sp, vy: Math.sin(a0 + k) * sp, splitLeft: left, split: left > 0, t: 0, hit: b.hit ? new Set() : undefined }));
+            }
+            pbullets.splice(i, 1);
+            continue;
+          }
+          if (b.life && b.t > b.life) { pbullets.splice(i, 1); continue; }
+          if (b.kind === "wave") {
+            b.x0 += b.vx * dt;
+            b.y += b.vy * dt;
+            b.x = b.x0 + Math.sin(b.t * 13) * (b.amp || 24) * b.side;
+          } else if (b.kind === "spiral") {
+            b.x0 += b.vx * dt;
+            b.y += b.vy * dt;
+            b.x = b.x0 + Math.sin(b.t * 20) * (b.amp || 30) * b.side;
+          } else if (b.kind === "fork") {
+            let target = null;
+            let bestD = 1e9;
+            for (const e of enemies) {
+              if (e.y < -10) continue;
+              const dx = e.x - b.x, dy = e.y - b.y;
+              const dd = dx * dx + dy * dy;
+              if (dd < bestD) { bestD = dd; target = e; }
+            }
+            const sp = SHOT_SPEED * 0.8;
+            let a = Math.atan2(b.vy, b.vx);
+            if (target) {
+              const want = Math.atan2(target.y - b.y, target.x - b.x);
+              let da = want - a;
+              while (da > Math.PI) da -= Math.PI * 2;
+              while (da < -Math.PI) da += Math.PI * 2;
+              a += clamp(da, -7 * dt, 7 * dt);
+            }
+            b.vx = Math.cos(a) * sp;
+            b.vy = Math.sin(a) * sp;
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+          } else {
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+          }
+          if (b.y < -24 || b.y > WORLD.h + 24 || b.x < -24 || b.x > WORLD.w + 24 || b.t > 4) pbullets.splice(i, 1);
+        }
+
+        // 敵
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const e = enemies[i];
+          if (e.holdY == null) e.holdY = rand(70, 150);
+          if (e.burn > 0) {
+            e.burn -= dt;
+            e.burnT = (e.burnT || 0) + dt;
+            if (e.burnT >= 0.35) {
+              e.burnT = 0;
+              burst(e.x + rand(-8, 8), e.y - e.r * 0.5, "#e84b4b", 2, 60);
+              if (damageEnemy(e, 1, "burn")) { if (mode !== "play") return; continue; }
+            }
+          }
+          updateEnemy(e, dt);
+          if (e.kind === "tail") {
+            if (e.x < -50 || e.x > WORLD.w + 50) {
+              enemies.splice(i, 1);
+              addPopup(clamp(e.x, 30, WORLD.w - 30), e.y, "にげられた…", "#7d7269", 13);
+              continue;
+            }
+          } else if (e.kind !== "boss" && (e.y > WORLD.h + e.r + 12 || e.x < -e.r - 40 || e.x > WORLD.w + e.r + 40)) {
+            enemies.splice(i, 1);
+            stats.escaped++;
+            if (stats.escaped >= 100) unlock("escaped100");
+            if (e.foodIdx === MUSHROOM_IDX && !e.touched) { stats.mushroomEscapes++; if (stats.mushroomEscapes >= 10) unlock("mushroom_escape"); }
+            continue;
+          }
+          // 体当たり判定（自機のあたり判定は小さめ）
+          if (invuln <= 0 && mode === "play") {
+            const dx = e.x - player.x;
+            const dy = e.y - player.y;
+            const rr = e.r * 0.72 + 9;
+            if (dx * dx + dy * dy < rr * rr) {
+              playerHit();
+              if (mode !== "play") return;
+              if (e.kind !== "boss" && e.kind !== "tail") {
+                burst(e.x, e.y, FOODS[e.foodIdx].color, 8, 120);
+                enemies.splice(i, 1);
+                continue;
+              }
+            }
+          }
+        }
+
+        // 自弾 × 敵
+        for (let i = pbullets.length - 1; i >= 0; i--) {
+          const b = pbullets[i];
+          const br = (b.kind === "big" ? 11 : b.tall ? 8 : 5) * (b.size || 1);
+          let consumed = false;
+          for (let j = enemies.length - 1; j >= 0; j--) {
+            const e = enemies[j];
+            if (e.y < -e.r) continue;
+            if (e.kind === "boss" && e.intro > 0) continue;
+            if (b.pierce && b.hit.has(e.id)) continue;
+            const dx = e.x - b.x;
+            const dy = e.y - b.y;
+            const rr = e.r + br;
+            if (dx * dx + dy * dy < rr * rr) {
+              sfxHit();
+              if (b.burn && e.kind !== "boss") e.burn = 2.0;
+              else if (b.burn) e.burn = 1.2;
+              if (b.pierce) {
+                b.hit.add(e.id);
+                burst(b.x, b.y, b.color || "#f2c06c", 3, 80);
+              } else {
+                consumed = true;
+              }
+              damageEnemy(e, b.dmg, b.kind);
+              if (mode !== "play") return;
+              if (consumed) break;
+            }
+          }
+          if (consumed) pbullets.splice(i, 1);
+        }
+
+        // 敵弾
+        for (let i = ebullets.length - 1; i >= 0; i--) {
+          const b = ebullets[i];
+          b.t += dt;
+          b.x += b.vx * dt;
+          b.y += b.vy * dt;
+          if (b.kind === "big" && b.splitAt != null && b.t >= b.splitAt) {
+            ebullets.splice(i, 1);
+            const base = Math.atan2(b.vy, b.vx);
+            for (let k = -1; k <= 1; k++) enemyShot(b.x, b.y, Math.cos(base + k * 0.5) * 190, Math.sin(base + k * 0.5) * 190, "chili");
+            continue;
+          }
+          if (b.y > WORLD.h + 20 || b.y < -30 || b.x < -20 || b.x > WORLD.w + 20) { ebullets.splice(i, 1); continue; }
+          if (invuln <= 0 && mode === "play") {
+            const dx = b.x - player.x;
+            const dy = b.y - player.y;
+            const rr = b.r + 6;
+            if (dx * dx + dy * dy < rr * rr) {
+              ebullets.splice(i, 1);
+              if (b.weak && chip === 0) {
+                chip = 1;
+                invuln = 0.5;
+                shake = 0.25;
+                tone(220, 0.08, { type: "square", gain: 0.05 });
+                burst(player.x, player.y, "#e85f5c", 6, 100);
+                addPopup(player.x, player.y - 36, "あつっ", "#d34744", 13);
+              } else {
+                chip = 0;
+                playerHit();
+                if (mode !== "play") return;
+              }
+            }
+          }
+        }
+
+        // パーティクル・ポップアップ
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.t += dt;
+          if (p.t >= p.life) { particles.splice(i, 1); continue; }
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vy += 220 * dt;
+        }
+        for (let i = popups.length - 1; i >= 0; i--) {
+          const p = popups[i];
+          p.t += dt;
+          if (p.t >= p.life) popups.splice(i, 1);
+        }
+      }
+
+      // ---- 描画 -------------------------------------------------------
+      if (!ctx.roundRect) {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+          this.moveTo(x + r, y);
+          this.arcTo(x + w, y, x + w, y + h, r);
+          this.arcTo(x + w, y + h, x, y + h, r);
+          this.arcTo(x, y + h, x, y, r);
+          this.arcTo(x, y, x + w, y, r);
+          this.closePath();
+          return this;
+        };
+      }
+
+      const steamBlobs = Array.from({ length: 7 }, () => ({
+        x: rand(30, WORLD.w - 30), y: rand(0, WORLD.h), r: rand(26, 60), sp: rand(9, 22), drift: rand(-6, 6),
+      }));
+
+      function drawBackground() {
+        const g = ctx.createLinearGradient(0, 0, 0, WORLD.h);
+        const night = bossRef ? 1 : 0;
+        g.addColorStop(0, night ? "#f6e6d8" : "#fffbee");
+        g.addColorStop(1, night ? "#f2d9c4" : "#fff1d2");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, WORLD.w, WORLD.h);
+        ctx.fillStyle = night ? "rgba(255, 200, 160, .22)" : "rgba(255, 225, 170, .3)";
+        for (const s of steamBlobs) {
+          const y = ((s.y - tGlobal * s.sp) % (WORLD.h + 120) + WORLD.h + 120) % (WORLD.h + 120) - 60;
+          const x = s.x + Math.sin(tGlobal * 0.4 + s.r) * s.drift;
+          ctx.beginPath();
+          ctx.arc(x, y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.fillStyle = "#ecd9b0";
+        ctx.fillRect(0, WORLD.h - 22, WORLD.w, 22);
+        ctx.fillStyle = "#e0c795";
+        ctx.fillRect(0, WORLD.h - 22, WORLD.w, 3);
+      }
+
+      // 自弾：ゆめのかけらのような結晶。追尾は星。レーザーは光の線
+      function drawBullet(g, b, x, y, ang) {
+        g.save();
+        g.translate(x, y);
+        g.rotate(ang);
+        if (b.size && b.size !== 1) g.scale(b.size, b.size);
+        const col = b.color || (b.kind === "wave" || b.kind === "spiral" ? "#a9c4f5" : "#8fd0ff");
+        if (b.tall) {
+          g.strokeStyle = col + "55";
+          g.lineWidth = 12;
+          g.beginPath(); g.moveTo(0, 14); g.lineTo(0, -30); g.stroke();
+          g.strokeStyle = col;
+          g.lineWidth = 5;
+          g.beginPath(); g.moveTo(0, 14); g.lineTo(0, -30); g.stroke();
+          g.strokeStyle = "#fff";
+          g.lineWidth = 1.6;
+          g.beginPath(); g.moveTo(0, 10); g.lineTo(0, -26); g.stroke();
+          g.restore();
+          return;
+        }
+        if (b.kind === "fork") {
+          // 星
+          g.fillStyle = b.color || "#f2c06c";
+          g.beginPath();
+          for (let i = 0; i < 10; i++) {
+            const r = i % 2 === 0 ? 7 : 3.2;
+            const a = -Math.PI / 2 + (i * Math.PI) / 5;
+            if (i === 0) g.moveTo(Math.cos(a) * r, Math.sin(a) * r); else g.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          }
+          g.closePath();
+          g.fill();
+          g.fillStyle = "rgba(255,255,255,.7)";
+          g.beginPath(); g.arc(-1, -1.5, 1.6, 0, Math.PI * 2); g.fill();
+          g.restore();
+          return;
+        }
+        const big = b.kind === "big";
+        const w = big ? 9 : 4.2;
+        const h = big ? 15 : 7.5;
+        if (big) {
+          g.fillStyle = (b.color || "#f2c06c") + "55";
+          g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.fill();
+        }
+        g.fillStyle = big ? (b.color || "#f2c06c") : col;
+        g.beginPath();
+        g.moveTo(0, -h); g.lineTo(w, 0); g.lineTo(0, h); g.lineTo(-w, 0); g.closePath();
+        g.fill();
+        g.fillStyle = "rgba(255,255,255,.7)";
+        g.beginPath();
+        g.moveTo(0, -h * 0.7); g.lineTo(w * 0.45, -h * 0.05); g.lineTo(-w * 0.2, -h * 0.05); g.closePath();
+        g.fill();
+        g.restore();
+      }
+      function drawPlayerBullet(b) {
+        drawBullet(ctx, b, b.x, b.y, Math.atan2(b.vy, b.vx) + Math.PI / 2);
+      }
+
+      function drawEnemyBullet(b) {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        if (b.weak) { ctx.scale(0.85, 0.85); ctx.globalAlpha = 0.85; }
+        if (b.kind === "chili") {
+          ctx.rotate(Math.atan2(b.vy, b.vx) - Math.PI / 2);
+          ctx.fillStyle = "#e0402f";
+          ctx.beginPath();
+          ctx.moveTo(0, 7);
+          ctx.quadraticCurveTo(6, 2, 2.6, -4.5);
+          ctx.quadraticCurveTo(0.8, -7, 0, -7.4);
+          ctx.quadraticCurveTo(-0.8, -7, -2.6, -4.5);
+          ctx.quadraticCurveTo(-6, 2, 0, 7);
+          ctx.fill();
+          ctx.strokeStyle = "#4d9e66";
+          ctx.lineWidth = 2.2;
+          ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(0, -11); ctx.stroke();
+        } else if (b.kind === "seed") {
+          ctx.rotate(b.t * 6);
+          ctx.fillStyle = "#8a5a2b";
+          ctx.beginPath(); ctx.ellipse(0, 0, 4, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.35)";
+          ctx.beginPath(); ctx.ellipse(-1.2, -1.8, 1.3, 2, 0, 0, Math.PI * 2); ctx.fill();
+        } else if (b.kind === "spore") {
+          ctx.fillStyle = "rgba(160, 110, 200, .85)";
+          ctx.beginPath(); ctx.arc(0, 0, 4.5 + Math.sin(b.t * 12) * 0.8, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.5)";
+          ctx.beginPath(); ctx.arc(-1.2, -1.2, 1.4, 0, Math.PI * 2); ctx.fill();
+        } else {
+          // big: アボカドのおおきなタネ
+          ctx.rotate(b.t * 2);
+          ctx.fillStyle = "#7a4a22";
+          ctx.beginPath(); ctx.ellipse(0, 0, 8, 10, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,.3)";
+          ctx.beginPath(); ctx.ellipse(-2.5, -3.5, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function drawPot() {
+        const x = player.x;
+        const y = player.y;
+        const blink = invuln > 0 && interlude <= 0 && Math.floor(tGlobal * 10) % 2 === 0 && mode === "play";
+        ctx.save();
+        ctx.translate(x, y);
+        if (!blink) {
+          const tilt = clamp((player.tx - player.x) * 0.004, -0.16, 0.16);
+          ctx.rotate(tilt);
+          ctx.fillStyle = "rgba(88, 62, 38, .12)";
+          ctx.beginPath(); ctx.ellipse(0, 30, 22, 5, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "rgba(255, 236, 200, .8)";
+          for (let i = 0; i < 3; i++) {
+            const yy = 26 + ((tGlobal * 60 + i * 14) % 26);
+            ctx.beginPath(); ctx.arc(Math.sin(tGlobal * 9 + i * 2.1) * 4, yy, 4.6 - i, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.strokeStyle = "#777069";
+          ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.arc(-22, 2, 6, Math.PI * 0.35, Math.PI * 1.6); ctx.stroke();
+          ctx.beginPath(); ctx.arc(22, 2, 6, -Math.PI * 0.6, Math.PI * 0.65); ctx.stroke();
+          ctx.fillStyle = "#5a544c";
+          ctx.beginPath(); ctx.roundRect(-21, -6, 42, 30, 9); ctx.fill();
+          ctx.fillStyle = "#777069";
+          ctx.beginPath(); ctx.roundRect(-24, -10, 48, 8, 4); ctx.fill();
+          ctx.fillStyle = "#e8a13b";
+          ctx.beginPath(); ctx.moveTo(-16, -10); ctx.quadraticCurveTo(0, -26, 16, -10); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#a3541e";
+          ctx.beginPath(); ctx.arc(0, -19, 3.6, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#fff7e5";
+          ctx.beginPath(); ctx.arc(-7, 5, 2.7, 0, Math.PI * 2); ctx.arc(7, 5, 2.7, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = "#fff7e5";
+          ctx.lineWidth = 2.2;
+          ctx.lineCap = "round";
+          ctx.beginPath(); ctx.arc(0, 9, 5, Math.PI * 0.15, Math.PI * 0.85); ctx.stroke();
+        }
+        ctx.restore();
+        // 装備した食材：おなべのまわりを回るミニアイコン
+        const n = equippedFoods.length;
+        for (let i = 0; i < n; i++) {
+          const a = -tGlobal * 1.5 + (i * Math.PI * 2) / n;
+          const ix = x + Math.cos(a) * 34;
+          const iy = y - 2 + Math.sin(a) * 17;
+          const im = foodImages[FOOD_BY_NAME[equippedFoods[i]]];
+          ctx.save();
+          ctx.translate(ix, iy);
+          if (equippedFoods[i] === lockedFood) { ctx.strokeStyle = "#7a5fbf"; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.stroke(); }
+          if (im.complete && im.naturalWidth) ctx.drawImage(im, -8, -8, 16, 16);
+          ctx.restore();
+        }
+        // なべぶた：食材を1つ装備していれば つかえる（装備をぎせいにして発動）
+        for (let i = 0; i < (n > 0 ? 1 : 0); i++) {
+          const a = tGlobal * 2.2;
+          const lx = x + Math.cos(a) * 44;
+          const ly = y + 6 + Math.sin(a) * 24;
+          ctx.save();
+          ctx.translate(lx, ly);
+          ctx.fillStyle = "#e8a13b";
+          ctx.beginPath(); ctx.moveTo(-6, 2); ctx.quadraticCurveTo(0, -8, 6, 2); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#777069";
+          ctx.beginPath(); ctx.roundRect(-7.5, 1.5, 15, 3, 1.5); ctx.fill();
+          ctx.fillStyle = "#a3541e";
+          ctx.beginPath(); ctx.arc(0, -4.5, 1.6, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        }
+        // あたり判定（小さい白い点）
+        ctx.fillStyle = "rgba(255,255,255,.95)";
+        ctx.beginPath(); ctx.arc(x, y, 3.2, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "rgba(211, 71, 68, .8)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(x, y, 4.2, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      function drawEnemy(e) {
+        const im = foodImages[e.foodIdx];
+        ctx.save();
+        ctx.translate(e.x, e.y);
+        ctx.fillStyle = FOODS[e.foodIdx].color + "2e";
+        ctx.beginPath(); ctx.arc(0, 0, e.r + 3, 0, Math.PI * 2); ctx.fill();
+        if (e.armed && e.kind !== "boss") {
+          // おこってる食材はあかい輪
+          ctx.strokeStyle = "rgba(211, 71, 68, .55)";
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(0, 0, e.r + 2, 0, Math.PI * 2); ctx.stroke();
+        }
+        if (e.burn > 0) {
+          ctx.fillStyle = `rgba(232, 75, 75, ${0.25 + Math.sin(tGlobal * 18) * 0.12})`;
+          ctx.beginPath(); ctx.arc(0, 0, e.r + 5, 0, Math.PI * 2); ctx.fill();
+        }
+        if (e.kind === "tail") {
+          ctx.fillStyle = "rgba(242, 187, 196, .45)";
+          ctx.beginPath(); ctx.arc(0, 0, e.r + 8 + Math.sin(tGlobal * 8) * 2, 0, Math.PI * 2); ctx.fill();
+        }
+        if (e.kind === "boss") {
+          ctx.strokeStyle = "rgba(211, 71, 68, .35)";
+          ctx.lineWidth = 6;
+          ctx.beginPath(); ctx.arc(0, 0, e.r + 8 + Math.sin(e.t * 3) * 3, 0, Math.PI * 2); ctx.stroke();
+        }
+        let rot;
+        if ((e.state === 1 && e.attack === "lance") || (e.kind === "boss" && e.dashing)) rot = e.angle + Math.PI / 2;
+        else rot = e.kind === "boss" ? Math.sin(e.t * 1.4) * 0.06 : Math.sin(e.t * 2.4 + e.phase) * 0.14;
+        ctx.rotate(rot);
+        const s = e.r * 1.84;
+        if (im.complete && im.naturalWidth) ctx.drawImage(im, -s / 2, -s / 2, s, s);
+        else { ctx.fillStyle = FOODS[e.foodIdx].color; ctx.beginPath(); ctx.arc(0, 0, e.r * 0.8, 0, Math.PI * 2); ctx.fill(); }
+        if (e.hitT > 0) {
+          ctx.globalAlpha = 0.55;
+          ctx.fillStyle = "#fff";
+          ctx.beginPath(); ctx.arc(0, 0, e.r * 0.9, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+        if (e.hp < e.maxHp && e.kind !== "boss") {
+          const w = e.r * 1.5;
+          ctx.fillStyle = "rgba(64, 55, 47, .25)";
+          ctx.fillRect(e.x - w / 2, e.y + e.r + 5, w, 4);
+          ctx.fillStyle = "#4d9e66";
+          ctx.fillRect(e.x - w / 2, e.y + e.r + 5, (w * Math.max(0, e.hp)) / e.maxHp, 4);
+        }
+      }
+
+      function drawPickup(pk) {
+        const im = foodImages[FOOD_BY_NAME[pk.name]];
+        const mod = FOOD_SHOT[pk.name];
+        const left = PICKUP_LIFE - pk.t;
+        const pulse = 1 + Math.sin(tGlobal * 6) * 0.06;
+        ctx.save();
+        ctx.translate(pk.x, pk.y + Math.sin(tGlobal * 3 + pk.slot) * 3);
+        // 「タップで装備」がわかる目印：白い丸＋食材色の残り時間の弧＋プラスの札＋「そうび」
+        ctx.fillStyle = "rgba(255, 255, 255, .88)";
+        ctx.beginPath(); ctx.arc(0, 0, 21 * pulse, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = mod.color;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(0, 0, 21 * pulse, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (left / PICKUP_LIFE)); ctx.stroke();
+        if (im.complete && im.naturalWidth) ctx.drawImage(im, -15, -15, 30, 30);
+        const bx = 14 * -pk.side;
+        ctx.fillStyle = "#7a5fbf";
+        ctx.beginPath(); ctx.arc(bx, -14, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2.2;
+        ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(bx - 4, -14); ctx.lineTo(bx + 4, -14); ctx.moveTo(bx, -18); ctx.lineTo(bx, -10); ctx.stroke();
+        ctx.fillStyle = "#7a5fbf";
+        ctx.font = "1000 9px 'M PLUS 1p', system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("そうび", 0, 32);
+        ctx.restore();
+      }
+      function drawBossIntro() {
+        if (!bossRef || bossRef.intro <= 0 || !order || !order.boss) return;
+        const k = Math.min(1, (BOSS_INTRO - bossRef.intro) / 0.4);
+        const fade = Math.min(1, bossRef.intro / 0.4);
+        ctx.save();
+        ctx.globalAlpha = k * fade;
+        const bw = WORLD.w - 40, bh = 104, bx = 20, by = WORLD.h / 2 - 20;
+        ctx.fillStyle = "rgba(64, 55, 47, .9)";
+        ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 18); ctx.fill();
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#ffe9bd";
+        ctx.font = "1000 22px 'M PLUS 1p', system-ui, sans-serif";
+        ctx.fillText(`${bossRef.def.title} あらわる！`, WORLD.w / 2, by + 36);
+        ctx.fillStyle = "#fff7e5";
+        ctx.font = "900 13px 'M PLUS 1p', system-ui, sans-serif";
+        const desc = bossRef.def.desc.replace(/^.ようびのぬし。/, "");
+        ctx.fillText(desc, WORLD.w / 2, by + 64);
+        ctx.fillStyle = "#f2c06c";
+        ctx.font = "1000 14px 'M PLUS 1p', system-ui, sans-serif";
+        ctx.fillText(`たおすと ${order.recipe.name}`, WORLD.w / 2, by + 90);
+        ctx.restore();
+      }
+      function drawBossBar() {
+        if (!bossRef) return;
+        const pad = 16;
+        const w = WORLD.w - pad * 2;
+        const y = WORLD.h - 40;
+        ctx.fillStyle = "rgba(64, 55, 47, .3)";
+        ctx.beginPath(); ctx.roundRect(pad, y, w, 9, 5); ctx.fill();
+        ctx.fillStyle = "#d34744";
+        ctx.beginPath(); ctx.roundRect(pad, y, Math.max(6, (w * Math.max(0, bossRef.hp)) / bossRef.maxHp), 9, 5); ctx.fill();
+        ctx.fillStyle = "#7d7269";
+        ctx.font = "1000 11px 'M PLUS 1p', system-ui, sans-serif";
+        ctx.textAlign = "center";
+        const dish = order && order.boss ? `  たおすと ${order.recipe.name}` : "";
+        ctx.fillText(`${bossRef.def.title}  ${Math.max(0, bossRef.hp)}/${bossRef.maxHp}${dish}`, WORLD.w / 2, y - 6);
+      }
+
+      function draw() {
+        ctx.save();
+        if (shake > 0 && !reducedMotion) ctx.translate(rand(-1, 1) * shake * 8, rand(-1, 1) * shake * 8);
+        drawBackground();
+        for (const e of enemies) drawEnemy(e);
+        for (const pk of pickups) drawPickup(pk);
+        for (const b of pbullets) drawPlayerBullet(b);
+        for (const b of ebullets) drawEnemyBullet(b);
+        drawPot();
+        for (const p of particles) {
+          ctx.globalAlpha = 1 - p.t / p.life;
+          ctx.fillStyle = p.color;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        for (const p of popups) {
+          const k = p.t / p.life;
+          ctx.globalAlpha = 1 - k * k;
+          ctx.fillStyle = p.color;
+          ctx.font = `1000 ${p.size}px 'M PLUS 1p', system-ui, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.fillText(p.text, p.x, p.y - k * 34);
+        }
+        ctx.globalAlpha = 1;
+        if (combo >= 2) {
+          ctx.fillStyle = combo >= 20 ? "#7a5fbf" : "#d96f2f";
+          ctx.font = "1000 17px 'M PLUS 1p', system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(`${combo}コンボ ×${comboMult()}`, WORLD.w / 2, 30);
+        }
+        drawBossBar();
+        drawBossIntro();
+        if (flash > 0) {
+          ctx.fillStyle = `rgba(255, 250, 235, ${flash * 0.85})`;
+          ctx.fillRect(-20, -20, WORLD.w + 40, WORLD.h + 40);
+        }
+        if (interlude > 0) {
+          const k = clamp(interlude / INTERLUDE_TIME, 0, 1);
+          ctx.globalAlpha = Math.min(1, k * 3);
+          ctx.fillStyle = "rgba(64, 55, 47, .78)";
+          ctx.beginPath(); ctx.roundRect(40, WORLD.h / 2 - 44, WORLD.w - 80, 88, 18); ctx.fill();
+          ctx.fillStyle = "#ffe9bd";
+          ctx.textAlign = "center";
+          ctx.font = "1000 24px 'M PLUS 1p', system-ui, sans-serif";
+          ctx.fillText(interludeText, WORLD.w / 2, WORLD.h / 2 - 2);
+          ctx.font = "900 13px 'M PLUS 1p', system-ui, sans-serif";
+          ctx.fillText(`${week}週目へ… おなべを あたためなおし`, WORLD.w / 2, WORLD.h / 2 + 26);
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+      }
+
+      // ---- リザルト ---------------------------------------------------
+      const ICON_OVER =
+        '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#fdf1f0"/>' +
+        '<path d="M14 52h72v6c0 22-14 34-36 34S14 80 14 58z" fill="#555049"/>' +
+        '<rect x="8" y="48" width="84" height="10" rx="5" fill="#777069"/>' +
+        '<path d="M34 66l8 8M42 66l-8 8M58 66l8 8M66 66l-8 8" stroke="#fff7e5" stroke-width="3.2" stroke-linecap="round"/>' +
+        '<path d="M42 84c4-4 12-4 16 0" stroke="#fff7e5" stroke-width="3.2" stroke-linecap="round" fill="none"/>' +
+        '<path d="M30 38c-3-8 3-10 1-16M50 36c-3-8 3-10 1-16M70 38c-3-8 3-10 1-16" stroke="#b3a89c" stroke-width="4" stroke-linecap="round" fill="none"/></svg>';
+
+      function endRun() {
+        mode = "over";
+        const prevBest = best;
+        const isBest = score > best;
+        if (isBest) { best = score; persistBest(); }
+        bestValue.textContent = fmt(best);
+        persistAch();
+        resultIcon.innerHTML = ICON_OVER;
+        resultTitle.textContent = "おなべが しずんだ…";
+        const totalMeals = (week - 1) * MEALS_PER_WEEK + mealsRun;
+        resultSub.innerHTML = `${week}週目 ${WEEKDAYS[weekday()]}ようびの${MEAL_SLOTS[mealSlot()]}で リタイア。<br>あついうちに もういっちょう！`;
+        resultScore.textContent = fmt(score);
+        resultBestBadge.classList.toggle("show", isBest && prevBest > 0);
+        resultMeals.innerHTML = `つくった料理 <strong>${totalMeals}</strong>食 ／ たおした食材 <strong>${fmt(runKills)}</strong>`;
+        const achNames = runAch.map((id) => ACH_BY_ID[id].name);
+        resultAch.innerHTML = achNames.length
+          ? `かくとくしたタイトル ${achNames.length}こ：<strong>${achNames.slice(0, 5).join("、")}</strong>${achNames.length > 5 ? ` ほか${achNames.length - 5}こ` : ""}`
+          : `いまのタイトル：${currentTitle}`;
+        const shareText = `食材とれるかな！！ でエナジー ${fmt(score)} ためたよ！（${totalMeals}食かんせい・タイトル「${currentTitle}」） #食材とれるかな`;
+        xShare.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(SHARE_URL)}`;
+        resultOverlay.hidden = false;
+        sfxDamage();
+      }
+
+      // ---- リセット・進行 ---------------------------------------------
+      function startNewRun() {
+        score = 0;
+        week = 1;
+        mealsRun = 0;
+        bombs = 2;
+        xp = 0;
+        weaponIdx = 0;
+        runLv = 1;
+        volley = 0;
+        equippedFoods = [];
+        lockedFood = null;
+        chip = 0;
+        for (const k of Object.keys(foodExp)) delete foodExp[k];
+        for (const k of Object.keys(foodFire)) delete foodFire[k];
+        pickups = [];
+        renderBuffBar();
+        combo = 0;
+        comboTimer = 0;
+        runKills = 0;
+        runAch = [];
+        weeksThisRun = 0;
+        hitsThisDay = 0;
+        hitsThisWeek = 0;
+        bombsThisWeek = 0;
+        weekEnergy = 0;
+        dishHistory = [];
+        todayDishes = [];
+        pendingSecret = null;
+        lastRecipeName = "";
+        enemies = [];
+        pbullets = [];
+        ebullets = [];
+        particles = [];
+        popups = [];
+        player = { x: WORLD.w / 2, y: WORLD.h - 80, tx: WORLD.w / 2, ty: WORLD.h - 80 };
+        fireT = 0;
+        spawnT = 0.9;
+        invuln = 1.2;
+        interlude = 0;
+        flash = 0;
+        tailsSpawned = 0;
+        bossRef = null;
+        renderBombs();
+        renderPower();
+        newOrder();
+        updateMeta();
+        updateScoreUI();
+        resultOverlay.hidden = true;
+        startOverlay.hidden = true;
+        mode = "play";
+      }
+
+      // ---- 入力 -------------------------------------------------------
+      function toWorld(ev) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: ((ev.clientX - rect.left) / rect.width) * WORLD.w,
+          y: ((ev.clientY - rect.top) / rect.height) * WORLD.h,
+        };
+      }
+      let activePointer = null;
+      let potTap = null;   // いまの指が「タップ」のままか（すぐはなす・動かさない）
+      let lastTap = null;  // 直前のタップ（ダブルタップ判定用）
+      const DOUBLE_TAP_MS = 320;
+      canvas.addEventListener("pointerdown", (ev) => {
+        ensureAudio();
+        if (activePointer != null && ev.pointerId !== activePointer) { ev.preventDefault(); return; }
+        const p = toWorld(ev);
+        if (mode === "play" && tapPickup(p.x, p.y)) { ev.preventDefault(); return; }
+        activePointer = ev.pointerId;
+        try { canvas.setPointerCapture(ev.pointerId); } catch (_) { /* 合成イベントなど */ }
+        // 画面をすばやくダブルタップ（どちらも すぐはなす・動かさない）したら なべぶた
+        potTap = { t: performance.now(), x: ev.clientX, y: ev.clientY };
+        player.tx = clamp(p.x, 26, WORLD.w - 26);
+        player.ty = clamp(p.y - 46, WORLD.h * 0.4, WORLD.h - 46);
+        ev.preventDefault();
+      });
+      canvas.addEventListener("pointermove", (ev) => {
+        if (ev.pointerId !== activePointer) return;
+        if (potTap && Math.hypot(ev.clientX - potTap.x, ev.clientY - potTap.y) > 10) potTap = null;
+        const p = toWorld(ev);
+        player.tx = clamp(p.x, 26, WORLD.w - 26);
+        player.ty = clamp(p.y - 46, WORLD.h * 0.4, WORLD.h - 46);
+        ev.preventDefault();
+      });
+      const stopPointer = (ev) => {
+        if (ev.pointerId !== activePointer) return;
+        activePointer = null;
+        const now = performance.now();
+        if (potTap && ev.type === "pointerup" && now - potTap.t < 250 && Math.hypot(ev.clientX - potTap.x, ev.clientY - potTap.y) <= 10) {
+          if (lastTap && now - lastTap.t < DOUBLE_TAP_MS && Math.hypot(ev.clientX - lastTap.x, ev.clientY - lastTap.y) <= 40) { useBomb(); lastTap = null; }
+          else lastTap = { t: now, x: ev.clientX, y: ev.clientY };
+        } else lastTap = null;
+        potTap = null;
+      };
+      canvas.addEventListener("pointerup", stopPointer);
+      canvas.addEventListener("pointercancel", stopPointer);
+
+      addEventListener("keydown", (ev) => {
+        if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(ev.key)) { keys[ev.key] = true; ev.preventDefault(); }
+        if (["a", "d", "w", "s"].includes(ev.key)) keys[ev.key] = true;
+        if (ev.key === " " || ev.key === "x") { if (mode === "play") { useBomb(); ev.preventDefault(); } }
+        if (ev.key === "Enter" && mode === "title") startButton.click();
+      });
+      addEventListener("keyup", (ev) => { keys[ev.key] = false; });
+
+      // ---- ポーズ -----------------------------------------------------
+      // ひとやすみ：画面をはなれたり、あそびかた等をひらいたときに自動でとまる
+      function pauseGame() {
+        if (mode !== "play") return;
+        mode = "pause";
+        startTitle.textContent = "ひとやすみ";
+        startSub.innerHTML = "おちゃでも のんで ひとやすみ。";
+        startButton.textContent = "つづける！";
+        startOverlay.hidden = false;
+        stats.pauses++;
+        if (stats.pauses >= 10) unlock("pause10");
+      }
+      function resumeGame() {
+        if (mode !== "pause") return;
+        mode = "play";
+        startOverlay.hidden = true;
+      }
+      document.addEventListener("visibilitychange", () => { if (document.hidden) { pauseGame(); persistAch(); persistCooking(); } });
+      addEventListener("pagehide", () => { persistAch(); persistCooking(); if (score > best) { best = score; persistBest(); } });
+      startButton.addEventListener("click", () => {
+        ensureAudio();
+        if (mode === "title") startNewRun();
+        else if (mode === "pause") resumeGame();
+      });
+      restartButton.addEventListener("click", () => { ensureAudio(); startNewRun(); });
+
+      // ---- サウンドトグル ---------------------------------------------
+      function renderSoundButton() { soundButton.classList.toggle("muted", muted); }
+      soundButton.addEventListener("click", () => {
+        muted = !muted;
+        try { localStorage.setItem(LS("muted"), muted ? "1" : "0"); } catch (_) {}
+        renderSoundButton();
+        if (!muted) { ensureAudio(); tone(660, 0.08, { gain: 0.1 }); }
+      });
+      renderSoundButton();
+
+      // ---- ダイアログ -------------------------------------------------
+      const openDialog = (d) => { if (!d.open) { d.showModal(); if (mode === "play") pauseGame(); } };
+      rulesButton.addEventListener("click", () => openDialog(rulesDialog));
+      rulesClose.addEventListener("click", () => rulesDialog.close());
+
+      function renderRecipeNote() {
+        const fb = fbPercent();
+        const nextIn = FB_STEP_DISHES - (dishesCooked % FB_STEP_DISHES);
+        recipeFb.innerHTML =
+          `フィールドボーナス <strong>+${fb}%</strong> ／ つくった料理 通算<strong>${fmt(dishesCooked)}</strong>品` +
+          (fb < 75 ? `<br>あと<strong>${nextIn}</strong>品つくると FB+${Math.min(75, fb + 5)}% ！` : "");
+        recipeList.innerHTML = "";
+        const visible = BASE_RECIPES.concat(SECRET_RECIPES.filter((r) => secrets.recipes.includes(r.name)));
+        visible.sort((a, b) => a.bonus - b.bonus);
+        visible.forEach((r) => {
+          const lv = recipeLevel(r.name);
+          const isMax = lv >= RECIPE_LV_MAX;
+          const row = document.createElement("div");
+          row.className = `recipe-row${r.secret ? " secret" : ""}`;
+          row.style.setProperty("--lv-progress", `${(((lv - 1) / (RECIPE_LV_MAX - 1)) * 100).toFixed(1)}%`);
+          const needsHtml = Object.entries(r.needs).map(([name, n]) => `${iconTag(name)}<span>${n}</span>`).join("");
+          row.innerHTML =
+            `<div class="recipe-row-main">` +
+            `<span class="recipe-row-name">${r.name} <span class="order-lv${isMax ? " max" : ""}">${isMax ? "LvMAX" : `Lv${lv}`}</span></span>` +
+            `<span class="recipe-row-needs">${needsHtml}</span>` +
+            `</div>` +
+            `<span class="recipe-row-reward">+${fmt(withFb(recipeReward(r)))}</span>`;
+          recipeList.appendChild(row);
+        });
+        const hiddenCount = SECRET_RECIPES.filter((r) => !secrets.recipes.includes(r.name)).length;
+        if (hiddenCount > 0) {
+          const row = document.createElement("div");
+          row.className = "recipe-row secret";
+          row.innerHTML =
+            `<div class="recipe-row-main"><span class="recipe-row-name">？？？（あと${hiddenCount}品）</span>` +
+            `<span class="recipe-row-needs"><span>まっかな ナニカが かぎを にぎっているらしい…</span></span></div>`;
+          recipeList.appendChild(row);
+        }
+      }
+      orderCard.addEventListener("click", () => { renderRecipeNote(); openDialog(recipeDialog); });
+      orderCard.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); renderRecipeNote(); openDialog(recipeDialog); }
+      });
+      recipeClose.addEventListener("click", () => recipeDialog.close());
+
+      function renderAchList() {
+        achProgress.innerHTML = `かくとく <strong>${achGot.length}/${ACHS.length}</strong> ／ いまのタイトル <strong>${currentTitle}</strong><br>かくとくずみをタップで タイトルにセット`;
+        achList.innerHTML = "";
+        const section = (label) => {
+          const h = document.createElement("div");
+          h.className = "ach-section";
+          h.textContent = label;
+          achList.appendChild(h);
+        };
+        const addRow = (a) => {
+          const got = hasAch(a.id);
+          const row = document.createElement("div");
+          row.className = `ach-row ${got ? "got" : "locked"}${a.hidden && !got ? " hidden-ach" : ""}${a.name === currentTitle ? " now" : ""}`;
+          row.innerHTML =
+            `<span class="ach-mark">${got ? "済" : a.hidden ? "？" : "・"}</span>` +
+            `<div class="ach-main">` +
+            `<span class="ach-name">${got || !a.hidden ? a.name : "？？？"}</span>` +
+            `<span class="ach-desc">${got || !a.hidden ? a.desc : `ヒント：${a.hint}`}</span>` +
+            `</div>` +
+            (got ? `<span class="ach-set">${a.name === currentTitle ? "セット中" : "セット"}</span>` : "");
+          if (got) {
+            row.classList.add("settable");
+            row.addEventListener("click", () => {
+              currentTitle = a.name;
+              updateTitleLabel();
+              persistAch();
+              tone(880, 0.08, { gain: 0.05 });
+              renderAchList();
+            });
+          }
+          achList.appendChild(row);
+        };
+        section("きほん");
+        ACHS.filter((a) => !a.hidden).forEach(addRow);
+        section("かくしタイトル");
+        ACHS.filter((a) => a.hidden).forEach(addRow);
+      }
+      titleLabel.addEventListener("click", () => { renderAchList(); openDialog(achDialog); });
+      titleLabel.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); renderAchList(); openDialog(achDialog); }
+      });
+      achClose.addEventListener("click", () => achDialog.close());
+
+      // 食材図鑑（うちおとした食材＋弾のとくちょう解説）
+      const foodDexButton = $("foodDexButton");
+      const foodDexDialog = $("foodDexDialog");
+      const foodDexProgress = $("foodDexProgress");
+      const foodGrid = $("foodGrid");
+      const foodDexClose = $("foodDexClose");
+      const foodDetailDialog = $("foodDetailDialog");
+      const foodDetail = $("foodDetail");
+      const LIGHT_COLORS = ["#f4f6ff", "#FCFAF0", "#F9D79B", "#FFE36C", "#E5DF6C", "#FAC801"];
+      const ATTACK_TEXT = {
+        dive: "おなべめがけて 急降下してくる",
+        drop: "タネを ぽろぽろ落としてくる",
+        drop2: "タネを 3方向に落としてくる",
+        aimed: "とうがらしを ねらいうちしてくる",
+        fan: "とうがらしを 3方向にうってくる",
+        dash: "高速ダッシュしながら ねらいうち",
+        spore: "たおすと ほうしをまきちらす",
+        lance: "ねぎミサイルになって 突進してくる",
+        none: "ぬしとして よるにあらわれる",
+      };
+      function shotSpecRows(mod) {
+        const rows = [];
+        const sp2 = [];
+        if (mod.homing) sp2.push("おいかける星");
+        if (mod.big) sp2.push("おおきな弾");
+        if (mod.pierce) sp2.push("貫通");
+        if (mod.burn) sp2.push("あたった食材が燃える");
+        if (mod.split2) sp2.push("2回はじけて4つになる");
+        if (mod.life) sp2.push("射程がみじかい");
+        if (mod.scatter) sp2.push("ねらいがぶれる");
+        if (mod.kind === "wave") sp2.push("大きくジグザグ");
+        if (mod.kind === "spiral") sp2.push("うずまき軌道");
+        if (mod.tall) sp2.push("レーザー");
+        if (mod.size && mod.size > 1) sp2.push("弾が大きい");
+        if (mod.spreadAngle && mod.count > 1) sp2.push("ひろがってとぶ");
+        return rows.concat(sp2.length ? [["とくしゅ", `<strong>${sp2.join("・")}</strong>`, true]] : []);
+      }
+      // 弾のつよさ（1発あたりの期待ダメージ÷間隔×命中しやすさ）。基礎エナジー順にならぶ
+      function shotPower(m) {
+        const dmg = m.dmg || 1, count = m.count || 0, homing = m.homing || 0, speed = m.speed || 1, rate = m.rate || 1;
+        let hits = m.split2 ? count * 4 * 0.6 : count;
+        if (m.life) hits *= 0.7;
+        if (count > 1 && m.spreadAngle) hits *= 0.8;
+        let total = hits * (dmg + (m.burn ? 3 : 0)) + homing * 1.3 + (m.big ? Math.max(BIG_DMG, dmg + 3) : 0);
+        let acc = Math.min(1.2, Math.max(0.75, 0.7 + 0.15 * speed));
+        if (m.kind === "wave" || m.kind === "spiral") acc *= 0.85;
+        if (m.scatter) acc *= 0.8;
+        if (m.pierce || m.big) total *= 1.5;
+        if ((m.size || 1) > 1) total *= 1 + 0.15 * (m.size - 1);
+        return (total / rate) * acc;
+      }
+      function barRow(label, ratio) {
+        return `<div class="food-bar"><span>${label}</span><div class="food-bar-track"><div class="food-bar-fill" style="width:${(clamp(ratio, 0.06, 1) * 100).toFixed(0)}%"></div></div></div>`;
+      }
+      function openFoodDetail(name) {
+        const idx = FOOD_BY_NAME[name];
+        const f = FOODS[idx];
+        const mod = FOOD_SHOT[name];
+        const rows = shotSpecRows(mod);
+        foodDetail.innerHTML =
+          `<img src="img/foods/svg/${f.img}.svg" alt="">` +
+          `<h2 id="foodDetailName">${f.name}</h2>` +
+          `<p class="food-energy">基礎エナジー ${f.energy} ／ きほんHP ${Math.max(3, Math.round(f.energy / 18))}<br>たおした数 ${fmt(stats.foodKills[name] || 0)}<br>こんかいの弾Lv${foodShotLv(name)}${foodKillLv(name) < FOOD_LV_MAX ? `（あと${fmt(FOOD_LV_EXP[foodKillLv(name)] - foodTotalExp(name))}exp／1体${fmt(foodExpGain(name))}exp）` : "（MAX）"}</p>` +
+          `<span class="food-shot-name" style="background:${mod.color};${LIGHT_COLORS.includes(mod.color) ? "color:#40372f" : ""}">${mod.desc}</span>` +
+          (foodLocked(name) ? `<p class="food-energy">ロック中：${foodLockBoss(name).title}を たおすと 装備できる</p>` : "") +
+          `<div class="food-bars">` +
+          barRow("弾の数", ((mod.count || 0) + (mod.homing || 0) + (mod.big ? 1 : 0)) * (mod.split2 ? 4 : 1) / 4) +
+          barRow("弾速", (mod.speed || 1) / 2.5) +
+          barRow("ダメージ", (mod.big ? Math.max(BIG_DMG, (mod.dmg || 1) + 3) : mod.dmg || 1) / 8) +
+          barRow("連射", 1 / (mod.rate || 1) / 2.2) +
+          barRow("つよさ", shotPower(mod) / 3.5) +
+          `</div>` +
+          `<div class="food-spec">` +
+          rows.map(([k, v, special]) => `<div class="food-spec-row${special ? " special" : ""}"><span>${k}</span><span>${v}</span></div>`).join("") +
+          `<div class="food-spec-row"><span>おこると</span><span>${ATTACK_TEXT[f.attack] || ""}</span></div>` +
+          `</div>` +
+          `<button type="button" class="rules-close" id="foodDetailClose">とじる</button>`;
+        $("foodDetailClose").addEventListener("click", () => foodDetailDialog.close());
+        if (!foodDetailDialog.open) foodDetailDialog.showModal();
+      }
+      function renderFoodDex() {
+        const known = FOODS.filter((f) => stats.foods.includes(f.name)).length;
+        foodDexProgress.innerHTML = `うちおとした食材 <strong>${known}/${FOODS.length}</strong>`;
+        foodGrid.innerHTML = "";
+        FOODS.forEach((f, i) => {
+          // 雑魚食材（基礎エナジー101未満）は最初から見える
+          const got = i <= RANDOM_POOL_MAX || stats.foods.includes(f.name);
+          const cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = `food-cell${got ? "" : " unknown"}${equippedFoods.includes(f.name) ? " equipped-now" : ""}`;
+          cell.innerHTML = got
+            ? `<img src="img/foods/svg/${f.img}.svg" alt=""><span>${f.name}</span>`
+            : `<span class="food-cell-mark">？</span><span>？？？</span>`;
+          if (got) cell.addEventListener("click", () => openFoodDetail(f.name));
+          foodGrid.appendChild(cell);
+        });
+      }
+      foodDexButton.addEventListener("click", () => { renderFoodDex(); openDialog(foodDexDialog); });
+      foodDexClose.addEventListener("click", () => foodDexDialog.close());
+
+      // シークレット図鑑（マスコットを5れんだ）
+      let mascotTaps = 0;
+      let mascotTapTimer = 0;
+      mascot.addEventListener("click", () => {
+        mascotTaps++;
+        clearTimeout(mascotTapTimer);
+        mascotTapTimer = setTimeout(() => { mascotTaps = 0; }, 1400);
+        if (mascotTaps >= 5) {
+          mascotTaps = 0;
+          unlock("secret_door");
+          renderSecretDex();
+          openDialog(secretDialog);
+        }
+      });
+      function renderSecretDex() {
+        const entries = [
+          { found: secrets.wildTail, img: "SlowpokeTail", name: "野生のおいしいシッポ", desc: "ものすごいスピードで空をよこぎる でんせつの食材。とてつもなくかたく、うちおとすのは ほぼむり…（エナジー342）" },
+          ...BOSSES.map((b, i) => ({ found: secrets.bosses.includes(i), img: FOODS[FOOD_BY_NAME[b.food]].img, name: b.title, desc: b.desc })),
+          ...SECRET_RECIPES.map((r) => ({ found: secrets.recipes.includes(r.name), img: null, name: r.name, desc: `シークレットレシピ（+${fmt(r.bonus)}）。おいしいシッポで つくる ごちそう。` })),
+        ];
+        const foundCount = entries.filter((e) => e.found).length;
+        secretProgress.innerHTML = `みつけたひみつ <strong>${foundCount}/${entries.length}</strong>`;
+        secretList.innerHTML = "";
+        entries.forEach((e) => {
+          const row = document.createElement("div");
+          row.className = `secret-row${e.found ? " found" : ""}`;
+          const icon = e.found
+            ? (e.img ? `<img src="img/foods/svg/${e.img}.svg" alt="">` : `<span class="secret-mark">食</span>`)
+            : `<span class="secret-mark">？</span>`;
+          row.innerHTML =
+            icon +
+            `<div class="secret-row-main">` +
+            `<span class="secret-row-name">${e.found ? e.name : "？？？"}</span>` +
+            `<span class="secret-row-desc">${e.found ? e.desc : "まだ みつけていない…"}</span>` +
+            `</div>`;
+          secretList.appendChild(row);
+        });
+        if (foundCount >= entries.length) {
+          const row = document.createElement("div");
+          row.className = "secret-row found";
+          row.innerHTML =
+            `<span class="secret-mark">怒</span>` +
+            `<div class="secret-row-main">` +
+            `<span class="secret-row-name">「怒破餓鬼」のなまえのひみつ</span>` +
+            `<span class="secret-row-desc">怒＝おこった食材たち。破＝うちやぶる かけら。餓鬼＝はらぺこの きみ。ぜんぶそろって ドパガキ！</span>` +
+            `</div>`;
+          secretList.appendChild(row);
+        }
+      }
+      secretClose.addEventListener("click", () => secretDialog.close());
+
+      // ---- キャンバス初期化・ループ -----------------------------------
+      function setupCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = WORLD.w * dpr;
+        canvas.height = WORLD.h * dpr;
+        canvas.style.height = "auto";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      setupCanvas();
+      addEventListener("resize", setupCanvas);
+
+      let lastTs = performance.now();
+      function loop(ts) {
+        const dt = Math.min(0.035, (ts - lastTs) / 1000);
+        lastTs = ts;
+        if (mode === "play") update(dt);
+        else tGlobal += dt * 0.35;
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      // ---- デバッグフック（?debug 付きURLのみ。自動検証用） -----------
+      if (location.search.includes("debug")) {
+        window.__dopagaki = {
+          step(dt = 1 / 60, n = 1) { for (let i = 0; i < n; i++) if (mode === "play") update(dt); draw(); },
+          state() {
+            return {
+              mode, score, week, mealsRun, shields: equippedFoods.length, bombs: equippedFoods.length, xp, weaponLv: runLv, tier: weaponIdx + 1, combo,
+              enemies: enemies.length, pbullets: pbullets.length, ebullets: ebullets.length,
+              order: order && order.recipe.name, boss: bossRef ? { title: bossRef.def.title, hp: bossRef.hp, maxHp: bossRef.maxHp } : null,
+              got: order && { ...order.got }, side: sideOrder && { name: sideOrder.recipe.name, got: { ...sideOrder.got } }, dishesCooked, fb: fbPercent(), runKills, interlude,
+              ach: achGot.slice(), secrets: JSON.parse(JSON.stringify(secrets)), stats: JSON.parse(JSON.stringify(stats)),
+            };
+          },
+          start: () => startNewRun(),
+          setPlayer(x, y) { player.x = player.tx = x; player.y = player.ty = y; },
+          grant: (name) => grantIngredient(name),
+          spawnTail,
+          bomb: () => useBomb(),
+          addXp: (v) => gainXp(v),
+          addKills(name, k) { noteFoodKill(name, k); },
+          foodLocked: (name) => foodLocked(name),
+          unlockBoss: (i) => { if (!secrets.bosses.includes(i)) secrets.bosses.push(i); },
+          foodLv: (name) => ({ kill: foodKillLv(name), shot: foodShotLv(name), exp: foodExp[name] || 0, total: foodTotalExp(name) }),
+          spawnPickup,
+          equip: (name) => equipFood(name),
+          unequip: (i) => unequipFood(i),
+          tap: (x, y) => tapPickup(x, y),
+          equipped: () => ({ list: equippedFoods.slice(), locked: lockedFood }),
+          discover: (name) => noteFoodHarvest(FOOD_BY_NAME[name]),
+          lock: (i) => toggleLock(i),
+          pickups: () => pickups.map((pk) => ({ name: pk.name, x: Math.round(pk.x), y: Math.round(pk.y), t: +pk.t.toFixed(1) })),
+          listPBullets: () => pbullets.map((b) => ({ kind: b.kind, dmg: b.dmg, color: b.color, size: b.size, pierce: !!b.pierce, split: !!b.split, tall: !!b.tall })),
+          setMeals(n) { mealsRun = n; updateMeta(); },
+          newOrder: () => newOrder(),
+          sideNeeds: () => sideOrder ? { ...sideOrder.recipe.needs } : null,
+          killAt(i) { const e = enemies[i]; if (e) damageEnemy(e, 99999, "spoon"); },
+          damageBoss(v, cause = "spoon") { if (bossRef) damageEnemy(bossRef, v, cause); },
+          hit: () => playerHit(),
+          setInvuln(v) { invuln = v; },
+          clearField() { enemies = enemies.filter((e) => e.kind === "boss"); ebullets = []; pbullets = []; },
+          listEnemies: () => enemies.map((e) => ({ kind: e.kind, name: FOODS[e.foodIdx].name, hp: e.hp, armed: e.armed, x: Math.round(e.x), y: Math.round(e.y) })),
+          listBullets: () => ebullets.map((b) => b.kind),
+          resetSave() { ["best", "recipeLv", "dishes", "secrets", "ach", "stats", "title", "muted"].forEach((k) => localStorage.removeItem(LS(k))); },
+        };
+      }
+
+      // ---- 初期表示 ---------------------------------------------------
+      bestValue.textContent = fmt(best);
+      updateTitleLabel();
+      renderBombs();
+      renderPower();
+      renderBuffBar();
+      updateMeta();
+      newOrder();
+      updateScoreUI();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
