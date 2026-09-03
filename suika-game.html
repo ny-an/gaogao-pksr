@@ -1459,6 +1459,7 @@
       let dropQueue = [];
       let dropQueueTimer = 0;
       let rainGrace = 0;          // この間は溢れ判定を止める
+      let chargeMTimer = 0;       // 隠し機能「エナジーチャージM？」の残り秒数（食材が降り続ける）
 
       // ちゅうもん状態
       let order = null;          // { recipe, got: { poolIdx: n } }
@@ -1534,10 +1535,12 @@
       const HIDDEN_TITLES = {
         first: "かくしたもの みーつけた",
         fan: "せんぷうき はっけん",
-        shuffle: "しゃっふる はっけん",
+        shuffle: "がおぷん だいすき",
         rain: "びるどあっぷ はっけん",
+        cheer: "いつでもげんき げんきえーる",
+        chargeM: "すきるめい まちがえた",
       };
-      const HIDDEN_ORDER = ["first", "fan", "shuffle", "rain"];
+      const HIDDEN_ORDER = ["first", "fan", "shuffle", "rain", "cheer", "chargeM"];
       const hiddenTitles = new Set();
       try {
         const raw = localStorage.getItem("kabocha.hidden");
@@ -2224,6 +2227,7 @@
       }
 
       function updateSkillChips() {
+        chipCharge.querySelector(".skill-name").textContent = chargeMTimer > 0 ? "⚡エナジーチャージM" : "⚡エナジーチャージS";
         chipChargeState.innerHTML = combo > 0 && !chargeFired
           ? `いま <strong>${combo}</strong>/${CHARGE_COMBO}コンボ`
           : `<strong>${CHARGE_COMBO}</strong>コンボで発動`;
@@ -2339,6 +2343,7 @@
         fruits = [];
         dropQueue = [];
         rainGrace = 0;
+        chargeMTimer = 0;
         particles = [];
         popups = [];
         score = 0;
@@ -2821,6 +2826,13 @@
         }
         if (rainGrace > 0) rainGrace -= dt;
 
+        // 隠し機能「エナジーチャージM？」: 10秒間、りんごと牛乳だけを高速で降らせ続ける
+        if (chargeMTimer > 0) {
+          chargeMTimer -= dt;
+          if (dropQueue.length < 2) dropQueue.push(Math.random() < 0.5 ? 0 : 1); // chain[0]=リンゴ, chain[1]=ミルク（除外対象外）
+          if (chargeMTimer <= 0) { chargeMTimer = 0; updateSkillChips(); }
+        }
+
         // 押しっぱなしで連続ドロップ
         if (aiming) {
           holdTime += dt;
@@ -3087,6 +3099,38 @@
         }
       });
 
+      // げんきオールSのチップを100連打（30秒以内）: 使い切ったあとでも復活する
+      const cheerTaps = makeTapCounter(100, 30000);
+      chipCheer.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        if (!cheerTaps()) return;
+        if (gameOver || !cheerUsed) return;
+        cheerUsed = false;
+        updateSkillChips();
+        flashChip(chipCheer);
+        ensureAudio();
+        sfx.cheer();
+        unlockHiddenTitle("cheer");
+      });
+
+      // エナジーチャージSのチップを20連打（10秒以内）: 10秒間「エナジーチャージM」表記になり、
+      // 食材が高速で降り続ける（降った系譜はスコアに入らない）
+      const chargeTaps = makeTapCounter(20, 10000);
+      chipCharge.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        if (!chargeTaps()) return;
+        if (gameOver || chargeMTimer > 0) return;
+        chargeMTimer = 10;
+        rainGrace = Math.max(rainGrace, 10 + 2.5);
+        updateSkillChips();
+        flashChip(chipCharge);
+        ensureAudio();
+        showBanner("⚡ エナジーチャージM？発動！");
+        logEvent("⚡ エナジーチャージM？発動！（10びょう 食材が降りつづける）", 0, true);
+        sfx.skill();
+        unlockHiddenTitle("chargeM");
+      });
+
       // マスコット5連打: 確認ポップアップのあと食材をシャッフル（除外セットを引き直して新ゲーム）
       const mascotTaps = makeTapCounter(5, 1500);
       const shuffleDialog = document.getElementById("shuffleDialog");
@@ -3187,7 +3231,7 @@
           saveAcc += dt;
           if (saveAcc >= 4) { saveAcc = 0; saveGame(); }
         }
-        if (window.__suikaDebugHook) window.__suikaDebugHook({ fruits, current, cooldown, warn, gameOver, score, nextTier, dropX, foodGauge, cheerUsed, combo, chain, visibleTiers, activeShapes });
+        if (window.__suikaDebugHook) window.__suikaDebugHook({ fruits, current, cooldown, warn, gameOver, score, nextTier, dropX, foodGauge, cheerUsed, combo, chain, visibleTiers, activeShapes, setCheerUsed: (v) => { cheerUsed = !!v; updateSkillChips(); } });
         requestAnimationFrame(frame);
       }
 
