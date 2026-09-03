@@ -1213,6 +1213,17 @@
     </div>
   </dialog>
 
+  <dialog id="shuffleDialog" aria-labelledby="shuffleTitle">
+    <div class="rules-content">
+      <h2 id="shuffleTitle">食材をシャッフルする？</h2>
+      <p class="resume-info">いまのゲームはおわって、<br>あたらしい食材のならびで はじまるよ。</p>
+      <div class="resume-actions">
+        <button type="button" class="resume-continue" id="shuffleYes">シャッフル</button>
+        <button type="button" class="resume-reset" id="shuffleNo">やめる</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="rankDialog" aria-labelledby="rankTitle">
     <div class="rules-content">
       <h2 id="rankTitle">タイトルいちらん</h2>
@@ -1515,6 +1526,17 @@
       }
       updateRankLabel();
 
+      // 隠しタイトル: 連打系の隠し機能をはじめて使ったときに獲得（一覧の一番下にしれっと出る）
+      const HIDDEN_TITLE = "うらわざ はっけん";
+      let hiddenTitle = false;
+      try { hiddenTitle = localStorage.getItem("kabocha.hidden") === "1"; } catch (_) {}
+      function unlockHiddenTitle() {
+        if (hiddenTitle) return;
+        hiddenTitle = true;
+        try { localStorage.setItem("kabocha.hidden", "1"); } catch (_) {}
+        logEvent(`🎖 かくしタイトル「${HIDDEN_TITLE}」をかくとく！`, 0, true);
+      }
+
       // タイトルはスコアがしきい値に届いた瞬間に解放（ゲームオーバーを待たない）
       let bestBefore = best;          // このゲーム開始時点のベスト（リザルトの更新判定用）
       let shownRank = rankIndex(best);
@@ -1549,6 +1571,15 @@
             `<strong class="rank-thr">${fmt(r.t)}</strong>`;
           list.append(row);
         });
+        if (hiddenTitle) {
+          const row = document.createElement("div");
+          row.className = "rank-row got";
+          row.innerHTML =
+            `<span class="rank-num">★</span>` +
+            `<span class="rank-name">${HIDDEN_TITLE}</span>` +
+            `<strong class="rank-thr">かくし</strong>`;
+          list.append(row);
+        }
       }
 
       const foodOf = (tier) => FOOD_POOL[chain[tier]];
@@ -2951,17 +2982,22 @@
 
       restartButton.addEventListener("click", () => { ensureAudio(); reset(); });
 
-      // 隠し機能: 画面右下の何もないところを3秒以内に10連打、盤面が空なら
-      // 「食材を1000個落として全部合体した状態」の山を降らせる（スコアは入らない）
-      let cornerTaps = [];
-      document.addEventListener("pointerdown", (ev) => {
-        if (ev.target.closest("button, a, canvas, dialog, input, .stat, .guide, .skill-chip, .order, .title, .topbar")) return;
-        if (ev.clientX < window.innerWidth * 0.7 || ev.clientY < window.innerHeight * 0.7) return;
-        const now = performance.now();
-        cornerTaps = cornerTaps.filter((t) => now - t < 3000);
-        cornerTaps.push(now);
-        if (cornerTaps.length < 10) return;
-        cornerTaps = [];
+      // ---- 連打系の隠し機能 ------------------------------------------
+      // 連打カウンタ: windowMs 以内に count 回で true
+      function makeTapCounter(count, windowMs) {
+        let taps = [];
+        return () => {
+          const now = performance.now();
+          taps = taps.filter((t) => now - t < windowMs);
+          taps.push(now);
+          if (taps.length < count) return false;
+          taps = [];
+          return true;
+        };
+      }
+
+      // 右下10連打: 盤面が空なら「食材を1000個落として全部合体した状態」の山を降らせる（スコアは入らない）
+      function thousandDrops() {
         if (gameOver || fruits.length > 0 || dropQueue.length) return;
         // 1000個ぶんを「完全合体モデル」で圧縮（2個そろうたび1段上へ繰り上げ）
         const counts = new Array(MAX_TIER + 1).fill(0);
@@ -2978,22 +3014,58 @@
         showBanner(`🎁 食材を1000こ おとした！（${dropQueue.length}こに合体）`);
         logEvent(`🎁 食材を1000こ おとした → ${dropQueue.length}こに合体`, 0, true);
         sfx.feast();
+        unlockHiddenTitle();
+      }
+
+      // 左下10連打: 扇風機。盤面の食材をぜんぶ吹き飛ばす（表示はなにも出さない）
+      function fanBlast() {
+        if (gameOver || fruits.length === 0) return;
+        for (const f of fruits) {
+          const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.6; // 上向きの扇状
+          const sp = 380 + Math.random() * 320;
+          f.vx += Math.cos(ang) * sp;
+          f.vy += Math.sin(ang) * sp;
+          f.av += (Math.random() - 0.5) * 8;
+        }
+        shake = Math.max(shake, 8);
+        ensureAudio();
+        tone(90, 0.35, { type: "sawtooth", gain: 0.05, slide: 260 });
+        unlockHiddenTitle();
+      }
+
+      const cornerRightTaps = makeTapCounter(10, 3000);
+      const cornerLeftTaps = makeTapCounter(10, 3000);
+      document.addEventListener("pointerdown", (ev) => {
+        if (ev.target.closest("button, a, canvas, dialog, input, .stat, .guide, .skill-chip, .order, .title, .topbar")) return;
+        if (ev.clientY < window.innerHeight * 0.7) return;
+        if (ev.clientX >= window.innerWidth * 0.7) {
+          if (cornerRightTaps()) thousandDrops();
+        } else if (ev.clientX <= window.innerWidth * 0.3) {
+          if (cornerLeftTaps()) fanBlast();
+        }
       });
 
-      // 隠し機能: マスコットを1.5秒以内に5連打で食材をシャッフル（除外セットを引き直して新ゲーム）
-      let mascotTaps = [];
+      // マスコット5連打: 確認ポップアップのあと食材をシャッフル（除外セットを引き直して新ゲーム）
+      const mascotTaps = makeTapCounter(5, 1500);
+      const shuffleDialog = document.getElementById("shuffleDialog");
       document.getElementById("mascot").addEventListener("pointerdown", (ev) => {
         ev.preventDefault();
-        const now = performance.now();
-        mascotTaps = mascotTaps.filter((t) => now - t < 1500);
-        mascotTaps.push(now);
-        if (mascotTaps.length < 5) return;
-        mascotTaps = [];
+        if (!mascotTaps()) return;
+        if (shuffleDialog.open) return;
+        shuffleDialog.showModal();
+      });
+      document.getElementById("shuffleYes").addEventListener("click", () => {
+        shuffleDialog.close();
         ensureAudio();
         reset();
         showBanner("🔀 食材をシャッフルした！");
         spawnParticles(WORLD.w / 2, 200, "#f2c060", 24, 220);
         sfx.skill();
+        unlockHiddenTitle();
+      });
+      document.getElementById("shuffleNo").addEventListener("click", () => shuffleDialog.close());
+      shuffleDialog.addEventListener("click", (ev) => {
+        if (ev.target === shuffleDialog) shuffleDialog.close();
       });
 
       rulesButton.addEventListener("click", () => rulesDialog.showModal());
