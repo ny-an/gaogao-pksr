@@ -1529,15 +1529,28 @@
       }
       updateRankLabel();
 
-      // 隠しタイトル: 連打系の隠し機能をはじめて使ったときに獲得（一覧の一番下にしれっと出る）
-      const HIDDEN_TITLE = "うらわざ はっけん";
-      let hiddenTitle = false;
-      try { hiddenTitle = localStorage.getItem("kabocha.hidden") === "1"; } catch (_) {}
-      function unlockHiddenTitle() {
-        if (hiddenTitle) return;
-        hiddenTitle = true;
-        try { localStorage.setItem("kabocha.hidden", "1"); } catch (_) {}
-        logEvent(`🎖 かくしタイトル「${HIDDEN_TITLE}」をかくとく！`, 0, true);
+      // 隠しタイトル: 連打系の隠し機能で獲得（一覧の一番下にしれっと出る）
+      // first はどれかを初めて使ったとき、あとは機能ごと
+      const HIDDEN_TITLES = {
+        first: "かくしたもの みーつけた",
+        fan: "せんぷうき はっけん",
+        shuffle: "しゃっふる はっけん",
+        rain: "びるどあっぷ はっけん",
+      };
+      const HIDDEN_ORDER = ["first", "fan", "shuffle", "rain"];
+      const hiddenTitles = new Set();
+      try {
+        const raw = localStorage.getItem("kabocha.hidden");
+        if (raw === "1") hiddenTitles.add("first"); // 旧形式
+        else if (raw) JSON.parse(raw).forEach((k) => { if (HIDDEN_TITLES[k]) hiddenTitles.add(k); });
+      } catch (_) {}
+      function unlockHiddenTitle(key) {
+        const gained = [];
+        if (hiddenTitles.size === 0) { hiddenTitles.add("first"); gained.push("first"); }
+        if (key && HIDDEN_TITLES[key] && !hiddenTitles.has(key)) { hiddenTitles.add(key); gained.push(key); }
+        if (!gained.length) return;
+        try { localStorage.setItem("kabocha.hidden", JSON.stringify([...hiddenTitles])); } catch (_) {}
+        for (const k of gained) logEvent(`🎖 かくしタイトル「${HIDDEN_TITLES[k]}」をかくとく！`, 0, true);
       }
 
       // タイトルはスコアがしきい値に届いた瞬間に解放（ゲームオーバーを待たない）
@@ -1574,12 +1587,13 @@
             `<strong class="rank-thr">${fmt(r.t)}</strong>`;
           list.append(row);
         });
-        if (hiddenTitle) {
+        for (const k of HIDDEN_ORDER) {
+          if (!hiddenTitles.has(k)) continue;
           const row = document.createElement("div");
           row.className = "rank-row got";
           row.innerHTML =
             `<span class="rank-num">★</span>` +
-            `<span class="rank-name">${HIDDEN_TITLE}</span>` +
+            `<span class="rank-name">${HIDDEN_TITLES[k]}</span>` +
             `<strong class="rank-thr">かくし</strong>`;
           list.append(row);
         }
@@ -3042,7 +3056,7 @@
         showBanner(`🌧 食材を${RAIN_COUNT}こ ふらせた！`);
         logEvent(`🌧 食材を${RAIN_COUNT}こ ふらせた`, 0, true);
         sfx.feast();
-        unlockHiddenTitle();
+        unlockHiddenTitle("rain");
       }
 
       // 左下10連打: 扇風機。盤面の食材をぜんぶ吹き飛ばす（表示はなにも出さない）
@@ -3058,7 +3072,7 @@
         shake = Math.max(shake, 8);
         ensureAudio();
         tone(90, 0.35, { type: "sawtooth", gain: 0.05, slide: 260 });
-        unlockHiddenTitle();
+        unlockHiddenTitle("fan");
       }
 
       const cornerRightTaps = makeTapCounter(10, 3000);
@@ -3089,7 +3103,7 @@
         showBanner("🔀 食材をシャッフルした！");
         spawnParticles(WORLD.w / 2, 200, "#f2c060", 24, 220);
         sfx.skill();
-        unlockHiddenTitle();
+        unlockHiddenTitle("shuffle");
       });
       document.getElementById("shuffleNo").addEventListener("click", () => shuffleDialog.close());
       shuffleDialog.addEventListener("click", (ev) => {
