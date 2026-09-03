@@ -11,7 +11,12 @@
   <meta property="og:title" content="食材とれるかな！！">
   <meta property="og:description" content="食材をうって、あつめて、料理をつくるお料理シューティング。21食つくって1週間かんそうをめざせ！">
   <meta property="og:url" content="https://ny-an.github.io/gaogao-pksr/dopagaki.html">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/dopagaki-ogp.png?v=20260903-3">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="食材とれるかな！！の料理シューティング">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://ny-an.github.io/gaogao-pksr/img/ogp/dopagaki-ogp.png?v=20260903-3">
   <title>食材とれるかな！！</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpath%20d='M14%2040h72v8c0%2028-14%2042-36%2042S14%2076%2014%2048z'%20fill='%23555049'/%3E%3Crect%20x='8'%20y='36'%20width='84'%20height='10'%20rx='5'%20fill='%23777069'/%3E%3Cpath%20d='M30%2032c0-12%2040-12%2040%200z'%20fill='%23e8a13b'/%3E%3Ccircle%20cx='50'%20cy='22'%20r='6'%20fill='%23a3541e'/%3E%3C/svg%3E">
   <style>
@@ -1149,7 +1154,7 @@
         <p class="rules-skill"><strong>レシピLv（さいだい75）</strong><span>料理をつくるたびにアップ（さいしょは1品ごと、だんだん たくさん必要になる）。10Lvごとに きほんの弾が 連射・2連・3連・ゆらゆらとぶ弾・貫通するおおきな弾・おいかける星と強くなる。レシピLv1ごとに ぜんぶの食材弾に150expが上乗せされる。ぬしをたおすと かならず1あがる。スキル名は エナジーチャージS級→ゆめのかけらゲットS級→…→エナジーチャージM級 と強そうになっていくけど、とくにいみはない。</span></p>
         <p class="rules-skill"><strong>食材弾のLv（さいだい10）</strong><span>食材をたおすと、その食材の基礎エナジーぶんの経験値がたまって弾のLvがあがる。めったに出ないレアな食材（基礎エナジー101以上）は2倍もらえる。Lvがあがると連射が速くなり、Lv4・7・10で弾がふえ、Lv8からは左右にひろがる弾幕になる。たてになったり交代したりして装備を失っても、あがったLvは そのまま。</span></p>
         <p class="rules-skill"><strong>食材弾（装備）</strong><span>うちおとした食材は、装備に空きがあれば そのまま装備される。基礎エナジー150以上の食材（カカオ・コーヒー・アボカド・キノコ・ながねぎ・カボチャ・シッポ）は、その食材のぬしをたおすまでロック（カボチャは日ようびのぬし）。一度たおせば ずっと装備できる。3つ埋まっているときは画面の左右の端に8秒うかび、タップで古いのと交代。装備した食材は ぜんぶ同時に、それぞれのペースで弾をうつ！どれも長所と短所がはっきり：リンゴは超はやい単発、エッグはスナイパー、コーンは近距離ショットガン、カカオは全弾追尾、コーヒーは超連射だけどぶれる、ハーブは燃やす、カボチャはばくだん…19種ぜんぶちがう。たてになったり交代したりで失うのは、基礎エナジーがひくい食材から。画面下のバーをタップすると1つだけロック（たてに使われるのは最後・交代もされない）。×ではずせる。</span></p>
-        <p class="rules-skill"><strong>なべぶた（ボム）</strong><span>装備した食材を1つなげて（エナジーのひくいものから。ロック中はさいご）画面ぜんたいの弾をはらい、食材ぜんぶに大ダメージ。装備がないと つかえない。画面をすばやくダブルタップ、またはスペースキー。</span></p>
+        <p class="rules-skill"><strong>なべぶた（ボム）</strong><span>装備した食材を1つなげて（エナジーのひくいものから。ロック中はさいご）画面ぜんたいの弾をはらい、食材ぜんぶに大ダメージ。装備がないと つかえない。画面をすばやくダブルタップ、またはスペースキー。使ったあとは30秒待ち。</span></p>
       </div>
       <p class="rules-section-title">おこった食材たち</p>
       <div class="rules-tips">
@@ -1376,6 +1381,7 @@
       const BOMB_MAX = 3;
       const BOSS_INTRO = 5;
       const BOMB_DMG = 40;
+      const BOMB_COOLDOWN_SECONDS = 30;
 
       const COMBO_WINDOW = 2.0;
       const COMBO_MULT_CAP = 5;
@@ -1634,6 +1640,7 @@
       let spawnT = 0.8;
       let shake = 0;
       let flash = 0;
+      let bombCooldown = 0;
       let invuln = 0;
       let interlude = 0;
       let interludeText = "";
@@ -2284,8 +2291,12 @@
 
       // ---- なべぶた（ボム） -------------------------------------------
       function useBomb() {
-        if (mode !== "play" || interlude > 0) return;
-        if (!equippedFoods.length) { addPopup(player.x, player.y - 40, "装備がないと なべぶたは つかえない", "#7d7269", 12); return; }
+        if (mode !== "play" || interlude > 0) return false;
+        if (bombCooldown > 0) {
+          addPopup(player.x, player.y - 40, `なべぶた あと${Math.ceil(bombCooldown)}秒`, "#7d7269", 12);
+          return false;
+        }
+        if (!equippedFoods.length) { addPopup(player.x, player.y - 40, "装備がないと なべぶたは つかえない", "#7d7269", 12); return false; }
         // 装備をひとつ ぎせいにして発動（エナジーのひくいものから。ロック中はさいご）
         const lost = equippedFoods.splice(weakestEquipIndex(), 1)[0];
         if (lockedFood === lost) lockedFood = null;
@@ -2297,11 +2308,13 @@
         bombsThisBoss++;
         ebullets = [];
         flash = 1;
+        bombCooldown = BOMB_COOLDOWN_SECONDS;
         shake = 0.8;
         invuln = Math.max(invuln, 1.6);
         sfxBomb();
         showBanner("なべぶた！ ぜんぶ はらいのけた！");
         for (let i = enemies.length - 1; i >= 0; i--) if (!(enemies[i].kind === "boss" && enemies[i].intro > 0)) damageEnemy(enemies[i], BOMB_DMG, "bomb");
+        return true;
       }
 
       // ---- 戦闘 -------------------------------------------------------
@@ -2706,6 +2719,7 @@
         tGlobal += dt;
         if (shake > 0) shake = Math.max(0, shake - dt * 1.6);
         if (flash > 0) flash = Math.max(0, flash - dt * 2.4);
+        if (bombCooldown > 0) bombCooldown = Math.max(0, bombCooldown - dt);
         if (invuln > 0) invuln -= dt;
         if (interlude > 0) interlude -= dt;
         for (let i = pickups.length - 1; i >= 0; i--) {
@@ -3374,6 +3388,7 @@
         invuln = 1.2;
         interlude = 0;
         flash = 0;
+        bombCooldown = 0;
         tailsSpawned = 0;
         bossRef = null;
         renderBombs();
@@ -3746,6 +3761,7 @@
               enemies: enemies.length, pbullets: pbullets.length, ebullets: ebullets.length,
               order: order && order.recipe.name, boss: bossRef ? { title: bossRef.def.title, hp: bossRef.hp, maxHp: bossRef.maxHp } : null,
               got: order && { ...order.got }, side: sideOrder && { name: sideOrder.recipe.name, got: { ...sideOrder.got } }, dishesCooked, fb: fbPercent(), runKills, interlude,
+              bombCooldown: +bombCooldown.toFixed(2),
               ach: achGot.slice(), secrets: JSON.parse(JSON.stringify(secrets)), stats: JSON.parse(JSON.stringify(stats)),
             };
           },

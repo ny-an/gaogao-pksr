@@ -833,6 +833,25 @@ test('各ゲームはゲーム一覧を経由して献立表へ戻れる', () =>
   assert.match(shooterSource, /<title>食材とれるかな！！<\/title>/);
 });
 
+test('シューティングのなべぶたは発動後30秒のクールダウンを設ける', () => {
+  assert.match(shooterSource, /const BOMB_COOLDOWN_SECONDS = 30;/);
+  assert.match(shooterSource, /if \(bombCooldown > 0\)[\s\S]*?なべぶた あと\$\{Math\.ceil\(bombCooldown\)\}秒[\s\S]*?return false;/);
+  assert.match(shooterSource, /bombCooldown = BOMB_COOLDOWN_SECONDS;/);
+  assert.match(shooterSource, /bombCooldown = Math\.max\(0, bombCooldown - dt\);/);
+  assert.match(shooterSource, /bombCooldown = 0;[\s\S]*?mode = "play";/);
+  assert.match(shooterSource, /DOUBLE_TAP_MS[\s\S]*?useBomb\(\); lastTap = null;/);
+  assert.match(shooterSource, /ev\.key === " " \|\| ev\.key === "x"[\s\S]*?useBomb\(\)/);
+  assert.match(shooterSource, /使ったあとは30秒待ち。/);
+});
+
+test('シューティングOGPは1200x630の大画像カードを使用する', () => {
+  const image = fs.readFileSync(path.join(projectRoot, 'img/ogp/dopagaki-ogp.png'));
+  assert.equal(image.readUInt32BE(16), 1200);
+  assert.equal(image.readUInt32BE(20), 630);
+  assert.match(shooterSource, /property="og:image" content="https:\/\/ny-an\.github\.io\/gaogao-pksr\/img\/ogp\/dopagaki-ogp\.png\?v=20260903-3"/);
+  assert.match(shooterSource, /name="twitter:card" content="summary_large_image"/);
+});
+
 test('食材ゲットは盤面候補ではなく全食材から3種類を抽選する', () => {
   const body = functionSource('activateFoodGet');
   assert.match(body, /const candidates = \[\.\.\.ALL_FOOD_IDS\]/);
