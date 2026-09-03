@@ -5,10 +5,15 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const projectRoot = path.join(__dirname, '..');
-const source = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-v2.html'), 'utf8');
-const legacySource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
+const source = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
+const redirectSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-v2.html'), 'utf8');
+const legacySource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-survival.js'), 'utf8');
 const indexSource = fs.readFileSync(path.join(projectRoot, 'index.html'), 'utf8');
+const gamesSource = fs.readFileSync(path.join(projectRoot, 'games.html'), 'utf8');
+const suikaSource = fs.readFileSync(path.join(projectRoot, 'suika-game.html'), 'utf8');
 const v2Source = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-v2.js'), 'utf8');
+const survivalModeSource = legacySource;
+const survivalStyleSource = fs.readFileSync(path.join(projectRoot, 'css/koiki-puzzle-survival.css'), 'utf8');
 const debugSource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-debug-ui.js'), 'utf8');
 
 function functionSource(name) {
@@ -135,21 +140,25 @@ test('盤面リセットは全6種類・自動消去なし・有効手ありを�
 });
 
 test('v2ランタイムと3モード・食材バッグ調理UIを読み込む', () => {
-  assert.match(source, /<script src="js\/koiki-puzzle-v2\.js\?v=20260901-2"><\/script>/);
+  assert.match(source, /survivalMode[\s\S]*koiki-puzzle-survival\.js\?v=20260902-1[\s\S]*koiki-puzzle-v2\.js\?v=20260902-1/);
   assert.match(source, /id="modeDialog"/);
   assert.match(source, /data-mode="endless"/);
   assert.match(source, /data-mode="normal"/);
   assert.match(source, /data-mode="ex"/);
-  assert.match(source, /とことん<\/strong><span>無期限で記録に挑戦/);
   assert.match(source, /ノーマル<\/strong><span>1週間・必要食材70%・スキル＋1手/);
-  assert.match(source, /EX<\/strong><span>1週間・必要食材100%・スキル＋2手/);
+  assert.match(source, /EX<\/strong><span>1週間・必要食材100%・連鎖＋2手/);
+  assert.match(source, /とことん<\/strong><span>食材バッグとFBを育てる終盤モード/);
+  assert.ok(source.indexOf('data-mode="normal"') < source.indexOf('data-mode="ex"'));
+  assert.ok(source.indexOf('data-mode="ex"') < source.indexOf('data-mode="endless"'));
+  assert.match(v2Source, /activeMode = 'normal';[\s\S]*recipeAtDifficulty\(previewRecipe, 0, 'normal'\)/);
   assert.match(source, /id="cookButton"/);
   assert.match(source, /id="openAddFood"/);
   assert.match(source, /id="addFoodDialog"/);
   assert.match(source, /id="additionalIngredients" aria-label="食材バッグ"/);
   assert.match(source, /id="bagFullDialog"/);
   assert.doesNotMatch(source, /id="weeklyDialog"/);
-  assert.match(source, /href="koiki-puzzle\.html"><strong>サバイバル<\/strong><span>手数が尽きるまで料理を続ける<\/span>/);
+  assert.match(source, /href="koiki-puzzle\.html\?mode=survival"><strong>サバイバル<\/strong><span>手数が尽きるまで料理を続ける<\/span>/);
+  assert.match(redirectSource, /location\.replace\(`koiki-puzzle\.html\$\{location\.search\}\$\{location\.hash\}`\)/);
   assert.doesNotMatch(source, /const GAME_STATE_KEY = 'gaogao-pksr\.koiki-puzzle\.game\.v1'/);
 });
 
@@ -171,10 +180,17 @@ test('SPの主要操作は下部1列ドックで常に見つけられる', () =>
   assert.match(source, /\.cook-button:disabled \{[\s\S]*?opacity: 1;/);
 });
 
-test('サバイバルはv1のページ・保存領域・ランタイムとしてv2から分離する', () => {
-  assert.match(legacySource, /<title>お料理できるかな！！（サバイバル）<\/title>/);
+test('サバイバルはV2と同じHTMLでv1の保存領域・ランタイムを使う', () => {
+  assert.match(legacySource, /document\.title = 'お料理できるかな！！（サバイバル）'/);
   assert.match(legacySource, /class="legacy-label">サバイバル<\/p>/);
-  assert.doesNotMatch(legacySource, /href="koiki-puzzle-v2\.html"|新版へ/);
+  assert.doesNotMatch(legacySource, /href="koiki-puzzle-v2\.html|新版へ/);
+  assert.match(source, /new URLSearchParams\(location\.search\)\.get\('mode'\) === 'survival'/);
+  assert.doesNotMatch(source, /location\.replace\([\s\S]*koiki-puzzle\.html/);
+  assert.match(survivalModeSource, /document\.body\.innerHTML[\s\S]*class="legacy-label">サバイバル/);
+  assert.match(survivalModeSource, /const GAME_STATE_KEY = 'gaogao-pksr\.koiki-puzzle\.game\.v1'/);
+  assert.match(survivalModeSource, /const RECORDS_KEY = 'gaogao-pksr\.koiki-puzzle\.records\.v1'/);
+  assert.match(survivalModeSource, /必要食材がそろうと自動調理！/);
+  assert.match(survivalStyleSource, /\.legacy-label/);
   assert.match(legacySource, /const GAME_STATE_KEY = 'gaogao-pksr\.koiki-puzzle\.game\.v1'/);
   assert.match(legacySource, /const RECORDS_KEY = 'gaogao-pksr\.koiki-puzzle\.records\.v1'/);
   assert.match(legacySource, /const RARE_RECIPE_WEIGHT = 0\.5;/);
@@ -194,8 +210,9 @@ test('ローカルのdebug=1だけでV2とサバイバルの操作パネルを�
   assert.equal(enabled({ protocol: 'http:', hostname: 'localhost', search: '' }), false);
   assert.equal(enabled({ protocol: 'https:', hostname: 'ny-an.github.io', search: '?debug=1' }), false);
   assert.match(source, /js\/koiki-puzzle-debug-ui\.js[\s\S]*js\/koiki-puzzle-v2\.js/);
-  assert.match(legacySource, /js\/koiki-puzzle-debug-ui\.js[\s\S]*<script>[\s\S]*setupLocalDebug\(\)/);
-  assert.match(v2Source, /function setupLocalDebug\(\)[\s\S]*必要食材をそろえる[\s\S]*食材ゲット発動[\s\S]*日曜朝へ[\s\S]*21食目へ/);
+  assert.match(source, /js\/koiki-puzzle-debug-ui\.js[\s\S]*koiki-puzzle-survival\.js/);
+  assert.match(legacySource, /setupLocalDebug\(\)/);
+  assert.match(v2Source, /function setupLocalDebug\(\)[\s\S]*必要食材をそろえる[\s\S]*食材ゲット発動[\s\S]*完成食数＋10[\s\S]*日曜朝へ[\s\S]*21食目へ/);
   assert.match(legacySource, /function setupLocalDebug\(\)[\s\S]*今の料理を自動完成[\s\S]*追加食材 全種＋20[\s\S]*料理チャンス発動/);
   assert.match(v2Source, /const successful = debugForceCookingSuccess \|\| Math\.random\(\) < successChance\(\)/);
   assert.match(legacySource, /const isExtraTasty = debugForceCookingSuccess \|\| Math\.random\(\) < EXTRA_TASTY_CHANCE \+ extraTastyBonus/);
@@ -218,9 +235,14 @@ test('ノーマルとEXの必要食材倍率を仕様どおり計算する', () 
   assert.doesNotMatch(v2Source, /normalNeedFactor|exNeedFactor|normalCandidateTotal/);
 });
 
-test('とことんの必要食材数はレシピLvと独立して増え続ける', () => {
+test('とことんの追加必要数は70で頭打ちしFB+85%到達後に再び増える', () => {
+  const endlessExtraNeeds = vm.runInNewContext(`(${v2FunctionSource('endlessExtraNeeds')})`, {
+    ENDLESS_NEEDS_CAP: 70, FB_MAX: 85, FB_STEP: 5, MEALS_PER_WEEK: 21, Math, Number
+  });
+  assert.deepEqual([0, 69, 70, 200, 357, 400].map(endlessExtraNeeds), [0, 69, 70, 70, 70, 113]);
   const recipeNeeds = v2FunctionSource('recipeNeedsForMode');
-  assert.match(recipeNeeds, /mode === 'endless'\) return increaseRecipeNeeds\(recipe\.miniNeeds, completedDishes\)/);
+  assert.match(recipeNeeds, /mode === 'endless'\) return increaseRecipeNeeds\(recipe\.miniNeeds, endlessExtraNeeds\(completedDishes\)\)/);
+  assert.match(v2FunctionSource('parseSavedGame'), /recipeAtDifficulty\(baseRecipe, saved\.dishes, saved\.mode\)/);
   assert.doesNotMatch(recipeNeeds, /RECIPE_LEVEL_MAX/);
 });
 
@@ -325,7 +347,7 @@ test('料理は自動完成せず料理ボタンでのみ完成する', () => {
   assert.match(v2FunctionSource('renderStatus'), /cookButton\.disabled = [\s\S]*!recipeComplete\(\)/);
 });
 
-test('料理可否はロックを無視し追加食材は明示投入分だけを使う', () => {
+test('料理の必要分はバッグから自動使用し追加食材は明示投入分だけを使う', () => {
   const recipeComplete = vm.runInNewContext(`(${v2FunctionSource('recipeComplete')})`, {
     pot: { apple: 3, milk: 2 },
     currentRecipe: () => ({ needs: { apple: 3, milk: 2 } })
@@ -335,7 +357,6 @@ test('料理可否はロックを無視し追加食材は明示投入分だけ�
   const context = {
     pot: { apple: 5, milk: 4 },
     cookingAdditions: { honey: 2 },
-    lockedIngredients: new Set(['apple']),
     ALL_FOOD_IDS: ['apple', 'milk', 'honey'],
     currentRecipe: () => ({ needs: { apple: 3, milk: 2 } })
   };
@@ -343,14 +364,12 @@ test('料理可否はロックを無視し追加食材は明示投入分だけ�
   assert.deepEqual(JSON.parse(JSON.stringify(consumeBagForCooking())), { honey: 2 });
   assert.deepEqual(JSON.parse(JSON.stringify(context.pot)), { apple: 2, milk: 2 });
   assert.deepEqual(JSON.parse(JSON.stringify(context.cookingAdditions)), {});
-  assert.deepEqual(Array.from(context.lockedIngredients), ['apple']);
 });
 
-test('新しくバッグへ入った食材は全モード共通でロックし解除済み種類は維持する', () => {
+test('バッグ食材は既定で保護し投入操作だけで追加食材へ移す', () => {
   const context = {
     FOODS: { apple: { name: 'りんご' } },
     pot: {},
-    lockedIngredients: new Set(),
     totalAdditionalIngredients: {},
     autoInvestBagOverflow: () => ({}),
     Object
@@ -358,11 +377,9 @@ test('新しくバッグへ入った食材は全モード共通でロックし�
   const addIngredient = vm.runInNewContext(`(${v2FunctionSource('addIngredient')})`, context);
   addIngredient('apple', 2);
   assert.equal(context.pot.apple, 2);
-  assert.deepEqual(Array.from(context.lockedIngredients), ['apple']);
-  context.lockedIngredients.delete('apple');
   addIngredient('apple', 1);
   assert.equal(context.pot.apple, 3);
-  assert.deepEqual(Array.from(context.lockedIngredients), []);
+  assert.doesNotMatch(v2Source, /lockedIngredients|lockedIngredientIds|data-lock-food|lockAllIngredients/);
   assert.match(source, /id="openAddFood"[^>]*>投入<\/button>/);
   assert.match(source, /id="addFoodConfirm"[^>]*>投入する<\/button>/);
 });
@@ -421,7 +438,7 @@ test('月曜は30個以下、火曜以降は大皿を含む全料理から抽選
     Object
   };
   const chooseRecipe = vm.runInNewContext(
-    `${v2FunctionSource('totalOf')}; ${v2FunctionSource('recipeIngredientTotal')}; (${v2FunctionSource('chooseRecipe')})`,
+    `${v2FunctionSource('totalOf')}; ${v2FunctionSource('recipeIngredientTotal')}; ${v2FunctionSource('singleIngredientId')}; ${v2FunctionSource('excludeEndlessMercyRecipes')}; (${v2FunctionSource('chooseRecipe')})`,
     context
   );
   assert.equal(chooseRecipe().name, '小皿');
@@ -449,6 +466,8 @@ test('日曜は今週カテゴリの本家必要食材合計TOP5から抽選す�
     ${v2FunctionSource('totalOf')}
     ${v2FunctionSource('recipeIngredientTotal')}
     ${v2FunctionSource('topLargeRecipes')}
+    ${v2FunctionSource('singleIngredientId')}
+    ${v2FunctionSource('excludeEndlessMercyRecipes')}
     ${v2FunctionSource('chooseRecipe')}
     return { topLargeRecipes, chooseRecipe };
   })()`, context);
@@ -461,6 +480,27 @@ test('日曜は今週カテゴリの本家必要食材合計TOP5から抽選す�
   assert.match(v2FunctionSource('chooseRecipe'), /selectionWeight = recipe => sunday \? 1/);
 });
 
+test('とことんで1種類料理の直後は同じ食材だけの1種類料理を除外する', () => {
+  const recipes = [
+    { name: 'リンゴA', originalNeeds: { apple: 7 } },
+    { name: 'リンゴB', originalNeeds: { apple: 9 } },
+    { name: 'ミルクA', originalNeeds: { milk: 7 } },
+    { name: 'ミックス', originalNeeds: { apple: 4, milk: 3 } }
+  ];
+  const filter = vm.runInNewContext(
+    `(() => { ${v2FunctionSource('singleIngredientId')}; return ${v2FunctionSource('excludeEndlessMercyRecipes')}; })()`,
+    { RECIPES: recipes, activeMode: 'endless' }
+  );
+  assert.deepEqual(
+    Array.from(filter(recipes.slice(1), 'リンゴA'), recipe => recipe.name),
+    ['ミルクA', 'ミックス']
+  );
+  assert.deepEqual(
+    Array.from(filter(recipes.slice(1), 'リンゴA', 'normal'), recipe => recipe.name),
+    ['リンゴB', 'ミルクA', 'ミックス']
+  );
+});
+
 test('まぜまぜは初回無料でEXだけ3回目以降2手消費する', () => {
   const shuffleCost = vm.runInNewContext(`(${v2FunctionSource('shuffleCost')})`);
   assert.deepEqual([0, 1, 2, 3].map(count => shuffleCost('endless', count)), [0, 1, 1, 1]);
@@ -470,18 +510,21 @@ test('まぜまぜは初回無料でEXだけ3回目以降2手消費する', () =
   assert.match(v2FunctionSource('renderStatus'), /const nextShuffleCost = shuffleCost\(\)/);
 });
 
-test('スキル発動はとことん・ノーマル1手、EX2手で大消し・連鎖の別枠報酬はない', () => {
+test('食材ゲットは全モード1手、料理チャンスはEXだけ2手で別枠報酬はない', () => {
   const skillMoveAmount = vm.runInNewContext(`(${v2FunctionSource('skillMoveAmount')})`);
-  assert.equal(skillMoveAmount('endless'), 1);
-  assert.equal(skillMoveAmount('normal'), 1);
-  assert.equal(skillMoveAmount('ex'), 2);
+  assert.equal(skillMoveAmount('foodGet', 'endless'), 1);
+  assert.equal(skillMoveAmount('foodGet', 'normal'), 1);
+  assert.equal(skillMoveAmount('foodGet', 'ex'), 1);
+  assert.equal(skillMoveAmount('cookingChance', 'endless'), 1);
+  assert.equal(skillMoveAmount('cookingChance', 'normal'), 1);
+  assert.equal(skillMoveAmount('cookingChance', 'ex'), 2);
   const resolveBoard = v2FunctionSource('resolveBoard');
-  assert.match(resolveBoard, /foodGet \? addMoves\(skillMoveAmount\(\)\) : null/);
-  assert.match(resolveBoard, /cookingChanceBonus \? addMoves\(skillMoveAmount\(\)\) : null/);
+  assert.match(resolveBoard, /foodGet \? addMoves\(skillMoveAmount\('foodGet'\)\) : null/);
+  assert.match(resolveBoard, /cookingChanceBonus \? addMoves\(skillMoveAmount\('cookingChance'\)\) : null/);
   assert.doesNotMatch(v2Source, /exClearReward|exChainReward|chainMoveReward/);
 });
 
-test('800個では停止せず超過分を必要数・ロック・低エナジー順で自動投入する', () => {
+test('800個では停止せず超過分を必要数・低エナジー順で自動投入する', () => {
   assert.match(v2FunctionSource('isBagFull'), /stockTotal\(\) > BAG_CAPACITY/);
   assert.match(v2FunctionSource('boardIsBlocked'), /moves <= 0 \|\| isBagFull\(\)/);
   assert.match(v2FunctionSource('addIngredient'), /pot\[id\] = \(pot\[id\] \|\| 0\) \+ count/);
@@ -497,21 +540,19 @@ test('800個では停止せず超過分を必要数・ロック・低エナジ�
     },
     pot: { required: 10, low: 795, high: 5 },
     cookingAdditions: {},
-    lockedIngredients: new Set(['low']),
     isCappedMode: () => true,
     stockTotal: () => Object.values(context.pot).reduce((sum, count) => sum + count, 0),
     currentRecipe: () => ({ needs: { required: 10 } }),
     Math, Number, Object
   };
   const autoInvest = vm.runInNewContext(`(${v2FunctionSource('autoInvestBagOverflow')})`, context);
-  assert.deepEqual(JSON.parse(JSON.stringify(autoInvest())), { high: 5, low: 5 });
-  assert.deepEqual(JSON.parse(JSON.stringify(context.pot)), { required: 10, low: 790 });
-  assert.deepEqual(JSON.parse(JSON.stringify(context.cookingAdditions)), { high: 5, low: 5 });
+  assert.deepEqual(JSON.parse(JSON.stringify(autoInvest())), { low: 10 });
+  assert.deepEqual(JSON.parse(JSON.stringify(context.pot)), { required: 10, low: 785, high: 5 });
+  assert.deepEqual(JSON.parse(JSON.stringify(context.cookingAdditions)), { low: 10 });
   assert.equal(context.stockTotal(), 800);
 
   context.pot = { required: 10, low: 800 };
   context.cookingAdditions = {};
-  context.lockedIngredients = new Set(['low']);
   assert.deepEqual(JSON.parse(JSON.stringify(autoInvest())), { low: 10 });
   assert.equal(context.pot.required, 10);
   assert.equal(context.stockTotal(), 800);
@@ -523,7 +564,6 @@ test('投入で追加量を変更し全部戻す・全食材投入を選べる',
     pot: { apple: 5, milk: 5 },
     cookingAdditions: { apple: 4 },
     additionDraft: { apple: 1, milk: 3 },
-    lockedIngredients: new Set(),
     currentRecipe: () => ({ needs: { apple: 3, milk: 2 } }),
     addFoodDialog: {},
     closeDialog: () => {},
@@ -571,8 +611,94 @@ test('ノーマル・EXは1日3食・21食限定で19〜21食目だけ日曜に�
   assert.equal(isSundayMeal(18), false);
   const cookRecipe = v2FunctionSource('cookRecipe');
   assert.match(cookRecipe, /activeMode !== 'endless' && dishes >= MEALS_PER_WEEK/);
-  assert.match(cookRecipe, /endGame\(\)/);
+  assert.match(cookRecipe, /endGame\('', unlockedExNow \? 'EX' : unlockedEndlessNow \? 'とことん' : ''\)/);
   assert.doesNotMatch(v2Source, /showWeeklyResult|continueNextWeek|weeklyResultPending/);
+});
+
+test('ノーマル完走でEX、EX完走でとことんを解放し旧記録も救済する', () => {
+  assert.match(v2Source, /EX_UNLOCKED_KEY = 'gaogao-pksr\.koiki-puzzle\.ex-unlocked\.v2'/);
+  assert.match(v2Source, /ENDLESS_UNLOCKED_KEY = 'gaogao-pksr\.koiki-puzzle\.endless-unlocked\.v2'/);
+  assert.match(v2Source, /EX_RECORDS_RULESET = 2/);
+  assert.match(v2FunctionSource('recordsKey'), /ex\.ruleset\$\{EX_RECORDS_RULESET\}/);
+  assert.match(v2FunctionSource('exUnlocked'), /readRecords\('normal'\)\.dishes >= MEALS_PER_WEEK/);
+  assert.match(v2FunctionSource('cookRecipe'), /activeMode === 'normal' && dishes >= MEALS_PER_WEEK \? unlockEx\(\) : false/);
+  assert.match(v2FunctionSource('cookRecipe'), /activeMode === 'ex' && dishes >= MEALS_PER_WEEK \? unlockEndless\(\) : false/);
+  assert.match(v2FunctionSource('endGame'), /unlockedMode \? `\$\{unlockedMode\}モード解放！`/);
+  assert.match(v2FunctionSource('renderModeDialog'), /const available = mode === 'normal'[\s\S]*card\.disabled = !available/);
+  assert.match(v2FunctionSource('selectMode'), /mode === 'ex' && !exUnlocked\(\) && currentMode !== 'ex'/);
+  assert.match(v2FunctionSource('selectMode'), /mode === 'endless' && !endlessUnlocked\(\) && currentMode !== 'endless'/);
+  assert.match(source, /data-mode="ex"[^>]*disabled/);
+  assert.match(source, /data-mode-status="ex">ノーマル完走で解放/);
+  assert.match(source, /data-mode="endless"[^>]*disabled/);
+  assert.match(source, /data-mode-status="endless">EX完走で解放/);
+  assert.match(source, /data-mode-best="endless">自己ベスト FB\+0%/);
+  assert.match(source, /\.mode-card:disabled span, \.mode-card:disabled em \{ display: none; \}/);
+
+  const values = {};
+  const context = {
+    EX_UNLOCKED_KEY: 'ex.unlocked', MEALS_PER_WEEK: 21,
+    localStorage: {
+      getItem: key => values[key] ?? null,
+      setItem: (key, value) => { values[key] = value; }
+    },
+    readRecords: () => ({ dishes: 21 })
+  };
+  const exUnlocked = vm.runInNewContext(`(${v2FunctionSource('exUnlocked')})`, context);
+  assert.equal(exUnlocked(), true);
+  assert.equal(values['ex.unlocked'], '1');
+
+  const buildEndlessUnlock = ({ stored = {}, records = {}, savedMode = null } = {}) => {
+    const localValues = { ...stored };
+    const unlock = vm.runInNewContext(`(() => {
+      ${v2FunctionSource('recordDishesForKey')}
+      ${v2FunctionSource('hasPastEndlessPlay')}
+      return ${v2FunctionSource('endlessUnlocked')};
+    })()`, {
+      ENDLESS_UNLOCKED_KEY: 'endless.unlocked', RECORDS_KEY_PREFIX: 'records.',
+      MEALS_PER_WEEK: 21,
+      localStorage: {
+        getItem: key => localValues[key] ?? null,
+        setItem: (key, value) => { localValues[key] = value; }
+      },
+      readRecords: mode => records[mode] || { dishes: 0, totalEnergy: 0 },
+      readSavedGame: () => savedMode ? { mode: savedMode } : null,
+      Math, Number, JSON
+    });
+    return { unlock, localValues };
+  };
+  assert.equal(buildEndlessUnlock().unlock(), false);
+  assert.equal(buildEndlessUnlock({ records: { ex: { dishes: 21 } } }).unlock(), true);
+  assert.equal(buildEndlessUnlock({ stored: { 'records.ex': JSON.stringify({ dishes: 21 }) } }).unlock(), true);
+  assert.equal(buildEndlessUnlock({ records: { endless: { dishes: 1, totalEnergy: 100 } } }).unlock(), true);
+  assert.equal(buildEndlessUnlock({ savedMode: 'endless' }).unlock(), true);
+  assert.doesNotMatch(v2FunctionSource('endGame'), /unlockEx|unlockEndless/);
+});
+
+test('EXととことんはJSTの公開日前だけ通常プレイを止めローカルdebugでは解除する', () => {
+  const exReleaseAt = Date.UTC(2026, 8, 4, 15);
+  const endlessReleaseAt = Date.UTC(2026, 8, 11, 15);
+  assert.match(v2Source, /MODE_RELEASE_AT = Object\.freeze\(\{[\s\S]*ex: Date\.UTC\(2026, 8, 4, 15\),[\s\S]*endless: Date\.UTC\(2026, 8, 11, 15\)/);
+
+  const modeReleased = vm.runInNewContext(`(${v2FunctionSource('modeReleased')})`, {
+    MODE_RELEASE_AT: { ex: exReleaseAt, endless: endlessReleaseAt },
+    localDebugEnabled: () => false,
+    Date,
+    Number
+  });
+  assert.equal(modeReleased('normal', exReleaseAt - 1, false), true);
+  assert.equal(modeReleased('ex', exReleaseAt - 1, false), false);
+  assert.equal(modeReleased('ex', exReleaseAt, false), true);
+  assert.equal(modeReleased('endless', endlessReleaseAt - 1, false), false);
+  assert.equal(modeReleased('endless', endlessReleaseAt, false), true);
+  assert.equal(modeReleased('ex', exReleaseAt - 1, true), true);
+  assert.equal(modeReleased('endless', endlessReleaseAt - 1, true), true);
+
+  assert.match(v2FunctionSource('localDebugEnabled'), /window\.KoikiDebugPanel\?\.enabled\(\) === true/);
+  assert.match(debugSource, /localPage && new URLSearchParams\(locationObject\.search\)\.get\('debug'\) === '1'/);
+  assert.match(v2FunctionSource('renderModeDialog'), /modeReleased\('ex'\) && \(exUnlocked\(\) \|\| currentMode === 'ex'\)/);
+  assert.match(v2FunctionSource('renderModeDialog'), /modeReleased\('endless'\) && \(endlessUnlocked\(\) \|\| currentMode === 'endless'\)/);
+  assert.match(v2FunctionSource('selectMode'), /if \(!modeReleased\(mode\)\)[\s\S]*まだ開始できません/);
+  assert.match(v2FunctionSource('startGame'), /if \(!modeReleased\(mode\)\)[\s\S]*openDialog\(modeDialog\)/);
 });
 
 test('共通途中セーブにバッグと手動投入を保存し旧あふれ食材はバッグへ戻す', () => {
@@ -679,15 +805,25 @@ test('開始と再開時にモード別ルールを表示しもう見ない設�
   assert.match(source, /id="modeGuideNever"[^>]*type="checkbox"/);
   assert.match(source, /このモードではもう見ない/);
   assert.match(source, /\.mode-guide-list li \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
-  assert.match(source, /食材バッグは全ロックが基本。<br>料理の必要分はそのまま使えます。<br>余りは「投入」で追加食材へ。/);
+  assert.match(source, /食材バッグはそのまま持ち越せます。<br>料理の必要分だけ自動で使用。<br>追加分は「投入」から選びます。/);
+  assert.match(source, /<strong>最終目標<\/strong><span>FB\+85%<\/span>/);
+  assert.match(source, /<strong>必要食材<\/strong><span>70食で一度止まり、FB\+85%後に再び増加<\/span>/);
+  assert.match(source, /<strong>ゴール<\/strong><span>21食完走でEX解放<\/span>/);
+  assert.match(source, /<strong>ゴール<\/strong><span>21食完走でとことん解放<\/span>/);
   assert.match(v2Source, /const MODE_GUIDE_HIDDEN_KEY_PREFIX = 'gaogao-pksr\.koiki-puzzle\.mode-guide-hidden\.v2\.'/);
   assert.match(v2FunctionSource('startGame'), /restoreGame\(mode\)[\s\S]*showModeGuide\(mode\)[\s\S]*resetState\(mode\)[\s\S]*showModeGuide\(mode\)/);
   assert.match(v2FunctionSource('showModeGuide'), /modeGuideHidden\(mode\)[\s\S]*section\.dataset\.modeGuide !== mode[\s\S]*openDialog\(modeGuideDialog\)/);
   assert.match(v2FunctionSource('closeModeGuide'), /MODE_GUIDE_HIDDEN_KEY_PREFIX[\s\S]*activeMode[\s\S]*'1'/);
 });
 
-test('献立表のクレジットからパズルへ移動できる', () => {
-  assert.match(indexSource, /<a href="koiki-puzzle\.html">パズル<\/a>/);
+test('各ゲームはゲーム一覧を経由して献立表へ戻れる', () => {
+  assert.match(indexSource, /<a href="games\.html">ゲーム一覧<\/a>/);
+  assert.match(gamesSource, /href="index\.html">← 献立表に戻る<\/a>/);
+  assert.match(gamesSource, /href="koiki-puzzle\.html"/);
+  assert.match(gamesSource, /href="suika-game\.html"/);
+  assert.match(source, /href="games\.html">← ゲーム一覧へ<\/a>/);
+  assert.match(legacySource, /href="games\.html">← ゲーム一覧へ<\/a>/);
+  assert.match(suikaSource, /href="games\.html">← ゲーム一覧へ<\/a>/);
 });
 
 test('食材ゲットは盤面候補ではなく全食材から3種類を抽選する', () => {
@@ -709,11 +845,11 @@ test('食材ゲットの取得数を3種類へ差1個以内で配分する', () 
   }
 });
 
-test('食材ゲットはモード別の手数を回復してから料理チャンスを表示する', () => {
+test('食材ゲットは全モード1手を回復してから料理チャンスを表示する', () => {
   assert.doesNotMatch(v2FunctionSource('activateFoodGet'), /addMoves|moveReward/);
   assert.doesNotMatch(v2FunctionSource('activateCookingChance'), /addMoves|moveReward/);
   const resolveBoard = v2FunctionSource('resolveBoard');
-  assert.match(resolveBoard, /const foodGetMoveReward = foodGet \? addMoves\(skillMoveAmount\(\)\) : null;/);
+  assert.match(resolveBoard, /const foodGetMoveReward = foodGet \? addMoves\(skillMoveAmount\('foodGet'\)\) : null;/);
   assert.match(resolveBoard, /if \(foodGetMoveReward\) \{[\s\S]*showActivationMoveMessage\(foodGetMoveReward\)/);
   const foodGetRewardIndex = resolveBoard.indexOf('if (foodGetMoveReward)');
   const cookingChanceIndex = resolveBoard.indexOf('if (cookingChanceBonus) {', foodGetRewardIndex);
@@ -723,7 +859,7 @@ test('食材ゲットはモード別の手数を回復してから料理チャ�
 test('料理チャンスは2連鎖目以降の各連鎖で発動し上限到達後も回復する', () => {
   const resolveBoard = v2FunctionSource('resolveBoard');
   assert.match(resolveBoard, /const cookingChanceBonus = chain >= 2 \? activateCookingChance\(\) : 0;/);
-  assert.match(resolveBoard, /const cookingChanceMoveReward = cookingChanceBonus \? addMoves\(skillMoveAmount\(\)\) : null;/);
+  assert.match(resolveBoard, /const cookingChanceMoveReward = cookingChanceBonus \? addMoves\(skillMoveAmount\('cookingChance'\)\) : null;/);
 
   const context = {
     extraTastyBonus: 0.7,
@@ -892,23 +1028,22 @@ test('料理完成時に実際に消費した追加食材だけをアイコン�
   assert.match(renderIngredients, /class="cook-additional-count"/);
 });
 
-test('SPの追加食材は全19種類をロックとバッジが重ならない2段に収める', () => {
+test('SPの食材バッグは全19種類をバッジ付き2段に収める', () => {
   const mobileStart = source.indexOf('@media (max-width: 520px)');
   const narrowStart = source.indexOf('@media (max-width: 360px)', mobileStart);
   const mobileStyles = source.slice(mobileStart, narrowStart);
 
   assert.match(mobileStyles, /\.additional-row \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
   assert.match(mobileStyles, /\.additional-ingredients \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: repeat\(10, minmax\(0, 1fr\)\);[\s\S]*?column-gap: clamp\(4px, 1\.5vw, 9px\);[\s\S]*?row-gap: 10px;/);
-  assert.match(mobileStyles, /\.additional-lock \{ left: 0; \}/);
   assert.match(mobileStyles, /\.additional-count \{ right: 0; \}/);
+  assert.doesNotMatch(source, /\.additional-lock/);
 });
 
-test('追加食材は全ロックだけを一括操作できる', () => {
-  assert.match(source, /id="lockAllIngredients"[\s\S]*?🔒 全ロック/);
-  assert.doesNotMatch(source, /unlockAllIngredients|全解除/);
-  assert.match(v2Source, /lockAllIngredientsButton\.disabled = disabled \|\| ingredientIds\.length === 0 \|\| ingredientIds\.every\(id => lockedIngredients\.has\(id\)\)/);
-  assert.match(v2Source, /function lockAllAdditionalIngredients\(\)[\s\S]*?\.forEach\(id => lockedIngredients\.add\(id\)\)/);
-  assert.match(v2Source, /lockAllIngredientsButton\.addEventListener\('click'/);
+test('V2の食材バッグには鍵やロック操作を表示しない', () => {
+  assert.doesNotMatch(source, /id="lockAllIngredients"|全ロック|全解除|additional-lock|data-lock-food/);
+  assert.doesNotMatch(v2Source, /lockedIngredients|lockedIngredientIds|lockAllAdditionalIngredients/);
+  assert.match(source, /id="returnAllAdditions"[^>]*>全部戻す<\/button>/);
+  assert.match(source, /id="addAllFoods"[^>]*>全食材を投入<\/button>/);
 });
 
 test('持ち越した追加食材はロック解除時に現在料理の不足分へ充当する', () => {

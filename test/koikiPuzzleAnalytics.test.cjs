@@ -6,9 +6,9 @@ const vm = require('node:vm');
 
 const projectRoot = path.join(__dirname, '..');
 const analyticsSource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-analytics.js'), 'utf8');
-const v2PageSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle-v2.html'), 'utf8');
+const v2PageSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
 const v2Source = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-v2.js'), 'utf8');
-const survivalSource = fs.readFileSync(path.join(projectRoot, 'koiki-puzzle.html'), 'utf8');
+const survivalSource = fs.readFileSync(path.join(projectRoot, 'js/koiki-puzzle-survival.js'), 'utf8');
 
 function runAnalytics({ protocol = 'https:', hostname = 'ny-an.github.io', gtag } = {}) {
   const appendedScripts = [];
@@ -48,9 +48,10 @@ function eventCalls(context) {
     .filter(call => call[0] === 'event');
 }
 
-test('V2とサバイバルが同じGA4共通処理を読み込む', () => {
+test('単一HTMLのV2とサバイバルが同じGA4共通処理を使う', () => {
   assert.match(v2PageSource, /<script src="js\/koiki-puzzle-analytics\.js\?v=20260901-2"><\/script>/);
-  assert.match(survivalSource, /<script src="js\/koiki-puzzle-analytics\.js\?v=20260901-2"><\/script>/);
+  assert.match(v2PageSource, /koiki-puzzle-survival\.js\?v=20260902-1/);
+  assert.match(survivalSource, /window\.KoikiPuzzleAnalytics/);
   assert.match(analyticsSource, /G-Q5BGCQDCV6/);
 });
 

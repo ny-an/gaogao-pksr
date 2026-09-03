@@ -3,7 +3,7 @@
 ## 対象と送信環境
 
 - Measurement ID: `G-Q5BGCQDCV6`
-- 対象: V2（`koiki-puzzle-v2.html`）／サバイバル（`koiki-puzzle.html`）
+- 対象: V2／サバイバル（ともに`koiki-puzzle.html`）
 - 送信許可: `https://ny-an.github.io`のみ
 - `file://`、localhost、テスト環境ではGA4スクリプトを読み込まず、イベントも送信しない
 - 個人・端末を独自に識別するIDは追加しない

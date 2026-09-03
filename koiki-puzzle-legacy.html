@@ -7,10 +7,15 @@
   <link rel="canonical" href="https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html">
   <title>お料理できるかな！！（サバイバル）</title>
   <script>
-    location.replace(`koiki-puzzle.html${location.search}${location.hash}`);
+    const target = new URL('koiki-puzzle.html', location.href);
+    const params = new URLSearchParams(location.search);
+    target.searchParams.set('mode', 'survival');
+    if (params.get('debug') === '1') target.searchParams.set('debug', '1');
+    target.hash = location.hash;
+    location.replace(target.href);
   </script>
 </head>
 <body>
-  <p><a href="koiki-puzzle.html">サバイバルを開く</a></p>
+  <p><a href="koiki-puzzle.html?mode=survival">サバイバルを開く</a></p>
 </body>
 </html>

@@ -27,6 +27,7 @@
   const MEALS_PER_DAY = 3;
   const FB_STEP = 5;
   const FB_MAX = 85;
+  const ENDLESS_NEEDS_CAP = 70;
   const NORMAL_NEED_FACTOR = 0.7;
   const MONDAY_RECIPE_MAX_INGREDIENTS = 30;
   const IDLE_SWAP_INTERVAL = 1450;
@@ -36,12 +37,19 @@
   const MODE_SAVE_MIGRATION_KEY = 'gaogao-pksr.koiki-puzzle.game.v2.mode-migration';
   const RECORDS_KEY_PREFIX = 'gaogao-pksr.koiki-puzzle.records.v2.';
   const MODE_GUIDE_HIDDEN_KEY_PREFIX = 'gaogao-pksr.koiki-puzzle.mode-guide-hidden.v2.';
-  const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle-v2.html';
+  const EX_UNLOCKED_KEY = 'gaogao-pksr.koiki-puzzle.ex-unlocked.v2';
+  const ENDLESS_UNLOCKED_KEY = 'gaogao-pksr.koiki-puzzle.endless-unlocked.v2';
+  const EX_RECORDS_RULESET = 2;
+  const MODE_RELEASE_AT = Object.freeze({
+    ex: Date.UTC(2026, 8, 4, 15),
+    endless: Date.UTC(2026, 8, 11, 15)
+  });
+  const SHARE_URL = 'https://ny-an.github.io/gaogao-pksr/koiki-puzzle.html';
 
   const MODES = Object.freeze({
-    endless: { id: 'endless', name: 'とことん', capped: false },
     normal: { id: 'normal', name: 'ノーマル', capped: true },
-    ex: { id: 'ex', name: 'EX', capped: true }
+    ex: { id: 'ex', name: 'EX', capped: true },
+    endless: { id: 'endless', name: 'とことん', capped: false }
   });
   const ANALYTICS_CATEGORIES = Object.freeze({
     カレー: 'curry',
@@ -64,6 +72,12 @@
     const increased = { ...needs };
     for (let index = 0; index < extraTotal; index++) increased[ids[index % ids.length]]++;
     return increased;
+  }
+
+  function endlessExtraNeeds(completedDishes) {
+    const normalizedDishes = Math.max(0, Math.floor(Number(completedDishes) || 0));
+    const fbMaxMeals = (FB_MAX / FB_STEP) * MEALS_PER_WEEK;
+    return Math.min(normalizedDishes, ENDLESS_NEEDS_CAP) + Math.max(0, normalizedDishes - fbMaxMeals);
   }
 
   function scaleNeeds(needs, factor) {
@@ -176,7 +190,6 @@
   const requirementsEl = $('requirements');
   const additionalIngredientsEl = $('additionalIngredients');
   const cookingAdditionsEl = $('cookingAdditions');
-  const lockAllIngredientsButton = $('lockAllIngredients');
   const openAddFoodButton = $('openAddFood');
   const cookButton = $('cookButton');
   const startButton = $('startButton');
@@ -220,7 +233,6 @@
   let activePalette = [];
   let pot = {};
   let cookingAdditions = {};
-  let lockedIngredients = new Set();
   let totalAdditionalIngredients = {};
   let totalUsedIngredients = {};
   let shuffleCount = 0;
@@ -241,7 +253,7 @@
   let debugForceCookingSuccess = false;
 
   function modeConfig(mode = activeMode) {
-    return MODES[mode] || MODES.endless;
+    return MODES[mode] || MODES.normal;
   }
 
   function analyticsCategory(mode = activeMode) {
@@ -307,7 +319,72 @@
   }
 
   function recordsKey(mode = activeMode) {
+    if (mode === 'ex') return `${RECORDS_KEY_PREFIX}ex.ruleset${EX_RECORDS_RULESET}`;
     return `${RECORDS_KEY_PREFIX}${mode || 'endless'}`;
+  }
+
+  function exUnlocked() {
+    try {
+      if (localStorage.getItem(EX_UNLOCKED_KEY) === '1') return true;
+      if (readRecords('normal').dishes < MEALS_PER_WEEK) return false;
+      localStorage.setItem(EX_UNLOCKED_KEY, '1');
+      return true;
+    } catch (_) {
+      return readRecords('normal').dishes >= MEALS_PER_WEEK;
+    }
+  }
+
+  function unlockEx() {
+    try {
+      if (localStorage.getItem(EX_UNLOCKED_KEY) === '1') return false;
+      localStorage.setItem(EX_UNLOCKED_KEY, '1');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function recordDishesForKey(key) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || 'null');
+      return saved && typeof saved === 'object' ? Math.max(0, Number(saved.dishes) || 0) : 0;
+    } catch (_) { return 0; }
+  }
+
+  function hasPastEndlessPlay() {
+    const records = readRecords('endless');
+    if (records.dishes > 0 || records.totalEnergy > 0) return true;
+    return readSavedGame()?.mode === 'endless';
+  }
+
+  function endlessUnlocked() {
+    try {
+      if (localStorage.getItem(ENDLESS_UNLOCKED_KEY) === '1') return true;
+      const completedEx = Math.max(
+        readRecords('ex').dishes,
+        recordDishesForKey(`${RECORDS_KEY_PREFIX}ex`)
+      ) >= MEALS_PER_WEEK;
+      if (!completedEx && !hasPastEndlessPlay()) return false;
+      localStorage.setItem(ENDLESS_UNLOCKED_KEY, '1');
+      return true;
+    } catch (_) { return false; }
+  }
+
+  function unlockEndless() {
+    try {
+      if (localStorage.getItem(ENDLESS_UNLOCKED_KEY) === '1') return false;
+      localStorage.setItem(ENDLESS_UNLOCKED_KEY, '1');
+      return true;
+    } catch (_) { return false; }
+  }
+
+  function localDebugEnabled() {
+    try { return window.KoikiDebugPanel?.enabled() === true; } catch (_) { return false; }
+  }
+
+  function modeReleased(mode, now = Date.now(), debugEnabled = localDebugEnabled()) {
+    const releaseAt = MODE_RELEASE_AT[mode];
+    return !releaseAt || debugEnabled || Number(now) >= releaseAt;
   }
 
   function currentRecipe() {
@@ -366,8 +443,20 @@
     ).slice(0, limit);
   }
 
+  function singleIngredientId(recipe) {
+    const ids = Object.keys(recipe?.originalNeeds || {});
+    return ids.length === 1 ? ids[0] : '';
+  }
+
+  function excludeEndlessMercyRecipes(recipes, previousName, mode = activeMode) {
+    if (mode !== 'endless' || !previousName) return recipes;
+    const previousIngredient = singleIngredientId(RECIPES.find(recipe => recipe.name === previousName));
+    if (!previousIngredient) return recipes;
+    return recipes.filter(recipe => singleIngredientId(recipe) !== previousIngredient);
+  }
+
   function recipeNeedsForMode(recipe, completedDishes = dishes, mode = activeMode) {
-    if (mode === 'endless') return increaseRecipeNeeds(recipe.miniNeeds, completedDishes);
+    if (mode === 'endless') return increaseRecipeNeeds(recipe.miniNeeds, endlessExtraNeeds(completedDishes));
     return scaleNeeds(recipe.originalNeeds, mode === 'normal' ? NORMAL_NEED_FACTOR : 1);
   }
 
@@ -383,6 +472,7 @@
     let candidates = sunday
       ? topLargeRecipes(categoryRecipes).filter(recipe => recipe.name !== excludedName)
       : categoryRecipes.filter(recipe => recipe.name !== excludedName);
+    candidates = excludeEndlessMercyRecipes(candidates, excludedName);
 
     if (!sunday) {
       const needsOneIngredient = requiredIngredientCount === 1 || dishes === 0;
@@ -394,7 +484,7 @@
     }
 
     if (!candidates.length) {
-      candidates = categoryRecipes.filter(recipe => recipe.name !== excludedName);
+      candidates = excludeEndlessMercyRecipes(categoryRecipes.filter(recipe => recipe.name !== excludedName), excludedName);
     }
     const selectionWeight = recipe => sunday ? 1 : (isRareRecipe(recipe) ? RARE_RECIPE_WEIGHT : 1);
     const totalWeight = candidates.reduce((sum, recipe) => sum + selectionWeight(recipe), 0);
@@ -568,14 +658,10 @@
   }
 
   function renderAdditionalIngredients() {
-    const disabled = !started || ended || cooking || busy;
     const ingredientIds = ALL_FOOD_IDS.filter(id => (pot[id] || 0) > 0);
-    lockAllIngredientsButton.disabled = disabled || ingredientIds.length === 0 || ingredientIds.every(id => lockedIngredients.has(id));
     additionalIngredientsEl.innerHTML = ingredientIds.map(id => {
       const food = FOODS[id];
-      const locked = lockedIngredients.has(id);
-      const action = locked ? 'ロック中。タップで解除' : 'タップでロック';
-      return `<button class="additional-item${locked ? ' locked' : ''}" type="button" data-lock-food="${id}" aria-pressed="${locked}" aria-label="${food.name} ${pot[id]}個 ${action}" ${disabled ? 'disabled' : ''}><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span>${locked ? '<span class="additional-lock" aria-hidden="true">🔒</span>' : ''}</button>`;
+      return `<span class="additional-item" aria-label="${food.name} ${pot[id]}個"><img src="${foodImage(food)}" alt=""><span class="additional-count">${pot[id]}</span></span>`;
     }).join('');
   }
 
@@ -663,9 +749,7 @@
 
   function addIngredient(id, count = 1) {
     if (!FOODS[id] || count <= 0) return;
-    const alreadyInBag = (pot[id] || 0) > 0;
     pot[id] = (pot[id] || 0) + count;
-    if (!alreadyInBag) lockedIngredients.add(id);
     totalAdditionalIngredients[id] = (totalAdditionalIngredients[id] || 0) + count;
     autoInvestBagOverflow();
   }
@@ -677,8 +761,7 @@
     const candidates = ALL_FOOD_IDS
       .filter(id => (pot[id] || 0) > (currentRecipe().needs[id] || 0))
       .sort((left, right) =>
-        Number(lockedIngredients.has(left)) - Number(lockedIngredients.has(right))
-        || FOODS[left].energy - FOODS[right].energy
+        FOODS[left].energy - FOODS[right].energy
         || FOODS[left].name.localeCompare(FOODS[right].name, 'ja')
       );
     for (const id of candidates) {
@@ -687,22 +770,12 @@
       const count = Math.min(available, remaining);
       if (count <= 0) continue;
       pot[id] -= count;
-      if (pot[id] <= 0) {
-        delete pot[id];
-        lockedIngredients.delete(id);
-      }
+      if (pot[id] <= 0) delete pot[id];
       cookingAdditions[id] = (cookingAdditions[id] || 0) + count;
       invested[id] = count;
       remaining -= count;
     }
     return invested;
-  }
-
-  function lockAllAdditionalIngredients() {
-    ALL_FOOD_IDS.filter(id => (pot[id] || 0) > 0).forEach(id => lockedIngredients.add(id));
-    renderAdditionalIngredients();
-    saveGame();
-    showMessage('食材バッグをすべてロック！', 'cook');
   }
 
   function mergeIngredients(...groups) {
@@ -720,10 +793,7 @@
     cookingAdditions = {};
     Object.entries(currentRecipe().needs).forEach(([id, need]) => {
       pot[id] -= need;
-      if (pot[id] <= 0) {
-        delete pot[id];
-        lockedIngredients.delete(id);
-      }
+      if (pot[id] <= 0) delete pot[id];
     });
     return additional;
   }
@@ -751,8 +821,8 @@
     return { amount, maxed };
   }
 
-  function skillMoveAmount(mode = activeMode) {
-    return mode === 'ex' ? 2 : 1;
+  function skillMoveAmount(skill, mode = activeMode) {
+    return skill === 'cookingChance' && mode === 'ex' ? 2 : 1;
   }
 
   function activateCookingChance() {
@@ -810,9 +880,9 @@
       if (matches.size === 0) break;
       chain++;
       const foodGet = matches.size >= 6 ? activateFoodGet() : null;
-      const foodGetMoveReward = foodGet ? addMoves(skillMoveAmount()) : null;
+      const foodGetMoveReward = foodGet ? addMoves(skillMoveAmount('foodGet')) : null;
       const cookingChanceBonus = chain >= 2 ? activateCookingChance() : 0;
-      const cookingChanceMoveReward = cookingChanceBonus ? addMoves(skillMoveAmount()) : null;
+      const cookingChanceMoveReward = cookingChanceBonus ? addMoves(skillMoveAmount('cookingChance')) : null;
       maxChain = Math.max(maxChain, chain);
       matches.forEach(index => {
         const food = cells[index];
@@ -953,14 +1023,15 @@
     weekEnergy += energy.totalEnergy;
     dishes++;
     moves = Math.min(MAX_MOVES, moves + COOK_BONUS_MOVES);
+    const unlockedExNow = activeMode === 'normal' && dishes >= MEALS_PER_WEEK ? unlockEx() : false;
+    const unlockedEndlessNow = activeMode === 'ex' && dishes >= MEALS_PER_WEEK ? unlockEndless() : false;
     trackMealComplete(energy.totalEnergy, successType);
     updateRecords();
     renderStatus();
     await showCookCelebration(cooked, levelEnergy.totalEnergy, energy.totalEnergy, successType, usedAdditionalIngredients);
-
     if (activeMode !== 'endless' && dishes >= MEALS_PER_WEEK) {
       cooking = false;
-      endGame();
+      endGame('', unlockedExNow ? 'EX' : unlockedEndlessNow ? 'とことん' : '');
       return;
     }
 
@@ -1026,7 +1097,7 @@
       const delta = next - current;
       if (delta > 0) {
         pot[id] -= delta;
-        if (pot[id] <= 0) { delete pot[id]; lockedIngredients.delete(id); }
+        if (pot[id] <= 0) delete pot[id];
       } else if (delta < 0) pot[id] = (pot[id] || 0) - delta;
       if (next > 0) nextAdditions[id] = next;
     });
@@ -1088,7 +1159,7 @@
     Object.entries(pickerDraft).forEach(([id, count]) => {
       const discarded = Math.min(count, pot[id] || 0);
       pot[id] -= discarded;
-      if (pot[id] <= 0) { delete pot[id]; lockedIngredients.delete(id); }
+      if (pot[id] <= 0) delete pot[id];
     });
     pickerDraft = {};
     closeDialog(discardDialog);
@@ -1128,7 +1199,6 @@
       inventoryModel: 'bag-with-manual-additions',
       pot: { ...pot },
       cookingAdditions: { ...cookingAdditions },
-      lockedIngredientIds: [...lockedIngredients],
       totalAdditionalIngredients: { ...totalAdditionalIngredients },
       totalUsedIngredients: { ...totalUsedIngredients },
       shuffleCount, foodGetActivations,
@@ -1185,8 +1255,6 @@
             .filter(([, count]) => count > 0))
           : {};
 
-      const lockedIds = Array.isArray(saved.lockedIngredientIds) ? saved.lockedIngredientIds : [];
-      if (new Set(lockedIds).size !== lockedIds.length || lockedIds.some(id => !restoredPot[id])) return null;
       const cellIds = Array.isArray(saved.cellIds) ? saved.cellIds : [];
       if (cellIds.length !== ROWS * COLS || cellIds.filter(id => id === KOIKI.id).length !== 1 || cellIds.some(id => id !== KOIKI.id && !palette.includes(id))) return null;
       if (saved.mode !== 'endless' && !CATEGORIES.includes(saved.currentCategory)) return null;
@@ -1206,7 +1274,6 @@
         activePalette: [...palette],
         pot: restoredPot,
         cookingAdditions,
-        lockedIngredients: new Set(lockedIds),
         totalAdditionalIngredients: restoredTotals,
         totalUsedIngredients: restoredUsed,
         shuffleCount: saved.shuffleCount,
@@ -1243,7 +1310,6 @@
     activePalette = restored.activePalette;
     pot = restored.pot;
     cookingAdditions = restored.cookingAdditions;
-    lockedIngredients = restored.lockedIngredients;
     totalAdditionalIngredients = restored.totalAdditionalIngredients;
     totalUsedIngredients = restored.totalUsedIngredients;
     shuffleCount = restored.shuffleCount;
@@ -1370,7 +1436,7 @@
     resultIngredientsEl.innerHTML = ALL_FOOD_IDS.filter(id => (totalAdditionalIngredients[id] || 0) > 0).map(id => miniFoodHtml(id, totalAdditionalIngredients[id])).join('');
   }
 
-  function endGame(endReason = '') {
+  function endGame(endReason = '', unlockedMode = '') {
     if (!started || ended) return;
     trackPlayEnd(endReason);
     ended = true;
@@ -1381,7 +1447,7 @@
     updateRecords();
     const isBest = score > bestBeforeRun;
     $('resultTitle').textContent = activeMode === 'endless' ? 'お料理おしまい！' : '1週間の結果';
-    $('resultBestStatus').textContent = isBest ? '自己ベスト更新！' : '今回の結果';
+    $('resultBestStatus').textContent = [unlockedMode ? `${unlockedMode}モード解放！` : '', isBest ? '自己ベスト更新！' : '今回の結果'].filter(Boolean).join('・');
     $('resultBestStatus').classList.toggle('updated', isBest);
     $('resultScore').textContent = score.toLocaleString('ja-JP');
     const categoryText = activeMode === 'endless' ? '全カテゴリ' : currentCategory;
@@ -1409,7 +1475,6 @@
     currentCategory = mode === 'endless' ? null : chooseCategory();
     pot = {};
     cookingAdditions = {};
-    lockedIngredients = new Set();
     totalAdditionalIngredients = {};
     totalUsedIngredients = {};
     shuffleCount = 0;
@@ -1423,7 +1488,13 @@
     prepareNextRecipe();
   }
 
-  function startGame(mode = activeMode || 'endless', forceNew = true) {
+  function startGame(mode = activeMode || 'normal', forceNew = true) {
+    if (!modeReleased(mode)) {
+      renderModeDialog();
+      openDialog(modeDialog);
+      showMessage('このモードはまだ開始できません。');
+      return;
+    }
     stopIdleMotion();
     closeDialog(modeDialog);
     resultEl.hidden = true;
@@ -1478,13 +1549,22 @@
   function renderModeDialog() {
     const saved = readSavedGame();
     const currentMode = started && !ended ? activeMode : saved?.mode;
+    const exAvailable = modeReleased('ex') && (exUnlocked() || currentMode === 'ex');
+    const endlessAvailable = modeReleased('endless') && (endlessUnlocked() || currentMode === 'endless');
+    const endlessBest = fbPercentForMode(readRecords('endless').dishes, 'endless');
     $('modeSaveHint').textContent = currentMode ? `保存中：${modeConfig(currentMode).name}` : '途中セーブは1つ';
+    const endlessBestEl = document.querySelector('[data-mode-best="endless"]');
+    if (endlessBestEl) endlessBestEl.textContent = `自己ベスト FB+${endlessBest}%`;
     Object.keys(MODES).forEach(mode => {
       const status = document.querySelector(`[data-mode-status="${mode}"]`);
       const card = document.querySelector(`[data-mode="${mode}"]`);
       if (!status) return;
+      const available = mode === 'normal' || (mode === 'ex' && exAvailable) || (mode === 'endless' && endlessAvailable);
+      if (card) card.disabled = !available;
       card?.classList.toggle('current', currentMode === mode);
-      if (currentMode === mode) status.textContent = started && !ended ? '● プレイ中' : '▶ つづきから';
+      if (mode === 'ex' && !exAvailable) status.textContent = 'ノーマル完走で解放';
+      else if (mode === 'endless' && !endlessAvailable) status.textContent = 'EX完走で解放';
+      else if (currentMode === mode) status.textContent = started && !ended ? '● プレイ中' : '▶ つづきから';
       else status.textContent = currentMode ? '終了して開始' : 'はじめる';
     });
     $('activeModeActions').hidden = !started || ended;
@@ -1494,6 +1574,18 @@
   function selectMode(mode) {
     const saved = readSavedGame();
     const currentMode = started && !ended ? activeMode : saved?.mode;
+    if (!modeReleased(mode)) {
+      showMessage('このモードはまだ開始できません。');
+      return;
+    }
+    if (mode === 'ex' && !exUnlocked() && currentMode !== 'ex') {
+      showMessage('EXはノーマル21食完走で解放！');
+      return;
+    }
+    if (mode === 'endless' && !endlessUnlocked() && currentMode !== 'endless') {
+      showMessage('とことんはEX21食完走で解放！');
+      return;
+    }
     if (currentMode && mode !== currentMode) {
       pendingMode = mode;
       $('modeSwitchTitle').textContent = `${modeConfig(currentMode).name}を終了しますか？`;
@@ -1586,6 +1678,16 @@
       prepareNextRecipe();
       persist(`${completedDishes + 1}食目へ移動`);
     };
+    const advanceEndlessDishes = count => {
+      requireGame();
+      if (activeMode !== 'endless') throw new Error('とことん専用の操作です。');
+      const previousName = currentRecipe().name;
+      dishes += count;
+      moves = MAX_MOVES;
+      cookingAdditions = {};
+      prepareNextRecipe(previousName);
+      persist(`完成食数＋${count}`);
+    };
 
     debugPanel.mount({
       title: 'V2 DEBUG',
@@ -1610,14 +1712,13 @@
           requireGame();
           pot = {};
           cookingAdditions = {};
-          lockedIngredients = new Set();
           closeDialog(bagFullDialog);
           persist('バッグを空に');
         } },
         { label: '食材ゲット発動', run: () => {
           requireGame();
           const result = activateFoodGet();
-          addMoves(skillMoveAmount());
+          addMoves(skillMoveAmount('foodGet'));
           renderAll();
           saveGame();
           showFoodGetMessage(result);
@@ -1625,12 +1726,13 @@
         { label: '料理チャンス発動', run: () => {
           requireGame();
           activateCookingChance();
-          addMoves(skillMoveAmount());
+          addMoves(skillMoveAmount('cookingChance'));
           renderAll();
           saveGame();
           showCookingChanceMessage();
         } },
         { label: '次回成功100%', run: () => { requireGame(); debugForceCookingSuccess = true; persist('次回成功100%'); } },
+        { label: '完成食数＋10', run: () => advanceEndlessDishes(10) },
         { label: '日曜朝へ', run: () => jumpToMeal(18) },
         { label: '21食目へ', run: () => jumpToMeal(20) },
         { label: 'ゲーム終了', tone: 'danger', run: () => { requireGame(); endGame('manual_end'); } }
@@ -1643,19 +1745,6 @@
     if (tile) playMove(Number(tile.dataset.index));
   });
 
-  additionalIngredientsEl.addEventListener('click', event => {
-    const item = event.target.closest('[data-lock-food]');
-    if (!item || !started || ended || busy || cooking) return;
-    const id = item.dataset.lockFood;
-    if (!(pot[id] > 0)) return;
-    if (lockedIngredients.has(id)) {
-      lockedIngredients.delete(id);
-    } else lockedIngredients.add(id);
-    renderAll();
-    saveGame();
-  });
-
-  lockAllIngredientsButton.addEventListener('click', lockAllAdditionalIngredients);
   cookButton.addEventListener('click', cookRecipe);
   $('bagCookButton').addEventListener('click', cookRecipe);
   shuffleButton.addEventListener('click', performShuffle);
@@ -1715,9 +1804,10 @@
   window.addEventListener('pagehide', saveGame);
 
   migrateModeSavesToSingleSave();
-  activeMode = 'endless';
-  currentCategory = null;
-  activeRecipe = recipeAtDifficulty(RECIPES.find(recipe => Object.keys(recipe.originalNeeds).length === 1) || RECIPES[0], 0, 'endless');
+  activeMode = 'normal';
+  const previewRecipe = RECIPES.find(recipe => Object.keys(recipe.originalNeeds).length === 1) || RECIPES[0];
+  currentCategory = previewRecipe.category;
+  activeRecipe = recipeAtDifficulty(previewRecipe, 0, 'normal');
   activePalette = choosePalette(activeRecipe);
   cells = buildBoard();
   renderAll();
