@@ -2281,6 +2281,7 @@
         const gain = withFb(recovered);
         if (gain > 0) addScore(gain);
         logEvent(`📣 げんきオールS発動 → 小さい食材を${targets.length}個おかたづけ`, gain, true);
+        updateSkillChips(); // 「きょうは出動ずみ」表示を即反映（次の合体を待たない）
         showBanner(`📣 げんきオールS発動！ 小さい食材を${targets.length}個おかたづけ！`);
         addPopup(WORLD.w / 2, 200, "がんばれ〜！", "#35804d", 22);
         flashChip(chipCheer);
