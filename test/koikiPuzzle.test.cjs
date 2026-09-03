@@ -844,6 +844,12 @@ test('シューティングのなべぶたは発動後30秒のクールダウン
   assert.match(shooterSource, /使ったあとは30秒待ち。/);
 });
 
+test('シューティングのXシェアはボス戦敗北時だけボス食材名を添える', () => {
+  assert.match(shooterSource, /const bossName = bossRef \? bossRef\.def\.title\.replace\(\/\^ぬしの巨大\/, ""\) : "";/);
+  assert.match(shooterSource, /const bossDefeatText = bossName \? ` \$\{bossName\}にやられた。` : "";/);
+  assert.match(shooterSource, /タイトル「\$\{currentTitle\}」\）\$\{bossDefeatText\} #食材とれるかな/);
+});
+
 test('シューティングOGPは1200x630の大画像カードを使用する', () => {
   const image = fs.readFileSync(path.join(projectRoot, 'img/ogp/dopagaki-ogp.png'));
   assert.equal(image.readUInt32BE(16), 1200);

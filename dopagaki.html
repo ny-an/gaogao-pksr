@@ -3341,7 +3341,9 @@
         resultAch.innerHTML = achNames.length
           ? `かくとくしたタイトル ${achNames.length}こ：<strong>${achNames.slice(0, 5).join("、")}</strong>${achNames.length > 5 ? ` ほか${achNames.length - 5}こ` : ""}`
           : `いまのタイトル：${currentTitle}`;
-        const shareText = `食材とれるかな！！ でエナジー ${fmt(score)} ためたよ！（${totalMeals}食かんせい・タイトル「${currentTitle}」） #食材とれるかな`;
+        const bossName = bossRef ? bossRef.def.title.replace(/^ぬしの巨大/, "") : "";
+        const bossDefeatText = bossName ? ` ${bossName}にやられた。` : "";
+        const shareText = `食材とれるかな！！ でエナジー ${fmt(score)} ためたよ！（${totalMeals}食かんせい・タイトル「${currentTitle}」）${bossDefeatText} #食材とれるかな`;
         xShare.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(SHARE_URL)}`;
         resultOverlay.hidden = false;
         sfxDamage();
