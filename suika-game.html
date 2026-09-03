@@ -116,6 +116,7 @@
       /* @GaoGaoPuuun提供の操作アイコン（koiki-puzzleと同じ） */
       background: url("img/icons/gaogaopuuun-koiki.png") center / cover no-repeat;
       box-shadow: 0 6px 0 rgba(216, 142, 57, .18);
+      touch-action: manipulation;
     }
 
     h1 {
@@ -1068,7 +1069,7 @@
 <body>
   <div class="page">
     <div class="topbar">
-      <a class="back" href="index.html">← トップへ</a>
+      <a class="back" href="games.html">← ゲーム一覧へ</a>
       <div class="topbar-actions">
         <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
         <button type="button" class="chip-button" id="historyButton" aria-label="このゲームのきろく">きろく</button>
@@ -1077,7 +1078,7 @@
     </div>
 
     <header class="title">
-      <div class="title-mascot" aria-hidden="true"></div>
+      <div class="title-mascot" id="mascot" aria-hidden="true"></div>
       <h1><small id="rankLabel" role="button" tabindex="0" aria-label="かくとくしたタイトルいちらんをひらく">めざせ でんせつ</small>ごちそうできるかな！！</h1>
     </header>
 
@@ -2913,6 +2914,22 @@
       });
 
       restartButton.addEventListener("click", () => { ensureAudio(); reset(); });
+
+      // 隠し機能: マスコットを1.5秒以内に5連打で食材をシャッフル（除外セットを引き直して新ゲーム）
+      let mascotTaps = [];
+      document.getElementById("mascot").addEventListener("pointerdown", (ev) => {
+        ev.preventDefault();
+        const now = performance.now();
+        mascotTaps = mascotTaps.filter((t) => now - t < 1500);
+        mascotTaps.push(now);
+        if (mascotTaps.length < 5) return;
+        mascotTaps = [];
+        ensureAudio();
+        reset();
+        showBanner("🔀 食材をシャッフルした！");
+        spawnParticles(WORLD.w / 2, 200, "#f2c060", 24, 220);
+        sfx.skill();
+      });
 
       rulesButton.addEventListener("click", () => rulesDialog.showModal());
       rulesClose.addEventListener("click", () => rulesDialog.close());
