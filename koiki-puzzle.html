@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#fff7e5">
   <meta name="description" content="食材をそろえて料理を完成させる、かんたんお料理パズル。">
@@ -1527,17 +1527,17 @@
     .cook-celebration.super-success .cook-card { border-color: #a4e8ff; box-shadow: 0 0 0 8px rgba(255,255,255,.18), 0 26px 70px rgba(24,17,73,.45); }
 
     @media (max-width: 520px) {
-      body.game-started .page { padding-bottom: 78px; }
+      body.v2-shell.game-started .page { padding-bottom: calc(128px + env(safe-area-inset-bottom)); }
       body.game-started .game-card { padding: 10px; }
       body.game-started .hud { margin-bottom: 7px; }
       body.game-started .best-record { margin-bottom: 6px; }
       body.game-started .bonus-status { margin-bottom: 6px; }
       body.game-started .order { margin-bottom: 7px; padding-block: 8px; }
-      body.game-started .actions.v2-actions {
+      body.v2-shell.game-started .actions.v2-actions {
         position: fixed;
         z-index: 18;
         left: 50%;
-        bottom: max(7px, env(safe-area-inset-bottom));
+        bottom: calc(52px + env(safe-area-inset-bottom));
         grid-template-columns: minmax(0, 1fr) auto auto;
         width: min(calc(100% - 18px), 502px);
         margin: 0;
@@ -1611,7 +1611,7 @@
     }
   </style>
 </head>
-<body>
+<body class="v2-shell">
 <div class="page">
   <nav class="topbar" aria-label="ページ操作">
     <a class="back" href="games.html">← ゲーム一覧へ</a>

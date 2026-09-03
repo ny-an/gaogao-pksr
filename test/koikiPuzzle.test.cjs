@@ -175,7 +175,10 @@ test('あそびかたは3ステップと短いTipsに圧縮し詳細を折りた
 
 test('SPの主要操作は下部1列ドックで常に見つけられる', () => {
   assert.match(source, /id="startButton" type="button" aria-label="モードを選ぶ">モード<\/button>/);
-  assert.match(source, /body\.game-started \.actions\.v2-actions \{[\s\S]*?position: fixed;[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto auto;/);
+  assert.match(source, /<body class="v2-shell">/);
+  assert.match(source, /viewport-fit=cover/);
+  assert.match(source, /body\.v2-shell\.game-started \.page \{ padding-bottom: calc\(128px \+ env\(safe-area-inset-bottom\)\); \}/);
+  assert.match(source, /body\.v2-shell\.game-started \.actions\.v2-actions \{[\s\S]*?position: fixed;[\s\S]*?bottom: calc\(52px \+ env\(safe-area-inset-bottom\)\);[\s\S]*?grid-template-columns: minmax\(0, 1fr\) auto auto;/);
   assert.match(source, /body\.game-started \.actions\.v2-actions \.cook-button \{[\s\S]*?grid-column: auto;/);
   assert.match(source, /\.cook-button:disabled \{[\s\S]*?opacity: 1;/);
 });
