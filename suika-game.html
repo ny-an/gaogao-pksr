@@ -2392,14 +2392,7 @@
             currentTier: current ? current.tier : null,
             order: order ? { name: order.recipe.name, got: order.got } : null,
             history,
-            fruits: fruits.map((f) => ({
-              t: f.tier,
-              x: Math.round(f.x * 10) / 10,
-              y: Math.round(f.y * 10) / 10,
-              a: Math.round(f.angle * 1000) / 1000,
-              en: f.entered ? 1 : 0,
-              c: f.cheat ? 1 : 0,
-            })),
+            // 盤面（食材の配置）は保存しない: 物理状態の完全復元は無理なので、再開時は空の盤面から
           }));
         } catch (_) {}
       }
@@ -2411,7 +2404,7 @@
       function loadGame() {
         let d;
         try { d = JSON.parse(localStorage.getItem("kabocha.save") || "null"); } catch (_) { return false; }
-        if (!d || d.v !== 1 || !Array.isArray(d.chain) || !Array.isArray(d.fruits)) return false;
+        if (!d || d.v !== 1 || !Array.isArray(d.chain)) return false;
         if (d.chain.length !== FOOD_POOL.length - EXCLUDE_COUNT) return false;
         if (!d.chain.every((i) => Number.isInteger(i) && i >= 0 && i < FOOD_POOL.length)) return false;
         chain = d.chain;
@@ -2426,20 +2419,9 @@
         gameDishes = Math.max(0, Math.floor(Number(d.gameDishes) || 0));
         history = Array.isArray(d.history) ? d.history.slice(-HISTORY_MAX) : [];
         nextTier = Number.isInteger(d.nextTier) && d.nextTier >= 0 && d.nextTier <= MAX_TIER ? d.nextTier : randTier();
-        fruits = [];
+        fruits = []; // 盤面は復元しない（空からやり直し）
         refreshActiveShapes();
-        for (const s of d.fruits) {
-          if (!Number.isInteger(s.t) || s.t < 0 || s.t > MAX_TIER) continue;
-          if (!isFinite(s.x) || !isFinite(s.y)) continue;
-          const nf = makeFruit(s.t, s.x, s.y);
-          nf.angle = isFinite(s.a) ? s.a : 0;
-          nf.av = 0;
-          nf.entered = !!s.en;
-          nf.cheat = !!s.c;
-          nf.age = 5;
-          fruits.push(nf);
-        }
-        current = Number.isInteger(d.currentTier) && d.currentTier >= 0 && d.currentTier <= MAX_TIER
+        current =Number.isInteger(d.currentTier) && d.currentTier >= 0 && d.currentTier <= MAX_TIER
           ? { tier: d.currentTier }
           : null;
         if (!current) cooldown = 0.3;
@@ -3273,15 +3255,15 @@
       let savedData = null;
       try {
         const d = JSON.parse(savedRaw || "null");
-        if (d && d.v === 1 && Array.isArray(d.fruits)) savedData = d;
+        if (d && d.v === 1 && Array.isArray(d.chain)) savedData = d;
       } catch (_) {}
       if (savedData) {
         try { localStorage.setItem("kabocha.save", savedRaw); } catch (_) {}
         const resumeDialog = document.getElementById("resumeDialog");
         document.getElementById("resumeInfo").innerHTML =
           `エナジー <strong>${fmt(Math.floor(Number(savedData.score) || 0))}</strong> ／ ` +
-          `じかん <strong>${timeTag(Math.max(0, Number(savedData.playTime) || 0))}</strong> ／ ` +
-          `食材 <strong>${savedData.fruits.length}</strong>個`;
+          `じかん <strong>${timeTag(Math.max(0, Number(savedData.playTime) || 0))}</strong><br>` +
+          `<span style="font-size:.66rem">（盤面はまっさらになるよ。エナジーやごちそうはそのまま）</span>`;
         const applyResume = () => {
           if (loadGame()) {
             if (scale > 0 && canvas.width > 0) {
