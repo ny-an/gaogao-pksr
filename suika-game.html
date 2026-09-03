@@ -1459,7 +1459,8 @@
       let dropQueue = [];
       let dropQueueTimer = 0;
       let rainGrace = 0;          // この間は溢れ判定を止める
-      let chargeMTimer = 0;       // 隠し機能「エナジーチャージM？」の残り秒数（食材が降り続ける）
+      const CHARGE_M_SECONDS = 7; // 隠し機能「エナジーチャージM？」の効果時間
+      let chargeMTimer = 0;       // その残り秒数（食材が降り続ける）
 
       // ちゅうもん状態
       let order = null;          // { recipe, got: { poolIdx: n } }
@@ -2344,6 +2345,7 @@
         dropQueue = [];
         rainGrace = 0;
         chargeMTimer = 0;
+        chipCharge.style.setProperty("--meter-progress", "0%");
         particles = [];
         popups = [];
         score = 0;
@@ -2826,11 +2828,17 @@
         }
         if (rainGrace > 0) rainGrace -= dt;
 
-        // 隠し機能「エナジーチャージM？」: 10秒間、りんごと牛乳だけを高速で降らせ続ける
+        // 隠し機能「エナジーチャージM？」: CHARGE_M_SECONDS のあいだ、りんごと牛乳だけを高速で降らせ続ける
         if (chargeMTimer > 0) {
           chargeMTimer -= dt;
           if (dropQueue.length < 2) dropQueue.push(Math.random() < 0.5 ? 0 : 1); // chain[0]=リンゴ, chain[1]=ミルク（除外対象外）
-          if (chargeMTimer <= 0) { chargeMTimer = 0; updateSkillChips(); }
+          // 残り時間をチップ背景のメーターで見せる（減っていく）
+          chipCharge.style.setProperty("--meter-progress", `${Math.max(0, chargeMTimer / CHARGE_M_SECONDS) * 100}%`);
+          if (chargeMTimer <= 0) {
+            chargeMTimer = 0;
+            chipCharge.style.setProperty("--meter-progress", "0%");
+            updateSkillChips();
+          }
         }
 
         // 押しっぱなしで連続ドロップ
@@ -3065,25 +3073,30 @@
         dropQueueTimer = 0;
         rainGrace = RAIN_COUNT * RAIN_INTERVAL + 2.5; // 降り終わって2.5秒は溢れ判定をしない
         ensureAudio();
-        showBanner(`🌧 食材を${RAIN_COUNT}こ ふらせた！`);
-        logEvent(`🌧 食材を${RAIN_COUNT}こ ふらせた`, 0, true);
+        showBanner("なぜか食材がわいてきた！");
+        logEvent(`なぜか食材がわいてきた（${RAIN_COUNT}こ）`, 0, true);
         sfx.feast();
         unlockHiddenTitle("rain");
       }
 
-      // 左下10連打: 扇風機。盤面の食材をぜんぶ吹き飛ばす（表示はなにも出さない）
+      // 左下10連打: 扇風機。盤面の食材をぜんぶ吹き飛ばす。10回に1度は強風
+      let fanCount = 0;
       function fanBlast() {
         if (gameOver || fruits.length === 0) return;
+        fanCount += 1;
+        const strong = fanCount % 10 === 0;
+        const power = strong ? 1.9 : 1;
         for (const f of fruits) {
-          const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.6; // 上向きの扇状
-          const sp = 380 + Math.random() * 320;
+          const ang = -Math.PI / 2 + (Math.random() - 0.5) * (strong ? 2.2 : 1.6); // 上向きの扇状
+          const sp = (380 + Math.random() * 320) * power;
           f.vx += Math.cos(ang) * sp;
           f.vy += Math.sin(ang) * sp;
-          f.av += (Math.random() - 0.5) * 8;
+          f.av += (Math.random() - 0.5) * 8 * power;
         }
-        shake = Math.max(shake, 8);
+        shake = Math.max(shake, strong ? 16 : 8);
         ensureAudio();
-        tone(90, 0.35, { type: "sawtooth", gain: 0.05, slide: 260 });
+        tone(90, strong ? 0.6 : 0.35, { type: "sawtooth", gain: strong ? 0.09 : 0.05, slide: strong ? 420 : 260 });
+        showBanner(strong ? "強風がふいた！" : "風がふいてきた！");
         unlockHiddenTitle("fan");
       }
 
@@ -3120,13 +3133,14 @@
         ev.preventDefault();
         if (!chargeTaps()) return;
         if (gameOver || chargeMTimer > 0) return;
-        chargeMTimer = 10;
-        rainGrace = Math.max(rainGrace, 10 + 2.5);
+        chargeMTimer = CHARGE_M_SECONDS;
+        rainGrace = Math.max(rainGrace, CHARGE_M_SECONDS + 2.5);
+        chipCharge.style.setProperty("--meter-progress", "100%");
         updateSkillChips();
         flashChip(chipCharge);
         ensureAudio();
         showBanner("⚡ エナジーチャージM？発動！");
-        logEvent("⚡ エナジーチャージM？発動！（10びょう 食材が降りつづける）", 0, true);
+        logEvent(`⚡ エナジーチャージM？発動！（${CHARGE_M_SECONDS}びょう 食材が降りつづける）`, 0, true);
         sfx.skill();
         unlockHiddenTitle("chargeM");
       });
