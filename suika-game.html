@@ -1453,9 +1453,12 @@
       let gameDishes = 0;
       const HISTORY_MAX = 200;
 
-      // 隠し機能「1000個おとし」の投下待ち行列（tierの配列）
+      // 隠し機能「200個ふらせ」の投下待ち行列（tierの配列）
+      const RAIN_COUNT = 200;
+      const RAIN_INTERVAL = 0.04; // 秒（25個/秒）
       let dropQueue = [];
       let dropQueueTimer = 0;
+      let rainGrace = 0;          // この間は溢れ判定を止める
 
       // ちゅうもん状態
       let order = null;          // { recipe, got: { poolIdx: n } }
@@ -2252,7 +2255,7 @@
         let recovered = 0;
         for (const f of targets) {
           f.dead = true;
-          recovered += foodOf(f.tier).energy; // 回収した食材も基礎エナジー分
+          if (!f.cheat) recovered += foodOf(f.tier).energy; // 回収した食材も基礎エナジー分（降らせた分は除く）
           spawnParticles(f.x, f.y, foodOf(f.tier).color, 8, 140);
         }
         fruits = fruits.filter((f) => !f.dead);
@@ -2287,6 +2290,7 @@
           dead: false,
           entered: false, // 一度ラインの下に入ったか
           age: 0,
+          cheat: false,   // 隠し機能で降らせた系譜（スコア等に入れない）
           _wc: null,      // ワールド座標の円キャッシュ
         };
       }
@@ -2320,6 +2324,7 @@
         bestBefore = best;
         fruits = [];
         dropQueue = [];
+        rainGrace = 0;
         particles = [];
         popups = [];
         score = 0;
@@ -2371,6 +2376,7 @@
               y: Math.round(f.y * 10) / 10,
               a: Math.round(f.angle * 1000) / 1000,
               en: f.entered ? 1 : 0,
+              c: f.cheat ? 1 : 0,
             })),
           }));
         } catch (_) {}
@@ -2407,6 +2413,7 @@
           nf.angle = isFinite(s.a) ? s.a : 0;
           nf.av = 0;
           nf.entered = !!s.en;
+          nf.cheat = !!s.c;
           nf.age = 5;
           fruits.push(nf);
         }
@@ -2478,6 +2485,27 @@
         const mx = (a.x + b.x) / 2;
         const my = (a.y + b.y) / 2;
         const f = foodOf(a.tier);
+
+        // 隠し機能で降らせた系譜（cheat）: 合体と演出だけで、スコア・注文・スキル・履歴には入れない
+        if (a.cheat || b.cheat) {
+          if (a.tier === MAX_TIER) {
+            spawnParticles(mx, my, f.color, 30, 280);
+            sfx.feast();
+            return;
+          }
+          const t = a.tier + 1;
+          recordDiscovery(chain[t]);
+          const nf = makeFruit(t, mx, my, (a.vx + b.vx) * 0.25, (a.vy + b.vy) * 0.25 - 40);
+          nf.cheat = true;
+          nf.entered = a.entered || b.entered;
+          const rr = nf.shape.boundR;
+          nf.x = Math.min(Math.max(nf.x, rr), WORLD.w - rr);
+          nf.y = Math.min(nf.y, WORLD.h - rr);
+          fruits.push(nf);
+          spawnParticles(mx, my, f.color, 6 + t, 120 + t * 12);
+          sfx.merge(t);
+          return;
+        }
 
         if (comboTimer > 0) { combo += 1; } else { combo = 1; chargeFired = false; }
         comboTimer = 1.2;
@@ -2762,20 +2790,22 @@
           }
         }
 
-        // 隠し機能「1000個おとし」: 大きいものから順に上から降らせる
+        // 隠し機能「200個ふらせ」: 超高速で上からランダム投下（1フレームに複数個も可）
         if (dropQueue.length) {
           dropQueueTimer -= dt;
-          if (dropQueueTimer <= 0) {
-            dropQueueTimer = 0.18;
+          while (dropQueueTimer <= 0 && dropQueue.length) {
+            dropQueueTimer += RAIN_INTERVAL;
             const t = dropQueue.shift();
             const bound = activeShapes[t].boundR;
-            const nf = makeFruit(t, bound + 4 + Math.random() * (WORLD.w - bound * 2 - 8), -bound - 10);
+            const nf = makeFruit(t, bound + 4 + Math.random() * (WORLD.w - bound * 2 - 8), -bound - 10 - Math.random() * 40);
+            nf.vx = (Math.random() - 0.5) * 120;
             nf.angle = (Math.random() - 0.5) * 0.6;
+            nf.cheat = true;
             fruits.push(nf);
-            recordDiscovery(chain[t]);
-            sfx.drop();
+            if (dropQueue.length % 5 === 0) sfx.drop();
           }
         }
+        if (rainGrace > 0) rainGrace -= dt;
 
         // 押しっぱなしで連続ドロップ
         if (aiming) {
@@ -2796,6 +2826,10 @@
           if (top > LINE_Y) f.entered = true;
           const slow = Math.abs(f.vy) < 120;
           if ((f.entered || f.age > 2.5) && slow && top < LINE_Y) danger = true;
+        }
+        if (dropQueue.length || rainGrace > 0) {
+          danger = false; // 「200個ふらせ」の最中と直後は溢れ判定をしない
+          warn = 0;
         }
         if (danger) {
           warn += dt;
@@ -2996,23 +3030,17 @@
         };
       }
 
-      // 右下10連打: 盤面が空なら「食材を1000個落として全部合体した状態」の山を降らせる（スコアは入らない）
-      function thousandDrops() {
-        if (gameOver || fruits.length > 0 || dropQueue.length) return;
-        // 1000個ぶんを「完全合体モデル」で圧縮（2個そろうたび1段上へ繰り上げ）
-        const counts = new Array(MAX_TIER + 1).fill(0);
-        for (let i = 0; i < 1000; i++) {
-          let t = randTier();
-          counts[t] += 1;
-          while (t < MAX_TIER && counts[t] >= 2) { counts[t] -= 2; t += 1; counts[t] += 1; }
-        }
-        if (counts[MAX_TIER] > 1) counts[MAX_TIER] = 1; // シッポ×2の即消滅ボーナスは渡さない
+      // 右下10連打: 食材を200個、超高速で自動投下する（いつでも発動可）。
+      // 降らせた食材とその合体の系譜（cheat）はスコア・注文・スキルゲージに入らない。
+      function rainDrops() {
+        if (gameOver || dropQueue.length) return;
         dropQueue = [];
-        for (let t = MAX_TIER; t >= 0; t--) for (let c = 0; c < counts[t]; c++) dropQueue.push(t);
+        for (let i = 0; i < RAIN_COUNT; i++) dropQueue.push(randTier());
         dropQueueTimer = 0;
+        rainGrace = RAIN_COUNT * RAIN_INTERVAL + 2.5; // 降り終わって2.5秒は溢れ判定をしない
         ensureAudio();
-        showBanner(`🎁 食材を1000こ おとした！（${dropQueue.length}こに合体）`);
-        logEvent(`🎁 食材を1000こ おとした → ${dropQueue.length}こに合体`, 0, true);
+        showBanner(`🌧 食材を${RAIN_COUNT}こ ふらせた！`);
+        logEvent(`🌧 食材を${RAIN_COUNT}こ ふらせた`, 0, true);
         sfx.feast();
         unlockHiddenTitle();
       }
@@ -3039,7 +3067,7 @@
         if (ev.target.closest("button, a, canvas, dialog, input, .stat, .guide, .skill-chip, .order, .title, .topbar")) return;
         if (ev.clientY < window.innerHeight * 0.7) return;
         if (ev.clientX >= window.innerWidth * 0.7) {
-          if (cornerRightTaps()) thousandDrops();
+          if (cornerRightTaps()) rainDrops();
         } else if (ev.clientX <= window.innerWidth * 0.3) {
           if (cornerLeftTaps()) fanBlast();
         }
