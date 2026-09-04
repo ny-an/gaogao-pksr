@@ -33,6 +33,15 @@ function v2FunctionSource(name) {
   return v2Source.slice(start, end + 5);
 }
 
+function suikaFunctionSource(name) {
+  const start = suikaSource.indexOf(`function ${name}(`);
+  assert.notEqual(start, -1, `${name} is missing from suika game`);
+  const next = suikaSource.indexOf('\n      function ', start + 1);
+  const end = next === -1 ? suikaSource.indexOf('\n      // ----', start + 1) : next;
+  assert.notEqual(end, -1, `${name} is incomplete in suika game`);
+  return suikaSource.slice(start, end);
+}
+
 function v2SpawnFunctions(recipe, pot, activePalette) {
   return vm.runInNewContext(`(() => {
     ${v2FunctionSource('ingredientShortages')}
@@ -862,6 +871,164 @@ test('シューティングのXシェアはボス戦敗北時だけボス食材�
 
 test('ごちそうできるかなのXシェアは今回完成した料理数を添える', () => {
   assert.match(suikaSource, /料理 \$\{gameDishes\}品・いちばん大きな食材は \$\{topName\}/);
+});
+
+test('ごちそうできるかなは盤面と攻略状態をV2スナップショットへ保存する', () => {
+  const fruit = suikaFunctionSource('savedFruit');
+  const snapshot = suikaFunctionSource('gameSnapshot');
+
+  for (const field of ['tier', 'x', 'y', 'vx', 'vy', 'angle', 'av', 'entered', 'age', 'cheat']) {
+    assert.match(fruit, new RegExp(`\\b${field}\\b`));
+  }
+  assert.doesNotMatch(fruit, /\bshape\b|\b_wc\b|\bdead\b|\bid\b/);
+  assert.match(snapshot, /v: SAVE_VERSION/);
+  assert.match(snapshot, /fruits\.filter\(\(fruit\) => !fruit\.dead\)\.map\(savedFruit\)/);
+  for (const field of [
+    'chain', 'fruits', 'score', 'maxTierReached', 'combo', 'comboTimer', 'warn', 'cooldown',
+    'dropX', 'foodGauge', 'cheerUsed', 'chargeFired', 'playTime', 'mergeCount', 'gameDishes',
+    'nextTier', 'currentTier', 'order', 'history', 'dropQueue', 'dropQueueTimer', 'rainGrace',
+    'chargeMTimer'
+  ]) assert.match(snapshot, new RegExp(`\\b${field}\\b`));
+  assert.match(suikaSource, /const SAVE_VERSION = 2;/);
+});
+
+test('ごちそうできるかなは破損セーブと旧V1を盤面なしで再開しない', () => {
+  const parse = suikaFunctionSource('parseSavedGame');
+  assert.match(parse, /data\.v !== SAVE_VERSION/);
+  assert.match(parse, /data\.fruits\.length > MAX_SAVED_FRUITS/);
+  assert.match(suikaSource, /const finiteNumber = \(value\) => typeof value === "number" && Number\.isFinite\(value\)/);
+  assert.match(parse, /Math\.abs\(fruit\.x\) > WORLD\.w \* 10/);
+  assert.match(parse, /!validTier\(fruit\.tier\)/);
+  assert.match(parse, /RECIPES\.find/);
+  assert.match(parse, /got < 0 \|\| got > need/);
+  assert.match(suikaSource, /const savedData = parseSavedGame\(savedRaw\)/);
+  assert.doesNotMatch(suikaSource, /d\.v === 1/);
+});
+
+test('ごちそうできるかなは保存した盤面を物理状態ごと再構築する', () => {
+  const load = suikaFunctionSource('loadGame');
+  assert.match(load, /fruitSeq = 0/);
+  assert.match(load, /id: fruitSeq\+\+/);
+  assert.match(load, /shape: activeShapes\[fruit\.tier\]/);
+  assert.match(load, /_wc: null/);
+  for (const field of ['x', 'y', 'vx', 'vy', 'angle', 'av', 'entered', 'age', 'cheat']) {
+    assert.match(load, new RegExp(`${field}: fruit\\.${field}`));
+  }
+  assert.match(load, /order = \{ recipe, got: \{ \.\.\.data\.order\.got \} \}/);
+  assert.match(load, /dropQueue = \[\.\.\.data\.dropQueue\]/);
+  assert.match(load, /chargeMTimer = data\.chargeMTimer/);
+});
+
+test('ごちそうできるかなは10秒定期保存と操作後デバウンス保存を行う', () => {
+  assert.match(suikaSource, /const SAVE_INTERVAL = 10;/);
+  assert.match(suikaSource, /const SAVE_DEBOUNCE = 0\.3;/);
+  assert.match(suikaSource, /if \(saveDirty\)[\s\S]*?saveDebounce -= dt;[\s\S]*?saveGame\(\)/);
+  assert.match(suikaSource, /if \(saveAcc >= SAVE_INTERVAL\) saveGame\(\)/);
+  assert.match(suikaFunctionSource('drop'), /scheduleSave\(\)/);
+  assert.match(suikaFunctionSource('physicsStep'), /if \(mergePairs\.length\)[\s\S]*?scheduleSave\(\)/);
+  assert.match(suikaFunctionSource('buildOrder'), /scheduleSave\(\)/);
+  assert.match(suikaFunctionSource('trySkillCheer'), /scheduleSave\(\)/);
+  assert.match(suikaSource, /visibilitychange[\s\S]*?else if \(!resumePending && !startPending\) saveGame\(\)/);
+  assert.match(suikaSource, /pagehide", \(\) => \{ if \(!resumePending && !startPending\) saveGame\(\); \}/);
+});
+
+test('ごちそうできるかなの再開と最初からは盤面復元と長期記録維持を明示する', () => {
+  assert.match(suikaSource, /盤面もそのまま再開します/);
+  assert.match(suikaSource, /料理 <strong>\$\{savedData\.gameDishes\}<\/strong>品/);
+  assert.match(suikaSource, /loadGame\(savedData\)/);
+  assert.match(suikaSource, /resumeReset"\)\.addEventListener\("click",[\s\S]*?startNewGame\(\)/);
+  assert.match(suikaFunctionSource('reset'), /clearSave\(\)/);
+  assert.doesNotMatch(suikaFunctionSource('reset'), /kabocha\.best|kabocha\.recipeLv|kabocha\.dishes|kabocha\.secrets|kabocha\.hidden/);
+});
+
+test('ごちそうできるかなは確認後だけ固有の記録キーを全消去する', () => {
+  const resetAll = suikaFunctionSource('resetAllRecords');
+  assert.match(suikaSource, /id="historyResetButton">記録をりせっと<\/button>/);
+  assert.match(suikaSource, /すべての記録をりせっとする？/);
+  assert.match(suikaSource, /id="resetRecordsNo">やめる<\/button>/);
+  assert.match(suikaSource, /id="resetRecordsYes">りせっと<\/button>/);
+  assert.match(suikaSource, /resetRecordsDialog\.addEventListener\("cancel"[\s\S]*?cancelRecordsReset\(\)/);
+  assert.match(suikaSource, /ev\.target === resetRecordsDialog\) cancelRecordsReset\(\)/);
+  for (const key of [
+    'kabocha.save', 'kabocha.best', 'kabocha.recipeLv', 'kabocha.dishes',
+    'kabocha.secrets', 'kabocha.hidden'
+  ]) assert.match(suikaSource, new RegExp(`"${key.replace('.', '\\.') }"`));
+  assert.doesNotMatch(suikaSource, /localStorage\.clear\(/);
+  assert.doesNotMatch(resetAll, /kabocha\.muted/);
+  assert.match(resetAll, /best = 0[\s\S]*?recipeLv = \{\}[\s\S]*?dishesCooked = 0/);
+  assert.match(resetAll, /hiddenTitles\.clear\(\)[\s\S]*?discovered\.clear\(\)/);
+  assert.match(resetAll, /startNewGame\(\)/);
+});
+
+test('ごちそうできるかなはゲーム中に1〜60分の整数タイマーを設定・編集・解除できる', () => {
+  const open = suikaFunctionSource('openTimeLimitDialog');
+  assert.match(suikaSource, /id="timeLimitDialog"[\s\S]*?タイマーをセット/);
+  assert.match(suikaSource, /id="timeLimitInput"[^>]*min="1"[^>]*max="60"[^>]*step="1"/);
+  assert.doesNotMatch(suikaSource, /お試しは「0\.1分」で6秒/);
+  assert.match(open, /active \? "残り時間を変更" : "タイマーをセット"/);
+  assert.match(open, /timeLimitInput\.value = String\(Math\.ceil\(remaining \/ 60\)\)/);
+  assert.match(suikaSource, /timeLimitMeter\.addEventListener\("click"[\s\S]*?openTimeLimitDialog\(\)/);
+  assert.match(suikaSource, /!Number\.isInteger\(minutes\)/);
+  assert.match(suikaSource, /timeLimitSeconds = playTime \+ seconds/);
+  assert.match(suikaSource, /id="timeLimitClear" hidden>タイマーを解除<\/button>/);
+  assert.match(suikaSource, /timeLimitClear\.addEventListener\("click"[\s\S]*?timeLimitSeconds = null/);
+  assert.match(suikaFunctionSource('startNewGame'), /reset\(\)/);
+  assert.doesNotMatch(suikaFunctionSource('startNewGame'), /openTimeLimitDialog\(\)/);
+  assert.match(suikaSource, /const MIN_TIME_LIMIT_SECONDS = 60;/);
+  assert.match(suikaSource, /const MAX_TIME_LIMIT_SECONDS = 60 \* 60;/);
+});
+
+test('ごちそうできるかなの残り時間はおわるボタン直下へ小さく浮かせる', () => {
+  assert.match(suikaSource, /class="end-control">\s*<button[^>]*id="endButton">おわる<\/button>\s*<button[^>]*class="time-limit-meter"/);
+  assert.match(suikaSource, /\.end-control \{ position: relative; display: flex; \}/);
+  assert.match(suikaSource, /\.time-limit-meter \{[\s\S]*?position: absolute;[\s\S]*?top: calc\(100% \+ 3px\);[\s\S]*?right: 0;[\s\S]*?font-size: \.52rem;/);
+  assert.match(suikaSource, /\.time-limit-meter > span \{ font-size: \.62rem; line-height: 1; \}/);
+  assert.match(suikaFunctionSource('updateTimeLimitDisplay'), /timeLimitValue\.hidden = !active[\s\S]*?タイマーをセット/);
+});
+
+test('ごちそうできるかなは制限時間と経過時間を保存して再開する', () => {
+  const snapshot = suikaFunctionSource('gameSnapshot');
+  const parse = suikaFunctionSource('parseSavedGame');
+  const load = suikaFunctionSource('loadGame');
+  assert.match(snapshot, /timeLimitSeconds/);
+  assert.match(parse, /data\.timeLimitSeconds !== undefined && data\.timeLimitSeconds !== null/);
+  assert.match(parse, /timeLimitSeconds: savedTimeLimit/);
+  assert.match(load, /playTime = data\.playTime/);
+  assert.match(load, /timeLimitSeconds = data\.timeLimitSeconds/);
+  assert.match(load, /updateTimeLimitDisplay\(\)/);
+});
+
+test('ごちそうできるかなは時間切れで終了か続行を選べる', () => {
+  const prompt = suikaFunctionSource('openTimeUpDialog');
+  const update = suikaFunctionSource('update');
+  assert.match(suikaSource, /id="timeUpDialog"[\s\S]*?時間になりました[\s\S]*?id="timeUpContinue">つづける<\/button>[\s\S]*?id="timeUpEnd">おわる<\/button>/);
+  assert.match(prompt, /timeUpPending = true[\s\S]*?timeUpDialog\.showModal\(\)/);
+  assert.match(update, /playTime >= timeLimitSeconds[\s\S]*?openTimeUpDialog\(\)/);
+  assert.match(suikaSource, /timeUpContinue"\)\.addEventListener\("click"[\s\S]*?timeLimitSeconds = null[\s\S]*?scheduleSave\(\)/);
+});
+
+test('ごちそうできるかなは時間切れ終了を選ぶと最初から巨大なネギを落として最終加点後に終了する', () => {
+  const begin = suikaFunctionSource('beginTimeLimitEnding');
+  const ending = suikaFunctionSource('updateTimeLimitEnding');
+  const collisions = suikaFunctionSource('resolveDoomLeekCollisions');
+  const gameOver = suikaFunctionSource('triggerGameOver');
+  assert.match(begin, /tier: chain\.indexOf\(LEEK_POOL_IDX\)[\s\S]*?scale: DOOM_LEEK_SCALE[\s\S]*?impactTime: null/);
+  assert.match(begin, /ゴゴゴゴゴ…/);
+  assert.match(suikaSource, /const DOOM_LEEK_SCALE = 3\.1;/);
+  assert.match(suikaFunctionSource('updateDoomLeekWorldCircles'), /source\.r \* doomLeek\.scale/);
+  assert.match(collisions, /updateWorldCircles\(fruit\)/);
+  assert.match(collisions, /fruit\.x \+= nx \* overlap/);
+  assert.match(collisions, /relativeNormalVelocity/);
+  assert.match(collisions, /fruit\.shape\.invM/);
+  assert.match(ending, /DOOM_LEEK_RUMBLE_SECONDS[\s\S]*?shake = Math\.max\(shake, 5 \+ rumbleRatio \* 13\)/);
+  assert.doesNotMatch(ending, /doomLeek\.scale\s*=/);
+  assert.match(ending, /resolveDoomLeekCollisions\(\)[\s\S]*?physicsStep\(substep\)/);
+  assert.match(ending, /doomLeek\.impactTime[\s\S]*?DOOM_LEEK_IMPACT_HOLD/);
+  assert.match(ending, /triggerGameOver\("time_limit"\)/);
+  assert.match(suikaSource, /timeUpEnd"\)\.addEventListener\("click"[\s\S]*?beginTimeLimitEnding\(\)/);
+  assert.match(suikaFunctionSource('render'), /sprites\[doomLeek\.tier\][\s\S]*?ctx\.scale\(doomLeek\.scale, doomLeek\.scale\)/);
+  assert.match(gameOver, /resultScore\.textContent = fmt\(score\)/);
+  assert.match(gameOver, /reason === "time_limit"[\s\S]*?ばかでかいネギで 盤面いっぱい！/);
 });
 
 test('ごちそうできるかなは右上から確認後に途中終了できる', () => {

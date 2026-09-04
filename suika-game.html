@@ -112,6 +112,8 @@
       text-decoration-thickness: 2px;
     }
 
+    .end-control { position: relative; display: flex; }
+
     .title {
       display: grid;
       grid-template-columns: 68px 1fr;
@@ -160,6 +162,49 @@
     }
 
     .resume-info strong { color: var(--orange-dark); font-variant-numeric: tabular-nums; }
+
+    .time-limit-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .time-limit-input-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .time-limit-input {
+      width: 92px;
+      padding: 8px 10px;
+      border: 2px solid #e7c58e;
+      border-radius: 10px;
+      color: var(--ink);
+      background: #fffdf8;
+      font: 1000 1.28rem/1 "M PLUS 1p", sans-serif;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-limit-input:focus { outline: 3px solid rgba(239, 143, 79, .25); }
+
+    .time-limit-unit { font-size: .9rem; font-weight: 1000; }
+
+    .time-limit-clear {
+      justify-self: center;
+      padding: 4px 8px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      font-size: .68rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
 
     .resume-actions {
       display: grid;
@@ -313,6 +358,46 @@
     }
 
     .stat-value.score-bump { animation: score-bump .22s ease; }
+
+    .time-limit-meter {
+      position: absolute;
+      z-index: 5;
+      top: calc(100% + 3px);
+      right: 0;
+      display: inline-flex;
+      width: max-content;
+      margin: 0;
+      padding: 2px 6px;
+      align-items: center;
+      gap: 3px;
+      border: 0;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255, 248, 233, .88);
+      box-shadow: 0 3px 10px rgba(88, 62, 38, .08);
+      font-size: .52rem;
+      font-weight: 900;
+      line-height: 1.2;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .time-limit-meter strong {
+      color: var(--orange-dark);
+      font-size: .58rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-limit-meter > span { font-size: .62rem; line-height: 1; }
+
+    .time-limit-meter.ending {
+      color: #b93e35;
+      background: rgba(255, 240, 237, .9);
+    }
+
+    .time-limit-meter.ending strong { color: #b93e35; }
+
+    .time-limit-meter:active { transform: translateY(1px); }
 
     @keyframes score-bump {
       40% { transform: scale(1.18); color: var(--red-dark); }
@@ -1053,6 +1138,29 @@
       line-height: 1.5;
     }
 
+    .history-reset-zone {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .history-reset-button {
+      padding: 7px 10px;
+      border: 0;
+      color: var(--red-dark);
+      background: transparent;
+      font-size: .7rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .reset-danger {
+      border-color: #efc3bf;
+      color: var(--red-dark);
+      background: #fff5f4;
+    }
+
     .secret-empty {
       grid-column: 1 / -1;
       margin: 4px 0;
@@ -1095,7 +1203,13 @@
         <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
         <button type="button" class="chip-button" id="historyButton" aria-label="このゲームのきろく">きろく</button>
         <button type="button" class="chip-button" id="rulesButton">あそびかた</button>
-        <button type="button" class="chip-button end-button" id="endButton">おわる</button>
+        <div class="end-control">
+          <button type="button" class="chip-button end-button" id="endButton">おわる</button>
+          <button type="button" class="time-limit-meter" id="timeLimitMeter" aria-live="polite" aria-label="タイマーをセット">
+            <span aria-hidden="true">⏱</span>
+            <strong id="timeLimitValue" hidden></strong>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1235,6 +1349,35 @@
     </div>
   </dialog>
 
+  <dialog id="timeLimitDialog" aria-labelledby="timeLimitTitle">
+    <div class="rules-content">
+      <h2 id="timeLimitTitle">タイマーをセット</h2>
+      <p class="resume-info" id="timeLimitHelp">残り時間を分で設定できます。</p>
+      <form class="time-limit-form" id="timeLimitForm">
+        <label class="time-limit-input-wrap">
+          <input class="time-limit-input" id="timeLimitInput" type="number" min="1" max="60" step="1" value="3" inputmode="numeric" required>
+          <span class="time-limit-unit">分</span>
+        </label>
+        <div class="resume-actions">
+          <button type="button" class="resume-reset" id="timeLimitCancel">やめる</button>
+          <button type="submit" class="resume-continue">セット</button>
+        </div>
+        <button type="button" class="time-limit-clear" id="timeLimitClear" hidden>タイマーを解除</button>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="timeUpDialog" aria-labelledby="timeUpTitle">
+    <div class="rules-content">
+      <h2 id="timeUpTitle">時間になりました</h2>
+      <p class="resume-info">ここでおわる？<br>まだつづける？</p>
+      <div class="resume-actions">
+        <button type="button" class="resume-continue" id="timeUpContinue">つづける</button>
+        <button type="button" class="resume-reset" id="timeUpEnd">おわる</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="shuffleDialog" aria-labelledby="shuffleTitle">
     <div class="rules-content">
       <h2 id="shuffleTitle">食材をシャッフルする？</h2>
@@ -1271,7 +1414,21 @@
       <h2 id="historyTitle">このゲームのきろく</h2>
       <p class="history-summary" id="historySummary"></p>
       <div class="history-list" id="historyList"></div>
+      <div class="history-reset-zone">
+        <button type="button" class="history-reset-button" id="historyResetButton">記録をりせっと</button>
+      </div>
       <button type="button" class="rules-close" id="historyClose">とじる</button>
+    </div>
+  </dialog>
+
+  <dialog id="resetRecordsDialog" aria-labelledby="resetRecordsTitle">
+    <div class="rules-content">
+      <h2 id="resetRecordsTitle">すべての記録をりせっとする？</h2>
+      <p class="resume-info">料理ノート、FB、自己ベスト、<br>図鑑、タイトル、途中のゲームが消えます。</p>
+      <div class="resume-actions">
+        <button type="button" class="resume-continue" id="resetRecordsNo">やめる</button>
+        <button type="button" class="resume-reset reset-danger" id="resetRecordsYes">りせっと</button>
+      </div>
     </div>
   </dialog>
 
@@ -1319,6 +1476,7 @@
         { name: "おいしいシッポ",     img: "SlowpokeTail",       color: "#F2BBC4", energy: 342 },
       ];
       const HERB_POOL_IDX = 10;    // ここまでが「じゅんばん」に見える
+      const LEEK_POOL_IDX = 16;
       const EXCLUDE_COUNT = 4;     // opt から毎ゲーム除外する数
 
       // チェーン位置ごとの半径はチェーン長に合わせて生成（序盤の差を大きく、前傾カーブ）
@@ -1402,6 +1560,24 @@
       const CHEER_WARN_RATIO = 0.5;  // げんきオールS: 警告ゲージがこの割合でピンチ発動
 
       const SHARE_URL = "https://ny-an.github.io/gaogao-pksr/suika-game.html";
+      const SAVE_KEY = "kabocha.save";
+      const SAVE_VERSION = 2;
+      const SAVE_INTERVAL = 10;
+      const SAVE_DEBOUNCE = 0.3;
+      const MAX_SAVED_FRUITS = 400;
+      const MIN_TIME_LIMIT_SECONDS = 60;
+      const MAX_TIME_LIMIT_SECONDS = 60 * 60;
+      const DOOM_LEEK_SCALE = 3.1;
+      const DOOM_LEEK_RUMBLE_SECONDS = 0.85;
+      const DOOM_LEEK_IMPACT_HOLD = 0.65;
+      const RESET_STORAGE_KEYS = [
+        SAVE_KEY,
+        "kabocha.best",
+        "kabocha.recipeLv",
+        "kabocha.dishes",
+        "kabocha.secrets",
+        "kabocha.hidden",
+      ];
 
       // ---- DOM --------------------------------------------------------
       const canvas = document.getElementById("gameCanvas");
@@ -1413,6 +1589,7 @@
       const bestValue = document.getElementById("bestValue");
       const result = document.getElementById("result");
       const resultEmoji = document.getElementById("resultEmoji");
+      const resultTitle = document.getElementById("resultTitle");
       const resultSub = document.getElementById("resultSub");
       const resultScore = document.getElementById("resultScore");
       const resultBestBadge = document.getElementById("resultBestBadge");
@@ -1442,6 +1619,17 @@
       const historySummary = document.getElementById("historySummary");
       const historyList = document.getElementById("historyList");
       const historyClose = document.getElementById("historyClose");
+      const historyResetButton = document.getElementById("historyResetButton");
+      const resetRecordsDialog = document.getElementById("resetRecordsDialog");
+      const timeLimitDialog = document.getElementById("timeLimitDialog");
+      const timeLimitTitle = document.getElementById("timeLimitTitle");
+      const timeLimitHelp = document.getElementById("timeLimitHelp");
+      const timeLimitForm = document.getElementById("timeLimitForm");
+      const timeLimitInput = document.getElementById("timeLimitInput");
+      const timeLimitClear = document.getElementById("timeLimitClear");
+      const timeLimitMeter = document.getElementById("timeLimitMeter");
+      const timeLimitValue = document.getElementById("timeLimitValue");
+      const timeUpDialog = document.getElementById("timeUpDialog");
       const orderCard = document.getElementById("orderCard");
       const orderName = document.getElementById("orderName");
       const orderNeeds = document.getElementById("orderNeeds");
@@ -1469,6 +1657,10 @@
       let aiming = false;
       let holdTime = 0;          // 押しっぱなし時間
       let heldDrop = false;      // ホールド中に自動ドロップしたか
+      let timeLimitSeconds = null;
+      let timeUpPending = false;
+      let timeLimitEnding = false;
+      let doomLeek = null;
       const HOLD_DELAY = 2.0;    // これ以上おしっぱなしで連続ドロップ
 
       // 今ゲームのチェーン（FOOD_POOL のインデックス列）
@@ -2143,7 +2335,12 @@
 
       function buildOrder() {
         const candidates = RECIPES.filter(recipeAvailable);
-        if (!candidates.length) { order = null; renderOrder(); return; }
+        if (!candidates.length) {
+          order = null;
+          renderOrder();
+          scheduleSave();
+          return;
+        }
         let pick = candidates[(Math.random() * candidates.length) | 0];
         if (candidates.length > 1 && pick.name === lastRecipeName) {
           pick = candidates[(candidates.indexOf(pick) + 1) % candidates.length];
@@ -2153,6 +2350,7 @@
         Object.keys(pick.needs).forEach((name) => { got[POOL_IDX_BY_NAME[name]] = 0; });
         order = { recipe: pick, got };
         renderOrder();
+        scheduleSave();
       }
 
       function renderOrder() {
@@ -2179,7 +2377,11 @@
         if (need === undefined || order.got[poolIdx] >= need) return;
         order.got[poolIdx] += 1;
         const complete = Object.entries(order.recipe.needs).every(([name, n]) => order.got[POOL_IDX_BY_NAME[name]] >= n);
-        if (!complete) { renderOrder(); return; }
+        if (!complete) {
+          renderOrder();
+          scheduleSave();
+          return;
+        }
         const name = order.recipe.name;
         const lv = recipeLevel(name);
         const reward = withFb(recipeReward(order.recipe));
@@ -2285,6 +2487,7 @@
         spawnParticles(mx, my, "#facd45", 20, 240);
         flashChip(chipCharge);
         sfx.skill();
+        scheduleSave();
       }
 
       // 食材ゲットS: しんか10回で「つぎ」がレア食材に
@@ -2298,6 +2501,7 @@
         showBanner(`🌽 食材ゲットS発動！ つぎは「${foodOf(nextTier).name}」！`);
         flashChip(chipFood);
         sfx.skill();
+        scheduleSave();
       }
 
       // げんきオールS: ピンチのとき1回だけ、小さい食材をおかたづけ
@@ -2321,6 +2525,7 @@
         addPopup(WORLD.w / 2, 200, "がんばれ〜！", "#35804d", 22);
         flashChip(chipCheer);
         sfx.cheer();
+        scheduleSave();
       }
 
       // ---- ゲームロジック --------------------------------------------
@@ -2377,8 +2582,10 @@
         clearSave();
         buildChain();
         bestBefore = best;
+        fruitSeq = 0;
         fruits = [];
         dropQueue = [];
+        dropQueueTimer = 0;
         rainGrace = 0;
         chargeMTimer = 0;
         chipCharge.style.setProperty("--meter-progress", "0%");
@@ -2388,6 +2595,9 @@
         maxTierReached = 0;
         combo = 0;
         comboTimer = 0;
+        aiming = false;
+        holdTime = 0;
+        heldDrop = false;
         warn = 0;
         shake = 0;
         gameOver = false;
@@ -2398,8 +2608,13 @@
         chargeFired = false;
         history = [];
         playTime = 0;
+        timeLimitSeconds = null;
+        timeUpPending = false;
+        timeLimitEnding = false;
+        doomLeek = null;
         mergeCount = 0;
         gameDishes = 0;
+        lastRecipeName = "";
         buildOrder();
         nextTier = randTier();
         current = { tier: randTier() };
@@ -2407,6 +2622,7 @@
         endButton.disabled = false;
         result.hidden = true;
         boardWrap.classList.remove("over");
+        updateTimeLimitDisplay();
         updateSkillChips();
         if (scale > 0 && canvas.width > 0) {
           sprites = chain.map((_, t) => makeSprite(t, scale));
@@ -2415,71 +2631,295 @@
         drawNext();
       }
 
+      function formatCountdown(seconds) {
+        const whole = Math.max(0, Math.ceil(seconds));
+        return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+      }
+
+      function updateTimeLimitDisplay() {
+        const active = finiteNumber(timeLimitSeconds);
+        const remaining = active ? Math.max(0, timeLimitSeconds - playTime) : 0;
+        timeLimitValue.hidden = !active;
+        timeLimitValue.textContent = active ? formatCountdown(remaining) : "";
+        timeLimitMeter.setAttribute("aria-label", active
+          ? `残り時間 ${formatCountdown(remaining)}。タップで変更`
+          : "タイマーをセット");
+        timeLimitMeter.classList.toggle("ending", active && (remaining <= 0 || timeLimitEnding));
+      }
+
+      function openTimeLimitDialog() {
+        startPending = true;
+        const active = finiteNumber(timeLimitSeconds);
+        const remaining = active ? Math.max(MIN_TIME_LIMIT_SECONDS, timeLimitSeconds - playTime) : 180;
+        timeLimitTitle.textContent = active ? "残り時間を変更" : "タイマーをセット";
+        timeLimitHelp.textContent = active ? "ここからの残り時間を設定します。" : "好きな時にタイマーを始められます。";
+        timeLimitInput.value = String(Math.ceil(remaining / 60));
+        timeLimitClear.hidden = !active;
+        if (!timeLimitDialog.open) timeLimitDialog.showModal();
+        requestAnimationFrame(() => timeLimitInput.select());
+      }
+
+      function startNewGame() {
+        reset();
+      }
+
       // ---- プレイ途中のセーブ（リロードしても続きから）----------------
+      function savedFruit(fruit) {
+        return {
+          tier: fruit.tier,
+          x: fruit.x,
+          y: fruit.y,
+          vx: fruit.vx,
+          vy: fruit.vy,
+          angle: fruit.angle,
+          av: fruit.av,
+          entered: fruit.entered,
+          age: fruit.age,
+          cheat: fruit.cheat,
+        };
+      }
+
+      function gameSnapshot() {
+        return {
+          v: SAVE_VERSION,
+          chain: [...chain],
+          fruits: fruits.filter((fruit) => !fruit.dead).map(savedFruit),
+          score,
+          maxTierReached,
+          combo,
+          comboTimer,
+          warn,
+          cooldown,
+          dropX,
+          foodGauge,
+          cheerUsed,
+          chargeFired,
+          playTime,
+          timeLimitSeconds,
+          mergeCount,
+          gameDishes,
+          nextTier,
+          currentTier: current ? current.tier : null,
+          order: order ? { name: order.recipe.name, got: { ...order.got } } : null,
+          history: history.slice(-HISTORY_MAX),
+          dropQueue: [...dropQueue],
+          dropQueueTimer,
+          rainGrace,
+          chargeMTimer,
+          bestBefore,
+        };
+      }
+
+      const finiteNumber = (value) => typeof value === "number" && Number.isFinite(value);
+      const nonNegativeInteger = (value) => Number.isInteger(value) && value >= 0;
+
+      function parseSavedGame(raw) {
+        let data;
+        try { data = JSON.parse(raw || "null"); } catch (_) { return null; }
+        if (!data || data.v !== SAVE_VERSION || !Array.isArray(data.chain)) return null;
+        if (data.chain.length !== FOOD_POOL.length - EXCLUDE_COUNT) return null;
+        if (!data.chain.every((id) => Number.isInteger(id) && id >= 0 && id < FOOD_POOL.length)) return null;
+        if (new Set(data.chain).size !== data.chain.length) return null;
+        if (!data.chain.every((id, index) => index === 0 || data.chain[index - 1] < id)) return null;
+        if (FOOD_POOL.some((food, id) => !food.opt && !data.chain.includes(id))) return null;
+
+        const savedMaxTier = data.chain.length - 1;
+        const validTier = (tier) => Number.isInteger(tier) && tier >= 0 && tier <= savedMaxTier;
+        if (!Array.isArray(data.fruits) || data.fruits.length > MAX_SAVED_FRUITS) return null;
+        const cleanFruits = [];
+        for (const fruit of data.fruits) {
+          if (!fruit || !validTier(fruit.tier)) return null;
+          if (![fruit.x, fruit.y, fruit.vx, fruit.vy, fruit.angle, fruit.av, fruit.age].every(finiteNumber)) return null;
+          if (Math.abs(fruit.x) > WORLD.w * 10 || Math.abs(fruit.y) > WORLD.h * 10 || fruit.age < 0) return null;
+          if (typeof fruit.entered !== "boolean" || typeof fruit.cheat !== "boolean") return null;
+          cleanFruits.push({
+            tier: fruit.tier,
+            x: fruit.x,
+            y: fruit.y,
+            vx: fruit.vx,
+            vy: fruit.vy,
+            angle: fruit.angle,
+            av: fruit.av,
+            entered: fruit.entered,
+            age: fruit.age,
+            cheat: fruit.cheat,
+          });
+        }
+
+        if (!nonNegativeInteger(data.score) || !validTier(data.maxTierReached)) return null;
+        if (!nonNegativeInteger(data.combo) || !finiteNumber(data.comboTimer) || data.comboTimer < 0 || data.comboTimer > 30) return null;
+        if (!finiteNumber(data.warn) || data.warn < 0 || data.warn > OVER_TIME) return null;
+        if (!finiteNumber(data.cooldown) || data.cooldown < -1 || data.cooldown > 30) return null;
+        if (!finiteNumber(data.dropX) || data.dropX < 0 || data.dropX > WORLD.w) return null;
+        if (!nonNegativeInteger(data.foodGauge) || data.foodGauge > FOODGET_GAUGE_MAX) return null;
+        if (typeof data.cheerUsed !== "boolean" || typeof data.chargeFired !== "boolean") return null;
+        if (!finiteNumber(data.playTime) || data.playTime < 0) return null;
+        let savedTimeLimit = null;
+        if (data.timeLimitSeconds !== undefined && data.timeLimitSeconds !== null) {
+          if (!finiteNumber(data.timeLimitSeconds) || data.timeLimitSeconds < 0 || data.timeLimitSeconds - data.playTime > MAX_TIME_LIMIT_SECONDS) return null;
+          savedTimeLimit = data.timeLimitSeconds;
+        }
+        if (!nonNegativeInteger(data.mergeCount) || !nonNegativeInteger(data.gameDishes)) return null;
+        if (!validTier(data.nextTier) || !(data.currentTier === null || validTier(data.currentTier))) return null;
+        if (!Array.isArray(data.dropQueue) || data.dropQueue.length > RAIN_COUNT || !data.dropQueue.every(validTier)) return null;
+        if (![data.dropQueueTimer, data.rainGrace, data.chargeMTimer].every(finiteNumber)) return null;
+        if (data.rainGrace < -1 || data.chargeMTimer < 0 || data.chargeMTimer > CHARGE_M_SECONDS) return null;
+        if (!nonNegativeInteger(data.bestBefore)) return null;
+
+        if (!data.order || typeof data.order.name !== "string" || !data.order.got || typeof data.order.got !== "object") return null;
+        const recipe = RECIPES.find((candidate) => candidate.name === data.order.name);
+        if (!recipe) return null;
+        const availableFoods = new Set(data.chain.map((id) => FOOD_POOL[id].name));
+        if (!Object.keys(recipe.needs).every((name) => availableFoods.has(name))) return null;
+        const cleanGot = {};
+        for (const [name, need] of Object.entries(recipe.needs)) {
+          const poolIndex = POOL_IDX_BY_NAME[name];
+          if (poolIndex > HERB_POOL_IDX && !discovered.has(poolIndex)) return null;
+          const got = data.order.got[poolIndex];
+          if (!Number.isInteger(got) || got < 0 || got > need) return null;
+          cleanGot[poolIndex] = got;
+        }
+
+        if (!Array.isArray(data.history) || data.history.length > HISTORY_MAX) return null;
+        const cleanHistory = [];
+        for (const item of data.history) {
+          if (!item || !finiteNumber(item.t) || item.t < 0 || typeof item.html !== "string" || item.html.length > 4000) return null;
+          if (!finiteNumber(item.pts) || typeof item.skill !== "boolean") return null;
+          cleanHistory.push({ t: item.t, html: item.html, pts: item.pts, skill: item.skill });
+        }
+
+        return {
+          v: SAVE_VERSION,
+          chain: [...data.chain],
+          fruits: cleanFruits,
+          score: data.score,
+          maxTierReached: data.maxTierReached,
+          combo: data.combo,
+          comboTimer: data.comboTimer,
+          warn: data.warn,
+          cooldown: data.cooldown,
+          dropX: data.dropX,
+          foodGauge: data.foodGauge,
+          cheerUsed: data.cheerUsed,
+          chargeFired: data.chargeFired,
+          playTime: data.playTime,
+          timeLimitSeconds: savedTimeLimit,
+          mergeCount: data.mergeCount,
+          gameDishes: data.gameDishes,
+          nextTier: data.nextTier,
+          currentTier: data.currentTier,
+          order: { name: recipe.name, got: cleanGot },
+          history: cleanHistory,
+          dropQueue: [...data.dropQueue],
+          dropQueueTimer: data.dropQueueTimer,
+          rainGrace: data.rainGrace,
+          chargeMTimer: data.chargeMTimer,
+          bestBefore: data.bestBefore,
+        };
+      }
+
       function saveGame() {
-        if (gameOver) return;
+        if (gameOver || resumePending || startPending || timeLimitEnding) return false;
         try {
-          localStorage.setItem("kabocha.save", JSON.stringify({
-            v: 1,
-            chain,
-            score, maxTierReached, foodGauge, cheerUsed,
-            playTime, mergeCount, gameDishes,
-            nextTier,
-            currentTier: current ? current.tier : null,
-            order: order ? { name: order.recipe.name, got: order.got } : null,
-            history,
-            // 盤面（食材の配置）は保存しない: 物理状態の完全復元は無理なので、再開時は空の盤面から
-          }));
-        } catch (_) {}
+          localStorage.setItem(SAVE_KEY, JSON.stringify(gameSnapshot()));
+          saveDirty = false;
+          saveDebounce = 0;
+          saveAcc = 0;
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function scheduleSave() {
+        if (gameOver || resumePending || startPending || timeLimitEnding) return;
+        if (!saveDirty) saveDebounce = SAVE_DEBOUNCE;
+        saveDirty = true;
       }
 
       function clearSave() {
-        try { localStorage.removeItem("kabocha.save"); } catch (_) {}
+        try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+        saveDirty = false;
+        saveDebounce = 0;
+        saveAcc = 0;
       }
 
-      function loadGame() {
-        let d;
-        try { d = JSON.parse(localStorage.getItem("kabocha.save") || "null"); } catch (_) { return false; }
-        if (!d || d.v !== 1 || !Array.isArray(d.chain)) return false;
-        if (d.chain.length !== FOOD_POOL.length - EXCLUDE_COUNT) return false;
-        if (!d.chain.every((i) => Number.isInteger(i) && i >= 0 && i < FOOD_POOL.length)) return false;
-        chain = d.chain;
+      function resetAllRecords() {
+        for (const key of RESET_STORAGE_KEYS) {
+          try { localStorage.removeItem(key); } catch (_) {}
+        }
+        best = 0;
+        recipeLv = {};
+        dishesCooked = 0;
+        hiddenTitles.clear();
+        discovered.clear();
+        shownRank = 0;
+        bestBefore = 0;
+        bestValue.textContent = "0";
+        updateRankLabel();
+        startNewGame();
+      }
+
+      function loadGame(data) {
+        if (!data || data.v !== SAVE_VERSION) return false;
+        chain = [...data.chain];
         computeRadii(chain.length);
         visibleTiers = chain.indexOf(HERB_POOL_IDX) + 1;
-        score = Math.max(0, Math.floor(Number(d.score) || 0));
-        maxTierReached = Math.min(MAX_TIER, Math.max(0, Math.floor(Number(d.maxTierReached) || 0)));
-        foodGauge = Math.min(FOODGET_GAUGE_MAX, Math.max(0, Math.floor(Number(d.foodGauge) || 0)));
-        cheerUsed = !!d.cheerUsed;
-        playTime = Math.max(0, Number(d.playTime) || 0);
-        mergeCount = Math.max(0, Math.floor(Number(d.mergeCount) || 0));
-        gameDishes = Math.max(0, Math.floor(Number(d.gameDishes) || 0));
-        history = Array.isArray(d.history) ? d.history.slice(-HISTORY_MAX) : [];
-        nextTier = Number.isInteger(d.nextTier) && d.nextTier >= 0 && d.nextTier <= MAX_TIER ? d.nextTier : randTier();
-        fruits = []; // 盤面は復元しない（空からやり直し）
         refreshActiveShapes();
-        current =Number.isInteger(d.currentTier) && d.currentTier >= 0 && d.currentTier <= MAX_TIER
-          ? { tier: d.currentTier }
-          : null;
-        if (!current) cooldown = 0.3;
-        if (d.order && d.order.name) {
-          const recipe = RECIPES.find((r) => r.name === d.order.name);
-          if (recipe && recipeAvailable(recipe)) {
-            const got = {};
-            Object.keys(recipe.needs).forEach((n) => {
-              const pi = POOL_IDX_BY_NAME[n];
-              got[pi] = Math.min(recipe.needs[n], Math.max(0, Math.floor(Number(d.order.got?.[pi]) || 0)));
-            });
-            order = { recipe, got };
-            lastRecipeName = recipe.name;
-          } else {
-            buildOrder();
-          }
-        } else {
-          buildOrder();
-        }
+        fruitSeq = 0;
+        fruits = data.fruits.map((fruit) => ({
+          id: fruitSeq++,
+          tier: fruit.tier,
+          shape: activeShapes[fruit.tier],
+          x: fruit.x,
+          y: fruit.y,
+          vx: fruit.vx,
+          vy: fruit.vy,
+          angle: fruit.angle,
+          av: fruit.av,
+          dead: false,
+          entered: fruit.entered,
+          age: fruit.age,
+          cheat: fruit.cheat,
+          _wc: null,
+        }));
+        score = data.score;
+        maxTierReached = data.maxTierReached;
+        combo = data.combo;
+        comboTimer = data.comboTimer;
+        warn = data.warn;
+        cooldown = data.cooldown;
+        dropX = data.dropX;
+        foodGauge = data.foodGauge;
+        cheerUsed = data.cheerUsed;
+        chargeFired = data.chargeFired;
+        playTime = data.playTime;
+        timeLimitSeconds = data.timeLimitSeconds;
+        timeUpPending = false;
+        timeLimitEnding = false;
+        doomLeek = null;
+        mergeCount = data.mergeCount;
+        gameDishes = data.gameDishes;
+        nextTier = data.nextTier;
+        current = data.currentTier === null ? null : { tier: data.currentTier };
+        history = data.history.map((item) => ({ ...item }));
+        dropQueue = [...data.dropQueue];
+        dropQueueTimer = data.dropQueueTimer;
+        rainGrace = data.rainGrace;
+        chargeMTimer = data.chargeMTimer;
+        bestBefore = data.bestBefore;
+        const recipe = RECIPES.find((candidate) => candidate.name === data.order.name);
+        order = { recipe, got: { ...data.order.got } };
+        lastRecipeName = recipe.name;
+        chipCharge.style.setProperty("--meter-progress", `${Math.max(0, chargeMTimer / CHARGE_M_SECONDS) * 100}%`);
         scoreValue.textContent = fmt(score);
+        updateTimeLimitDisplay();
         updateSkillChips();
         renderOrder();
+        drawNext();
+        saveDirty = false;
+        saveDebounce = 0;
+        saveAcc = 0;
         return true;
       }
 
@@ -2765,6 +3205,144 @@
           fruits = fruits.filter((f) => !f.dead);
           for (const [a, b] of mergePairs) doMerge(a, b);
           fruits = fruits.filter((f) => !f.dead);
+          scheduleSave();
+        }
+      }
+
+      function openTimeUpDialog() {
+        if (gameOver || timeUpPending || timeLimitEnding) return;
+        timeUpPending = true;
+        aiming = false;
+        updateTimeLimitDisplay();
+        if (!timeUpDialog.open) timeUpDialog.showModal();
+      }
+
+      function beginTimeLimitEnding() {
+        if (gameOver || timeLimitEnding) return;
+        timeUpPending = false;
+        timeLimitEnding = true;
+        current = null;
+        aiming = false;
+        doomLeek = {
+          tier: chain.indexOf(LEEK_POOL_IDX),
+          x: WORLD.w / 2,
+          y: -260,
+          vy: 0,
+          angle: -0.16,
+          av: 0.42,
+          scale: DOOM_LEEK_SCALE,
+          rumbleTime: 0,
+          impactTime: null,
+          _wc: null,
+        };
+        clearSave();
+        updateTimeLimitDisplay();
+        showBanner("ゴゴゴゴゴ…");
+        logEvent("⏰ タイムアップ！ なにかが近づいてくる…", 0, true);
+        sfx.feast();
+      }
+
+      function updateDoomLeekWorldCircles() {
+        const shape = activeShapes[doomLeek.tier];
+        if (!doomLeek._wc || doomLeek._wc.length !== shape.circles.length) {
+          doomLeek._wc = shape.circles.map(() => ({ x: 0, y: 0, r: 0 }));
+        }
+        const cos = Math.cos(doomLeek.angle);
+        const sin = Math.sin(doomLeek.angle);
+        for (let i = 0; i < shape.circles.length; i++) {
+          const source = shape.circles[i];
+          const circle = doomLeek._wc[i];
+          const dx = source.dx * doomLeek.scale;
+          const dy = source.dy * doomLeek.scale;
+          circle.x = doomLeek.x + dx * cos - dy * sin;
+          circle.y = doomLeek.y + dx * sin + dy * cos;
+          circle.r = source.r * doomLeek.scale;
+        }
+        return doomLeek._wc;
+      }
+
+      function resolveDoomLeekCollisions() {
+        const leekCircles = updateDoomLeekWorldCircles();
+        for (const fruit of fruits) {
+          if (fruit.dead) continue;
+          for (let pass = 0; pass < 2; pass++) {
+            updateWorldCircles(fruit);
+            for (const leekCircle of leekCircles) {
+              for (const fruitCircle of fruit._wc) {
+                const dx = fruitCircle.x - leekCircle.x;
+                const dy = fruitCircle.y - leekCircle.y;
+                const minDistance = leekCircle.r + fruitCircle.r;
+                const distanceSquared = dx * dx + dy * dy;
+                if (distanceSquared >= minDistance * minDistance) continue;
+                const distance = Math.sqrt(distanceSquared) || 0.01;
+                const nx = distance > 0.01 ? dx / distance : (fruit.x < doomLeek.x ? -1 : 1);
+                const ny = distance > 0.01 ? dy / distance : 0;
+                const overlap = minDistance - distance;
+
+                // 巨大ネギは動かないほど重い物体として、食材側だけを押し出す
+                fruit.x += nx * overlap * 0.88;
+                fruit.y += ny * overlap * 0.88;
+
+                const contactX = fruitCircle.x - nx * fruitCircle.r;
+                const contactY = fruitCircle.y - ny * fruitCircle.r;
+                const fruitRx = contactX - fruit.x;
+                const fruitRy = contactY - fruit.y;
+                const leekRx = contactX - doomLeek.x;
+                const leekRy = contactY - doomLeek.y;
+                const fruitVx = fruit.vx - fruit.av * fruitRy;
+                const fruitVy = fruit.vy + fruit.av * fruitRx;
+                const leekVx = -doomLeek.av * leekRy;
+                const leekVy = doomLeek.vy + doomLeek.av * leekRx;
+                const relativeNormalVelocity = (fruitVx - leekVx) * nx + (fruitVy - leekVy) * ny;
+                if (relativeNormalVelocity >= 0) continue;
+                const armCrossNormal = fruitRx * ny - fruitRy * nx;
+                const impulse = (-(1 + RESTITUTION) * relativeNormalVelocity) /
+                  (fruit.shape.invM + armCrossNormal * armCrossNormal * fruit.shape.invI);
+                fruit.vx += impulse * nx * fruit.shape.invM;
+                fruit.vy += impulse * ny * fruit.shape.invM;
+                fruit.av += impulse * armCrossNormal * fruit.shape.invI;
+                fruit.vx = Math.max(-1200, Math.min(1200, fruit.vx));
+                fruit.vy = Math.max(-1200, Math.min(1200, fruit.vy));
+                fruit.av = Math.max(-12, Math.min(12, fruit.av));
+              }
+            }
+          }
+        }
+      }
+
+      function updateTimeLimitEnding(dt) {
+        if (!doomLeek) return;
+        const impactY = WORLD.h * 0.48;
+        const substep = dt / SUBSTEPS;
+        for (let step = 0; step < SUBSTEPS; step++) {
+          if (doomLeek.rumbleTime < DOOM_LEEK_RUMBLE_SECONDS) {
+            doomLeek.rumbleTime += substep;
+            const rumbleRatio = Math.min(1, doomLeek.rumbleTime / DOOM_LEEK_RUMBLE_SECONDS);
+            shake = Math.max(shake, 5 + rumbleRatio * 13);
+          } else if (doomLeek.impactTime === null) {
+            doomLeek.vy += 1700 * substep;
+            doomLeek.y += doomLeek.vy * substep;
+            doomLeek.angle += doomLeek.av * substep;
+            if (doomLeek.y >= impactY) {
+              doomLeek.y = impactY;
+              doomLeek.vy = 0;
+              doomLeek.impactTime = 0;
+              shake = Math.max(shake, 24);
+              spawnParticles(WORLD.w / 2, doomLeek.y, FOOD_POOL[LEEK_POOL_IDX].color, 36, 320);
+              tone(95, 0.45, { type: "sawtooth", gain: 0.08, slide: -45 });
+            }
+          } else {
+            doomLeek.impactTime += substep;
+            doomLeek.angle += doomLeek.av * substep;
+            doomLeek.av *= 0.985;
+            shake = Math.max(shake, 12);
+          }
+          resolveDoomLeekCollisions();
+          // ネギに押された食材同士の最後の合体まで、このフレームの得点へ反映する
+          physicsStep(substep);
+        }
+        if (doomLeek.impactTime !== null && doomLeek.impactTime >= DOOM_LEEK_IMPACT_HOLD) {
+          triggerGameOver("time_limit");
         }
       }
 
@@ -2775,7 +3353,9 @@
         boardWrap.classList.add("over");
         logEvent(reason === "manual"
           ? "🍳 ここまでのきろく！"
-          : `🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
+          : reason === "time_limit"
+            ? "⏰ ばかでかいネギで おしまい！"
+            : `🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
         sfx.over();
         const prevRank = rankIndex(bestBefore);
         const isBest = score > bestBefore;
@@ -2793,18 +3373,27 @@
         resultBestBadge.classList.toggle("show", isBest && score > 0);
         resultMax.textContent = maxTierReached > 0 ? `いちばん大きな食材は「${topName}」！` : "";
         if (reason === "manual") {
+          resultTitle.textContent = "おしまい！";
           resultEmoji.textContent = "🍲";
           resultSub.textContent = "ここまでのきろく！";
+        } else if (reason === "time_limit") {
+          resultTitle.textContent = "タイムアップ！";
+          resultEmoji.textContent = "🥬";
+          resultSub.textContent = "ばかでかいネギで 盤面いっぱい！";
         } else if (maxTierReached >= MAX_TIER) {
+          resultTitle.textContent = "おしまい！";
           resultEmoji.textContent = "👑";
           resultSub.textContent = "まさかの おいしいシッポ！？ でんせつ級！！";
         } else if (maxTierReached >= MAX_TIER - 1) {
+          resultTitle.textContent = "おしまい！";
           resultEmoji.textContent = "🎃";
           resultSub.textContent = "ずっしりカボチャまで育った！すごい！！";
         } else if (maxTierReached >= visibleTiers) {
+          resultTitle.textContent = "おしまい！";
           resultEmoji.textContent = "✨";
           resultSub.textContent = "シークレット食材までたどりついた！";
         } else {
+          resultTitle.textContent = "おしまい！";
           resultEmoji.textContent = "🍳";
           resultSub.textContent = "食材が あふれちゃった…";
         }
@@ -2814,7 +3403,7 @@
       }
 
       function update(dt) {
-        if (endDialog.open) return;
+        if (resumePending || startPending || timeUpPending || endDialog.open || resetRecordsDialog.open) return;
         if (gameOver) {
           // 演出だけ進める
           updateFx(dt);
@@ -2822,10 +3411,26 @@
         }
 
         playTime += dt;
+        updateTimeLimitDisplay();
+        if (timeLimitEnding) {
+          updateTimeLimitEnding(dt);
+          updateFx(dt);
+          return;
+        }
+        if (finiteNumber(timeLimitSeconds) && playTime >= timeLimitSeconds) {
+          openTimeUpDialog();
+          updateFx(dt);
+          return;
+        }
 
         if (comboTimer > 0) {
           comboTimer -= dt;
-          if (comboTimer <= 0) { combo = 0; chargeFired = false; updateSkillChips(); }
+          if (comboTimer <= 0) {
+            comboTimer = 0;
+            combo = 0;
+            chargeFired = false;
+            updateSkillChips();
+          }
         }
 
         if (cooldown > 0) {
@@ -2834,11 +3439,13 @@
             current = { tier: nextTier };
             nextTier = randTier();
             drawNext();
+            scheduleSave();
           }
         }
 
         // 隠し機能「200個ふらせ」: 超高速で上からランダム投下（1フレームに複数個も可）
         if (dropQueue.length) {
+          let spawned = false;
           dropQueueTimer -= dt;
           while (dropQueueTimer <= 0 && dropQueue.length) {
             dropQueueTimer += RAIN_INTERVAL;
@@ -2849,21 +3456,27 @@
             nf.angle = (Math.random() - 0.5) * 0.6;
             nf.cheat = true;
             fruits.push(nf);
+            spawned = true;
             if (dropQueue.length % 5 === 0) sfx.drop();
           }
+          if (spawned) scheduleSave();
         }
         if (rainGrace > 0) rainGrace -= dt;
 
         // 隠し機能「エナジーチャージM？」: CHARGE_M_SECONDS のあいだ、りんごと牛乳だけを高速で降らせ続ける
         if (chargeMTimer > 0) {
           chargeMTimer -= dt;
-          if (dropQueue.length < 2) dropQueue.push(Math.random() < 0.5 ? 0 : 1); // chain[0]=リンゴ, chain[1]=ミルク（除外対象外）
+          if (dropQueue.length < 2) {
+            dropQueue.push(Math.random() < 0.5 ? 0 : 1); // chain[0]=リンゴ, chain[1]=ミルク（除外対象外）
+            scheduleSave();
+          }
           // 残り時間をチップ背景のメーターで見せる（減っていく）
           chipCharge.style.setProperty("--meter-progress", `${Math.max(0, chargeMTimer / CHARGE_M_SECONDS) * 100}%`);
           if (chargeMTimer <= 0) {
             chargeMTimer = 0;
             chipCharge.style.setProperty("--meter-progress", "0%");
             updateSkillChips();
+            scheduleSave();
           }
         }
 
@@ -2976,6 +3589,19 @@
           drawSprite(ctx, f.tier, f.x, f.y, f.angle);
         }
 
+        // 制限時間終了時だけ、最初から盤面を覆うほど大きいネギを落とす
+        if (doomLeek) {
+          const sp = sprites[doomLeek.tier];
+          if (sp) {
+            ctx.save();
+            ctx.translate(doomLeek.x, doomLeek.y);
+            ctx.rotate(doomLeek.angle);
+            ctx.scale(doomLeek.scale, doomLeek.scale);
+            ctx.drawImage(sp.canvas, -sp.half, -sp.half, sp.half * 2, sp.half * 2);
+            ctx.restore();
+          }
+        }
+
         // コライダー表示（デバッグ用: window.__showColliders = true）
         if (window.__showColliders) {
           ctx.strokeStyle = "rgba(30, 120, 200, .75)";
@@ -3023,7 +3649,7 @@
       }
 
       function drop() {
-        if (!current || gameOver) return;
+        if (!current || gameOver || startPending || timeUpPending || timeLimitEnding) return;
         const bound = activeShapes[current.tier].boundR;
         const x = Math.min(Math.max(dropX, bound + 2), WORLD.w - bound - 2);
         const nf = makeFruit(current.tier, x, DROP_Y);
@@ -3034,6 +3660,7 @@
         current = null;
         cooldown = DROP_COOLDOWN;
         sfx.drop();
+        scheduleSave();
       }
 
       canvas.addEventListener("pointerdown", (ev) => {
@@ -3066,7 +3693,7 @@
 
       window.addEventListener("keydown", (ev) => {
         if (gameOver) {
-          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); reset(); }
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); startNewGame(); }
           return;
         }
         if (ev.key === "ArrowLeft") { dropX = Math.max(10, dropX - 14); ev.preventDefault(); }
@@ -3074,7 +3701,7 @@
         else if (ev.key === " " || ev.key === "ArrowDown" || ev.key === "Enter") { ensureAudio(); drop(); ev.preventDefault(); }
       });
 
-      restartButton.addEventListener("click", () => { ensureAudio(); reset(); });
+      restartButton.addEventListener("click", () => { ensureAudio(); startNewGame(); });
 
       // ---- 連打系の隠し機能 ------------------------------------------
       // 連打カウンタ: windowMs 以内に count 回で true
@@ -3103,6 +3730,7 @@
         logEvent(`なぜか食材がわいてきた（${RAIN_COUNT}こ）`, 0, true);
         sfx.feast();
         unlockHiddenTitle("rain");
+        scheduleSave();
       }
 
       // 左下10連打: 扇風機。盤面の食材をぜんぶ吹き飛ばす。10回に1度は強風
@@ -3124,6 +3752,7 @@
         tone(90, strong ? 0.6 : 0.35, { type: "sawtooth", gain: strong ? 0.09 : 0.05, slide: strong ? 420 : 260 });
         showBanner(strong ? "強風がふいた！" : "風がふいてきた！");
         unlockHiddenTitle("fan");
+        scheduleSave();
       }
 
       const cornerRightTaps = makeTapCounter(10, 3000);
@@ -3150,6 +3779,7 @@
         ensureAudio();
         sfx.cheer();
         unlockHiddenTitle("cheer");
+        scheduleSave();
       });
 
       // エナジーチャージSのチップを20連打（10秒以内）: 10秒間「エナジーチャージM」表記になり、
@@ -3169,6 +3799,7 @@
         logEvent(`⚡ エナジーチャージM？発動！（${CHARGE_M_SECONDS}びょう 食材が降りつづける）`, 0, true);
         sfx.skill();
         unlockHiddenTitle("chargeM");
+        scheduleSave();
       });
 
       // マスコット5連打: 確認ポップアップのあと食材をシャッフル（除外セットを引き直して新ゲーム）
@@ -3183,7 +3814,7 @@
       document.getElementById("shuffleYes").addEventListener("click", () => {
         shuffleDialog.close();
         ensureAudio();
-        reset();
+        startNewGame();
         showBanner("🔀 食材をシャッフルした！");
         spawnParticles(WORLD.w / 2, 200, "#f2c060", 24, 220);
         sfx.skill();
@@ -3260,6 +3891,88 @@
       historyDialog.addEventListener("click", (ev) => {
         if (ev.target === historyDialog) historyDialog.close();
       });
+      const cancelRecordsReset = () => {
+        resetRecordsDialog.close();
+        renderHistory();
+        historyDialog.showModal();
+      };
+      historyResetButton.addEventListener("click", () => {
+        historyDialog.close();
+        resetRecordsDialog.showModal();
+      });
+      document.getElementById("resetRecordsNo").addEventListener("click", cancelRecordsReset);
+      document.getElementById("resetRecordsYes").addEventListener("click", () => {
+        resetRecordsDialog.close();
+        resetAllRecords();
+      });
+      resetRecordsDialog.addEventListener("cancel", (ev) => {
+        ev.preventDefault();
+        cancelRecordsReset();
+      });
+      resetRecordsDialog.addEventListener("click", (ev) => {
+        if (ev.target === resetRecordsDialog) cancelRecordsReset();
+      });
+
+      timeLimitForm.addEventListener("submit", (ev) => {
+        ev.preventDefault();
+        const minutes = Number(timeLimitInput.value);
+        const seconds = minutes * 60;
+        if (!Number.isInteger(minutes) || !finiteNumber(seconds) || seconds < MIN_TIME_LIMIT_SECONDS || seconds > MAX_TIME_LIMIT_SECONDS) {
+          timeLimitInput.setCustomValidity("1〜60分の整数で指定してね");
+          timeLimitInput.reportValidity();
+          return;
+        }
+        timeLimitInput.setCustomValidity("");
+        timeLimitSeconds = playTime + seconds;
+        timeUpPending = false;
+        timeLimitEnding = false;
+        doomLeek = null;
+        startPending = false;
+        timeLimitDialog.close();
+        updateTimeLimitDisplay();
+        saveGame();
+        lastTime = performance.now();
+      });
+      const closeTimeLimitDialog = () => {
+        if (timeLimitDialog.open) timeLimitDialog.close();
+        startPending = false;
+        lastTime = performance.now();
+      };
+      timeLimitMeter.addEventListener("click", () => {
+        if (!gameOver && !timeUpPending && !timeLimitEnding) openTimeLimitDialog();
+      });
+      document.getElementById("timeLimitCancel").addEventListener("click", closeTimeLimitDialog);
+      timeLimitClear.addEventListener("click", () => {
+        timeLimitSeconds = null;
+        timeUpPending = false;
+        timeLimitEnding = false;
+        closeTimeLimitDialog();
+        updateTimeLimitDisplay();
+        saveGame();
+      });
+      timeLimitInput.addEventListener("input", () => timeLimitInput.setCustomValidity(""));
+      timeLimitDialog.addEventListener("cancel", (ev) => {
+        ev.preventDefault();
+        closeTimeLimitDialog();
+      });
+      timeLimitDialog.addEventListener("click", (ev) => {
+        if (ev.target === timeLimitDialog) closeTimeLimitDialog();
+      });
+      document.getElementById("timeUpContinue").addEventListener("click", () => {
+        timeUpDialog.close();
+        timeUpPending = false;
+        timeLimitSeconds = null;
+        updateTimeLimitDisplay();
+        scheduleSave();
+        lastTime = performance.now();
+      });
+      document.getElementById("timeUpEnd").addEventListener("click", () => {
+        timeUpDialog.close();
+        timeUpPending = false;
+        beginTimeLimitEnding();
+        lastTime = performance.now();
+      });
+      timeUpDialog.addEventListener("cancel", (ev) => ev.preventDefault());
       secretClose.addEventListener("click", () => secretDialog.close());
       secretDialog.addEventListener("click", (ev) => {
         if (ev.target === secretDialog) secretDialog.close();
@@ -3268,7 +3981,10 @@
       // ---- メインループ -----------------------------------------------
       let lastTime = performance.now();
       let saveAcc = 0;
+      let saveDirty = false;
+      let saveDebounce = 0;
       let resumePending = false; // 再開ポップアップの選択待ちの間はセーブしない
+      let startPending = false;  // タイマー編集ポップアップ中はゲームを進めない
 
       function frame(now) {
         let dt = (now - lastTime) / 1000;
@@ -3280,19 +3996,23 @@
         if (cssW > 0 && Math.abs(canvas.width - cssW * dpr) > 1) resize();
         update(dt);
         if (canvas.width > 0) render();
-        if (!gameOver && !resumePending) {
+        if (!gameOver && !resumePending && !startPending && !timeLimitEnding) {
           saveAcc += dt;
-          if (saveAcc >= 4) { saveAcc = 0; saveGame(); }
+          if (saveDirty) {
+            saveDebounce -= dt;
+            if (saveDebounce <= 0) saveGame();
+          }
+          if (saveAcc >= SAVE_INTERVAL) saveGame();
         }
-        if (window.__suikaDebugHook) window.__suikaDebugHook({ fruits, current, cooldown, warn, gameOver, score, nextTier, dropX, foodGauge, cheerUsed, combo, chain, visibleTiers, activeShapes, setCheerUsed: (v) => { cheerUsed = !!v; updateSkillChips(); } });
+        if (window.__suikaDebugHook) window.__suikaDebugHook({ fruits, current, cooldown, warn, gameOver, score, nextTier, dropX, foodGauge, cheerUsed, combo, chain, visibleTiers, activeShapes, timeLimitSeconds, timeUpPending, timeLimitEnding, doomLeek, setCheerUsed: (v) => { cheerUsed = !!v; updateSkillChips(); } });
         requestAnimationFrame(frame);
       }
 
       document.addEventListener("visibilitychange", () => {
         if (!document.hidden) lastTime = performance.now();
-        else if (!resumePending) saveGame();
+        else if (!resumePending && !startPending) saveGame();
       });
-      window.addEventListener("pagehide", () => { if (!resumePending) saveGame(); });
+      window.addEventListener("pagehide", () => { if (!resumePending && !startPending) saveGame(); });
 
       let resizeTimer = 0;
       window.addEventListener("resize", () => {
@@ -3303,25 +4023,22 @@
       buildChain();
       // reset() がセーブを消す前に退避しておく
       let savedRaw = null;
-      try { savedRaw = localStorage.getItem("kabocha.save"); } catch (_) {}
+      try { savedRaw = localStorage.getItem(SAVE_KEY); } catch (_) {}
       resize();
       reset();
 
       // 途中セーブがあれば「つづきから / さいしょから」を選んでもらう
-      let savedData = null;
-      try {
-        const d = JSON.parse(savedRaw || "null");
-        if (d && d.v === 1 && Array.isArray(d.chain)) savedData = d;
-      } catch (_) {}
+      const savedData = parseSavedGame(savedRaw);
       if (savedData) {
-        try { localStorage.setItem("kabocha.save", savedRaw); } catch (_) {}
+        try { localStorage.setItem(SAVE_KEY, JSON.stringify(savedData)); } catch (_) {}
         const resumeDialog = document.getElementById("resumeDialog");
         document.getElementById("resumeInfo").innerHTML =
-          `エナジー <strong>${fmt(Math.floor(Number(savedData.score) || 0))}</strong> ／ ` +
-          `じかん <strong>${timeTag(Math.max(0, Number(savedData.playTime) || 0))}</strong><br>` +
-          `<span style="font-size:.66rem">（盤面はまっさらになるよ。エナジーやごちそうはそのまま）</span>`;
+          `エナジー <strong>${fmt(savedData.score)}</strong> ／ ` +
+          `じかん <strong>${timeTag(savedData.playTime)}</strong> ／ ` +
+          `料理 <strong>${savedData.gameDishes}</strong>品<br>` +
+          `<span style="font-size:.66rem">盤面もそのまま再開します</span>`;
         const applyResume = () => {
-          if (loadGame()) {
+          if (loadGame(savedData)) {
             if (scale > 0 && canvas.width > 0) {
               sprites = chain.map((_, t) => makeSprite(t, scale));
               drawGuide();
@@ -3331,13 +4048,15 @@
         };
         document.getElementById("resumeContinue").addEventListener("click", () => {
           resumeDialog.close();
-          applyResume();
           resumePending = false;
+          applyResume();
+          lastTime = performance.now();
         });
         document.getElementById("resumeReset").addEventListener("click", () => {
           resumeDialog.close();
-          clearSave();
           resumePending = false;
+          startNewGame();
+          lastTime = performance.now();
         });
         // Escなどで閉じようとしたら「つづきから」あつかい
         resumeDialog.addEventListener("cancel", (ev) => {
