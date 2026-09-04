@@ -854,6 +854,15 @@ test('ごちそうできるかなのXシェアは今回完成した料理数を�
   assert.match(suikaSource, /料理 \$\{gameDishes\}品・いちばん大きな食材は \$\{topName\}/);
 });
 
+test('ごちそうできるかなは右上から確認後に途中終了できる', () => {
+  assert.match(suikaSource, /id="rulesButton">あそびかた<\/button>[\s\S]*?id="endButton">おわる<\/button>/);
+  assert.match(suikaSource, /id="endDialog"[\s\S]*?ゲームをおわる？[\s\S]*?id="endNo">つづける<\/button>[\s\S]*?id="endYes">おわる<\/button>/);
+  assert.match(suikaSource, /endButton\.addEventListener\("click",[\s\S]*?endDialog\.showModal\(\)/);
+  assert.match(suikaSource, /endNo"\)\.addEventListener\("click", \(\) => endDialog\.close\(\)\)/);
+  assert.match(suikaSource, /endYes"\)\.addEventListener\("click",[\s\S]*?triggerGameOver\("manual"\)/);
+  assert.match(suikaSource, /function triggerGameOver\(reason = "overflow"\)[\s\S]*?reason === "manual"[\s\S]*?ここまでのきろく！/);
+});
+
 test('シューティングOGPは1200x630の大画像カードを使用する', () => {
   const image = fs.readFileSync(path.join(projectRoot, 'img/ogp/dopagaki-ogp.png'));
   assert.equal(image.readUInt32BE(16), 1200);

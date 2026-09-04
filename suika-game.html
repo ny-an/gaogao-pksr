@@ -97,6 +97,13 @@
 
     .chip-button:active { transform: translateY(1px); }
 
+    .chip-button.end-button { color: var(--red-dark); }
+
+    .chip-button:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
     .chip-button.muted {
       color: var(--muted);
       text-decoration: line-through;
@@ -1066,6 +1073,13 @@
       line-height: 1.4;
     }
 
+    @media (max-width: 380px) {
+      .page { padding-inline: 10px; }
+      .topbar-actions { gap: 3px; }
+      .back { font-size: .72rem; }
+      .chip-button { padding-inline: 7px; font-size: .72rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; }
     }
@@ -1079,6 +1093,7 @@
         <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
         <button type="button" class="chip-button" id="historyButton" aria-label="このゲームのきろく">きろく</button>
         <button type="button" class="chip-button" id="rulesButton">あそびかた</button>
+        <button type="button" class="chip-button end-button" id="endButton">おわる</button>
       </div>
     </div>
 
@@ -1225,6 +1240,17 @@
       <div class="resume-actions">
         <button type="button" class="resume-continue" id="shuffleYes">シャッフル</button>
         <button type="button" class="resume-reset" id="shuffleNo">やめる</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="endDialog" aria-labelledby="endTitle">
+    <div class="rules-content">
+      <h2 id="endTitle">ゲームをおわる？</h2>
+      <p class="resume-info">いまの結果を残して、<br>このゲームをおわります。</p>
+      <div class="resume-actions">
+        <button type="button" class="resume-continue" id="endNo">つづける</button>
+        <button type="button" class="resume-reset" id="endYes">おわる</button>
       </div>
     </div>
   </dialog>
@@ -1393,6 +1419,8 @@
       const restartButton = document.getElementById("restartButton");
       const soundButton = document.getElementById("soundButton");
       const rulesButton = document.getElementById("rulesButton");
+      const endButton = document.getElementById("endButton");
+      const endDialog = document.getElementById("endDialog");
       const rulesDialog = document.getElementById("rulesDialog");
       const rulesClose = document.getElementById("rulesClose");
       const skillBanner = document.getElementById("skillBanner");
@@ -2374,6 +2402,7 @@
         nextTier = randTier();
         current = { tier: randTier() };
         scoreValue.textContent = "0";
+        endButton.disabled = false;
         result.hidden = true;
         boardWrap.classList.remove("over");
         updateSkillChips();
@@ -2737,11 +2766,14 @@
         }
       }
 
-      function triggerGameOver() {
+      function triggerGameOver(reason = "overflow") {
         gameOver = true;
+        endButton.disabled = true;
         clearSave();
         boardWrap.classList.add("over");
-        logEvent(`🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
+        logEvent(reason === "manual"
+          ? "🍳 ここまでのきろく！"
+          : `🍳 おしまい！（さいだい: ${iconTag(chain[maxTierReached])}${foodOf(maxTierReached).name}）`, 0);
         sfx.over();
         const prevRank = rankIndex(bestBefore);
         const isBest = score > bestBefore;
@@ -2758,7 +2790,10 @@
         resultScore.textContent = fmt(score);
         resultBestBadge.classList.toggle("show", isBest && score > 0);
         resultMax.textContent = maxTierReached > 0 ? `いちばん大きな食材は「${topName}」！` : "";
-        if (maxTierReached >= MAX_TIER) {
+        if (reason === "manual") {
+          resultEmoji.textContent = "🍲";
+          resultSub.textContent = "ここまでのきろく！";
+        } else if (maxTierReached >= MAX_TIER) {
           resultEmoji.textContent = "👑";
           resultSub.textContent = "まさかの おいしいシッポ！？ でんせつ級！！";
         } else if (maxTierReached >= MAX_TIER - 1) {
@@ -2777,6 +2812,7 @@
       }
 
       function update(dt) {
+        if (endDialog.open) return;
         if (gameOver) {
           // 演出だけ進める
           updateFx(dt);
@@ -3154,6 +3190,19 @@
       document.getElementById("shuffleNo").addEventListener("click", () => shuffleDialog.close());
       shuffleDialog.addEventListener("click", (ev) => {
         if (ev.target === shuffleDialog) shuffleDialog.close();
+      });
+
+      endButton.addEventListener("click", () => {
+        if (gameOver || endDialog.open) return;
+        endDialog.showModal();
+      });
+      document.getElementById("endNo").addEventListener("click", () => endDialog.close());
+      document.getElementById("endYes").addEventListener("click", () => {
+        endDialog.close();
+        triggerGameOver("manual");
+      });
+      endDialog.addEventListener("click", (ev) => {
+        if (ev.target === endDialog) endDialog.close();
       });
 
       rulesButton.addEventListener("click", () => rulesDialog.showModal());
