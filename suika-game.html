@@ -2771,7 +2771,7 @@
           resultEmoji.textContent = "🍳";
           resultSub.textContent = "食材が あふれちゃった…";
         }
-        const shareText = `ごちそうできるかな！！ でエナジー ${fmt(score)} をためたよ🍲（いちばん大きな食材は ${topName}）#ごちそうできるかな`;
+        const shareText = `ごちそうできるかな！！ でエナジー ${fmt(score)} をためたよ🍲（料理 ${gameDishes}品・いちばん大きな食材は ${topName}）#ごちそうできるかな`;
         xShare.href = `https://x.com/intent/post?text=${encodeURIComponent(`${shareText}\n${SHARE_URL}`)}`;
         result.hidden = false;
       }

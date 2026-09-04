@@ -850,6 +850,10 @@ test('シューティングのXシェアはボス戦敗北時だけボス食材�
   assert.match(shooterSource, /タイトル「\$\{currentTitle\}」\）\$\{bossDefeatText\} #食材とれるかな/);
 });
 
+test('ごちそうできるかなのXシェアは今回完成した料理数を添える', () => {
+  assert.match(suikaSource, /料理 \$\{gameDishes\}品・いちばん大きな食材は \$\{topName\}/);
+});
+
 test('シューティングOGPは1200x630の大画像カードを使用する', () => {
   const image = fs.readFileSync(path.join(projectRoot, 'img/ogp/dopagaki-ogp.png'));
   assert.equal(image.readUInt32BE(16), 1200);
