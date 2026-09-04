@@ -863,6 +863,13 @@ test('シューティングのなべぶたは発動後30秒のクールダウン
   assert.match(shooterSource, /使ったあとは30秒待ち。/);
 });
 
+test('シューティング開始時のおこってる説明は文の途中で折り返さない', () => {
+  assert.match(shooterSource, /<span class="start-copy-line start-copy-lead">食材はおこってる。ゲームにされて おこってる。<\/span>/);
+  assert.match(shooterSource, /<span class="start-copy-line">弾も体当たりも ようしゃなし。<\/span>/);
+  assert.match(shooterSource, /\.start-copy-line \{[\s\S]*?display: block;[\s\S]*?white-space: nowrap;/);
+  assert.match(shooterSource, /\.start-copy-lead \{ margin-top: 1\.65em; \}/);
+});
+
 test('シューティングのXシェアはボス戦敗北時だけボス食材名を添える', () => {
   assert.match(shooterSource, /const bossName = bossRef \? bossRef\.def\.title\.replace\(\/\^ぬしの巨大\/, ""\) : "";/);
   assert.match(shooterSource, /const bossDefeatText = bossName \? ` \$\{bossName\}にやられた。` : "";/);
@@ -1028,6 +1035,8 @@ test('ごちそうできるかなは時間切れ終了を選ぶと最初から�
   assert.match(suikaSource, /timeUpEnd"\)\.addEventListener\("click"[\s\S]*?beginTimeLimitEnding\(\)/);
   assert.match(suikaFunctionSource('render'), /sprites\[doomLeek\.tier\][\s\S]*?ctx\.scale\(doomLeek\.scale, doomLeek\.scale\)/);
   assert.match(gameOver, /resultScore\.textContent = fmt\(score\)/);
+  assert.match(gameOver, /resultEmoji\.classList\.add\("timer-icon"\)[\s\S]*?<svg viewBox="0 0 48 48"/);
+  assert.doesNotMatch(gameOver, /resultEmoji\.textContent = "🥬"/);
   assert.match(gameOver, /reason === "time_limit"[\s\S]*?ばかでかいネギで 盤面いっぱい！/);
 });
 

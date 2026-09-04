@@ -562,6 +562,15 @@
 
     .overlay-sub strong { color: var(--orange-dark); }
 
+    .start-copy-line {
+      display: block;
+      font-size: clamp(.64rem, 2.9vw, .72rem);
+      letter-spacing: -.025em;
+      white-space: nowrap;
+    }
+
+    .start-copy-lead { margin-top: 1.65em; }
+
     .primary-button {
       display: grid;
       width: 100%;
@@ -1111,7 +1120,8 @@
               空とぶおなべで 食材をうって しゅうかく！<br>
               ちゅうもんの食材をそろえて <strong>料理かんせい</strong>。<br>
               よるには <strong>ぬし</strong>がやってくる。<br>
-              食材はおこってる。弾も体当たりも ようしゃなし。
+              <span class="start-copy-line start-copy-lead">食材はおこってる。ゲームにされて おこってる。</span>
+              <span class="start-copy-line">弾も体当たりも ようしゃなし。</span>
             </p>
             <button type="button" class="primary-button" id="startButton">スタート！</button>
           </div>

@@ -781,6 +781,19 @@
 
     .result-emoji { font-size: 2.2rem; line-height: 1; }
 
+    .result-emoji.timer-icon {
+      display: flex;
+      color: var(--orange-dark);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-emoji.timer-icon svg {
+      width: 42px;
+      height: 42px;
+      stroke: currentColor;
+    }
+
     .result-card h2 { margin: 8px 0 2px; font-size: 1.24rem; }
 
     .result-sub { margin: 0 0 12px; color: var(--muted); font-size: .74rem; font-weight: 800; }
@@ -3369,6 +3382,7 @@
           resultRank.textContent = "";
         }
         const topName = foodOf(maxTierReached).name;
+        resultEmoji.classList.remove("timer-icon");
         resultScore.textContent = fmt(score);
         resultBestBadge.classList.toggle("show", isBest && score > 0);
         resultMax.textContent = maxTierReached > 0 ? `いちばん大きな食材は「${topName}」！` : "";
@@ -3378,7 +3392,8 @@
           resultSub.textContent = "ここまでのきろく！";
         } else if (reason === "time_limit") {
           resultTitle.textContent = "タイムアップ！";
-          resultEmoji.textContent = "🥬";
+          resultEmoji.classList.add("timer-icon");
+          resultEmoji.innerHTML = '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M18 5h12M24 5v5M36 12l3 3" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="27" r="15" stroke-width="3.5"/><path d="M24 18v10l7 4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
           resultSub.textContent = "ばかでかいネギで 盤面いっぱい！";
         } else if (maxTierReached >= MAX_TIER) {
           resultTitle.textContent = "おしまい！";
