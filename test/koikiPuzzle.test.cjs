@@ -833,6 +833,16 @@ test('各ゲームはゲーム一覧を経由して献立表へ戻れる', () =>
   assert.match(shooterSource, /<title>食材とれるかな！！<\/title>/);
 });
 
+test('3ゲームの上部ナビはゲーム一覧と操作ボタンを2行に分ける', () => {
+  for (const gameSource of [source, suikaSource, shooterSource]) {
+    assert.match(gameSource, /\.topbar \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+    assert.match(gameSource, /<a class="back" href="games\.html">← ゲーム一覧へ<\/a>\s*<div class="topbar-actions">/);
+    assert.match(gameSource, /\.topbar-actions \{[^}]*justify-content: flex-end;/);
+  }
+  assert.match(survivalStyleSource, /\.topbar \{[\s\S]*?display: grid;[\s\S]*?grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(survivalStyleSource, /\.topbar-actions \{[^}]*justify-content: flex-end;/);
+});
+
 test('シューティングのなべぶたは発動後30秒のクールダウンを設ける', () => {
   assert.match(shooterSource, /const BOMB_COOLDOWN_SECONDS = 30;/);
   assert.match(shooterSource, /if \(bombCooldown > 0\)[\s\S]*?なべぶた あと\$\{Math\.ceil\(bombCooldown\)\}秒[\s\S]*?return false;/);

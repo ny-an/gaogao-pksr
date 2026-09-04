@@ -66,14 +66,16 @@
     }
 
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+      gap: 2px;
       min-height: 36px;
       margin-bottom: 2px;
     }
 
     .back {
+      justify-self: start;
       padding: 10px 4px;
       border: 0;
       color: var(--ink);
@@ -84,7 +86,7 @@
       text-decoration: none;
     }
 
-    .topbar-actions { display: flex; gap: 5px; }
+    .topbar-actions { display: flex; justify-content: flex-end; gap: 5px; }
 
     .chip-button {
       padding: 7px 9px;

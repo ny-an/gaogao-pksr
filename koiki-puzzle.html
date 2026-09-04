@@ -64,9 +64,10 @@
     }
 
     .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: stretch;
+      gap: 2px;
       min-height: 42px;
       margin-bottom: 6px;
     }
@@ -81,7 +82,9 @@
       text-decoration: none;
     }
 
-    .back { padding: 10px 4px; }
+    .back { justify-self: start; padding: 10px 4px; }
+
+    .topbar-actions { display: flex; justify-content: flex-end; gap: 5px; }
 
     .rules-button {
       padding: 8px 12px;
@@ -1615,7 +1618,9 @@
 <div class="page">
   <nav class="topbar" aria-label="ページ操作">
     <a class="back" href="games.html">← ゲーム一覧へ</a>
-    <button class="rules-button" id="rulesButton" type="button">あそびかた</button>
+    <div class="topbar-actions">
+      <button class="rules-button" id="rulesButton" type="button">あそびかた</button>
+    </div>
   </nav>
 
   <header class="title">

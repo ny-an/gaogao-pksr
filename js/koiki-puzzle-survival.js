@@ -2,7 +2,7 @@
 (() => {
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = 'css/koiki-puzzle-survival.css?v=20260902-1';
+  stylesheet.href = 'css/koiki-puzzle-survival.css?v=20260904-1';
   document.head.appendChild(stylesheet);
   document.title = 'お料理できるかな！！（サバイバル）';
   document.body.className = '';
