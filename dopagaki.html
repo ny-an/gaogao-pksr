@@ -3335,6 +3335,14 @@
         '<path d="M42 84c4-4 12-4 16 0" stroke="#fff7e5" stroke-width="3.2" stroke-linecap="round" fill="none"/>' +
         '<path d="M30 38c-3-8 3-10 1-16M50 36c-3-8 3-10 1-16M70 38c-3-8 3-10 1-16" stroke="#b3a89c" stroke-width="4" stroke-linecap="round" fill="none"/></svg>';
 
+      function bossDefeatShareText(boss) {
+        if (!boss) return "";
+        const bossName = boss.def.title.replace(/^ぬしの巨大/, "");
+        if (bossName !== "シッポ") return ` ${bossName}にやられた。`;
+        const remainingTenths = Math.min(10, Math.max(1, Math.ceil((boss.hp / boss.maxHp) * 10)));
+        return ` ${bossName}にやられた（のこり${remainingTenths}割）。`;
+      }
+
       function endRun() {
         mode = "over";
         const prevBest = best;
@@ -3353,8 +3361,7 @@
         resultAch.innerHTML = achNames.length
           ? `かくとくしたタイトル ${achNames.length}こ：<strong>${achNames.slice(0, 5).join("、")}</strong>${achNames.length > 5 ? ` ほか${achNames.length - 5}こ` : ""}`
           : `いまのタイトル：${currentTitle}`;
-        const bossName = bossRef ? bossRef.def.title.replace(/^ぬしの巨大/, "") : "";
-        const bossDefeatText = bossName ? ` ${bossName}にやられた。` : "";
+        const bossDefeatText = bossDefeatShareText(bossRef);
         const shareText = `食材とれるかな！！ でエナジー ${fmt(score)} ためたよ！（${totalMeals}食かんせい・タイトル「${currentTitle}」）${bossDefeatText} #食材とれるかな`;
         xShare.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(SHARE_URL)}`;
         resultOverlay.hidden = false;

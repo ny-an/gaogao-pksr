@@ -42,6 +42,15 @@ function suikaFunctionSource(name) {
   return suikaSource.slice(start, end);
 }
 
+function shooterFunctionSource(name) {
+  const start = shooterSource.indexOf(`function ${name}(`);
+  assert.notEqual(start, -1, `${name} is missing from shooting game`);
+  const next = shooterSource.indexOf('\n      function ', start + 1);
+  const end = next === -1 ? shooterSource.indexOf('\n      // ----', start + 1) : next;
+  assert.notEqual(end, -1, `${name} is incomplete in shooting game`);
+  return shooterSource.slice(start, end);
+}
+
 function v2SpawnFunctions(recipe, pot, activePalette) {
   return vm.runInNewContext(`(() => {
     ${v2FunctionSource('ingredientShortages')}
@@ -870,9 +879,18 @@ test('シューティング開始時のおこってる説明は文の途中で�
   assert.match(shooterSource, /\.start-copy-lead \{ margin-top: 1\.65em; \}/);
 });
 
-test('シューティングのXシェアはボス戦敗北時だけボス食材名を添える', () => {
-  assert.match(shooterSource, /const bossName = bossRef \? bossRef\.def\.title\.replace\(\/\^ぬしの巨大\/, ""\) : "";/);
-  assert.match(shooterSource, /const bossDefeatText = bossName \? ` \$\{bossName\}にやられた。` : "";/);
+test('シューティングのXシェアはシッポ戦敗北時だけ残りHPを割で添える', () => {
+  const bossDefeatShareText = vm.runInNewContext(`(${shooterFunctionSource('bossDefeatShareText')})`, { Math });
+  assert.equal(bossDefeatShareText(null), '');
+  assert.equal(
+    bossDefeatShareText({ def: { title: 'ぬしの巨大カカオ' }, hp: 120, maxHp: 240 }),
+    ' カカオにやられた。'
+  );
+  assert.equal(
+    bossDefeatShareText({ def: { title: 'ぬしの巨大シッポ' }, hp: 701, maxHp: 1400 }),
+    ' シッポにやられた（のこり6割）。'
+  );
+  assert.match(shooterSource, /const bossDefeatText = bossDefeatShareText\(bossRef\);/);
   assert.match(shooterSource, /タイトル「\$\{currentTitle\}」\）\$\{bossDefeatText\} #食材とれるかな/);
 });
 
