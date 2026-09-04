@@ -310,7 +310,7 @@
 
     .buff-bar {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 6px;
       margin-top: 8px;
     }
@@ -395,6 +395,37 @@
       font-size: .62rem;
       font-weight: 900;
       text-align: center;
+    }
+
+    .debug-loadout {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 7px;
+      border: 1px dashed #c9b9e5;
+      background: #f8f4ff;
+      font-size: .66rem;
+      font-weight: 900;
+    }
+    .debug-loadout[hidden] { display: none; }
+    .debug-loadout select,
+    .debug-loadout button {
+      min-height: 32px;
+      border: 1px solid #cfc4e6;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 900;
+    }
+    .debug-loadout select { min-width: 0; padding: 0 6px; }
+    .debug-loadout button { padding: 0 9px; cursor: pointer; }
+    .debug-loadout-actions {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
     }
 
     .order {
@@ -1148,6 +1179,17 @@
       </div>
 
       <div class="buff-bar" id="buffBar" aria-label="直近の食材弾（タップでロック）"></div>
+      <div class="debug-loadout" id="debugLoadout" hidden>
+        <strong>デバッグ装備</strong>
+        <select id="debugFoodSelect" aria-label="装備する食材"></select>
+        <button type="button" id="debugEquipButton">装備</button>
+        <div class="debug-loadout-actions">
+          <button type="button" id="debugBasicLoadoutButton">基本3種</button>
+          <button type="button" id="debugRandomLoadoutButton">おまかせ3種</button>
+          <button type="button" id="debugCoffeeRestButton">休憩を見る</button>
+          <button type="button" id="debugDefeatBossButton">ボス撃破</button>
+        </div>
+      </div>
       <p class="hint">そうびしてやっつけろ！</p>
     </main>
   </div>
@@ -1165,7 +1207,7 @@
       <div class="rules-skills">
         <p class="rules-skill"><strong>レシピLv（さいだい75）</strong><span>料理をつくるたびにアップ（さいしょは1品ごと、だんだん たくさん必要になる）。10Lvごとに きほんの弾が 連射・2連・3連・ゆらゆらとぶ弾・貫通するおおきな弾・おいかける星と強くなる。レシピLv1ごとに ぜんぶの食材弾に150expが上乗せされる。ぬしをたおすと かならず1あがる。スキル名は エナジーチャージS級→ゆめのかけらゲットS級→…→エナジーチャージM級 と強そうになっていくけど、とくにいみはない。</span></p>
         <p class="rules-skill"><strong>食材弾のLv（さいだい10）</strong><span>食材をたおすと、その食材の基礎エナジーぶんの経験値がたまって弾のLvがあがる。めったに出ないレアな食材（基礎エナジー101以上）は2倍もらえる。Lvがあがると連射が速くなり、Lv4・7・10で弾がふえ、Lv8からは左右にひろがる弾幕になる。たてになったり交代したりして装備を失っても、あがったLvは そのまま。</span></p>
-        <p class="rules-skill"><strong>食材弾（装備）</strong><span>うちおとした食材は、装備に空きがあれば そのまま装備される。基礎エナジー150以上の食材（カカオ・コーヒー・アボカド・キノコ・ながねぎ・カボチャ・シッポ）は、その食材のぬしをたおすまでロック（カボチャは日ようびのぬし）。一度たおせば ずっと装備できる。3つ埋まっているときは画面の左右の端に8秒うかび、タップで古いのと交代。装備した食材は ぜんぶ同時に、それぞれのペースで弾をうつ！どれも長所と短所がはっきり：リンゴは超はやい単発、エッグはスナイパー、コーンは近距離ショットガン、カカオは全弾追尾、コーヒーは超連射だけどぶれる、ハーブは燃やす、カボチャはばくだん…19種ぜんぶちがう。たてになったり交代したりで失うのは、基礎エナジーがひくい食材から。画面下のバーをタップすると1つだけロック（たてに使われるのは最後・交代もされない）。×ではずせる。</span></p>
+        <p class="rules-skill"><strong>食材弾（装備）</strong><span>うちおとした食材は、装備に空きがあれば そのまま装備される。基礎エナジー150以上の食材（カカオ・コーヒー・アボカド・キノコ・ながねぎ・カボチャ・シッポ）は、その食材のぬしをたおすまでロック（カボチャは日ようび前半）。一度たおせば ずっと装備できる。3つ埋まっているときは画面の左右の端に8秒うかび、タップで古いのと交代。装備した食材は ぜんぶ同時に、それぞれのペースで弾をうつ！どれも長所と短所がはっきり：リンゴは超はやい単発、エッグはスナイパー、コーンは近距離ショットガン、カカオは全弾追尾、コーヒーは超連射だけどぶれる、ハーブは燃やす、カボチャはばくだん…19種ぜんぶちがう。たてになったり交代したりで失うのは、基礎エナジーがひくい食材から。画面下のバーをタップすると1つだけロック（たてに使われるのは最後・交代もされない）。×ではずせる。</span></p>
         <p class="rules-skill"><strong>なべぶた（ボム）</strong><span>装備した食材を1つなげて（エナジーのひくいものから。ロック中はさいご）画面ぜんたいの弾をはらい、食材ぜんぶに大ダメージ。装備がないと つかえない。画面をすばやくダブルタップ、またはスペースキー。使ったあとは30秒待ち。</span></p>
       </div>
       <p class="rules-section-title">おこった食材たち</p>
@@ -1175,7 +1217,7 @@
         <p class="rules-tip"><strong>おとしてくる組</strong><span>大豆・トマト・エッグ・オイル・ポテトは タネをぽろぽろ落とす。</span></p>
         <p class="rules-tip"><strong>ねらってくる組</strong><span>ハーブ・ジンジャーは とうがらしをねらいうち。コーン・カカオ・アボカドは3方向。コーヒーは とにかくはやい。</span></p>
         <p class="rules-tip"><strong>キノコのほうし</strong><span>たおすと ほうしが まわりにひろがる。近くでたおすな！</span></p>
-        <p class="rules-tip"><strong>ぬし（曜日ごとに7種）</strong><span>よるにあらわれる巨大食材。登場から5秒は なにもしてこないし ダメージもうけない。月のハーブから 日のシッポまで だんだん強くなり、2週目からは 雑魚もぬしも 週ごとに どんどんかたくなる。たおすと レシピLvが かならず1あがる。</span></p>
+        <p class="rules-tip"><strong>ぬし（全8体）</strong><span>よるにあらわれる巨大食材。登場から5秒は なにもしてこないし ダメージもうけない。日ようびだけ、カボチャからシッポへ続く2連戦。曜日が進むほど一般食材の補給は少なくなる。2週目からは 雑魚もぬしも 週ごとに どんどんかたくなる。夜の料理を完成すると レシピLvが かならず1あがる。</span></p>
       </div>
       <div class="rules-tips">
         <p class="rules-tip"><strong>コンボ</strong><span>つづけてたおすとエナジー倍増（さいだい×5）。ダメージでリセット。</span></p>
@@ -1278,12 +1320,20 @@
       const BOSSES = [
         { food: "げきからハーブ",   hp: 220, pattern: "fan",    title: "ぬしの巨大ハーブ",     desc: "月ようびのぬし。5方向のとうがらしと 小ハーブの護衛。" },
         { food: "リラックスカカオ", hp: 240, pattern: "spiral", title: "ぬしの巨大カカオ",     desc: "火ようびのぬし。画面を周回しながら うずまきのタネをまく。" },
-        { food: "めざましコーヒー", hp: 260, pattern: "dash",   title: "ぬしの巨大コーヒー",   desc: "水ようびのぬし。カフェイン全開で ジグザグダッシュ。" },
-        { food: "つやつやアボカド", hp: 280, pattern: "split",  title: "ぬしの巨大アボカド",   desc: "木ようびのぬし。下までせまってきて、おおきなタネが とちゅうではじける。" },
-        { food: "あじわいキノコ",   hp: 300, pattern: "spore",  title: "ぬしの巨大キノコ",     desc: "金ようびのぬし。ほうしのわっかをまいて ワープする。" },
-        { food: "ふといながねぎ",   hp: 330, pattern: "lance",  title: "ぬしの巨大ながねぎ",   desc: "土ようびのぬし。ずっと突進してくる。" },
-        { food: "おいしいシッポ",   hp: 1400, pattern: "legend", title: "ぬしの巨大シッポ",     desc: "日ようびのぬし。でんせつの食材そのもの。カボチャの護衛つきで ぜんぶやってくる。ほぼ むりゲー。" },
+        { food: "めざましコーヒー", hp: 260, pattern: "dash",   strength: 1,    title: "ぬしの巨大コーヒー",   desc: "水ようびのぬし。猛攻をしのぐと 5秒だけひとやすみ。" },
+        { food: "つやつやアボカド", hp: 280, pattern: "split",  strength: 1.03, title: "ぬしの巨大アボカド",   desc: "木ようびのぬし。下までせまってきて、おおきなタネが とちゅうではじける。" },
+        { food: "あじわいキノコ",   hp: 300, pattern: "spore",  strength: 1.06, title: "ぬしの巨大キノコ",     desc: "金ようびのぬし。ほうしのわっかをまいて ワープする。" },
+        { food: "ふといながねぎ",   hp: 330, pattern: "lance",  strength: 1.09, title: "ぬしの巨大ながねぎ",   desc: "土ようびのぬし。ずっと突進してくる。" },
+        { food: "おいしいシッポ",   hp: 360, pattern: "legend", strength: 1.12, title: "ぬしの巨大シッポ",     desc: "日ようびの最終戦。突進・うずまき・ほうしを くりかえす。" },
       ];
+      const SUNDAY_PUMPKIN_BOSS = {
+        food: "ずっしりカボチャ",
+        hp: 300,
+        pattern: "fan",
+        strength: 1.1,
+        title: "ぬしの巨大カボチャ",
+        desc: "日ようびの前半戦。深くせり出して 5方向へタネをまく。",
+      };
 
       // ちゅうもん（ポケモンスリープの実在料理。needs はミニ化した必要数、
       // bonus は js/data/dishes.js の基礎エナジーそのまま）
@@ -1369,6 +1419,8 @@
       // count=一度にうつ数 / scatter=ぶれ / life=射程(秒) / burn=もえる / split2=2回はじける
       const EQUIP_MAX = 3;
       const PICKUP_LIFE = 8;
+      const COFFEE_ATTACK_SECONDS = 25;
+      const COFFEE_REST_SECONDS = 5;
       const FOOD_SHOT = {
         "とくせんリンゴ":     { color: "#EF3930", count: 1, speed: 2.2, rate: 1.3, desc: "リンゴ弾：超速の単発" },
         "モーモーミルク":     { color: "#f4f6ff", count: 1, size: 2.6, speed: 0.5, rate: 1.1, desc: "ミルク弾：巨大でおそい" },
@@ -1400,6 +1452,7 @@
       const MEALS_PER_WEEK = 21;     // 21食で1週間（koiki-puzzle-v2 と共通）
       const WEEKDAYS = ["月", "火", "水", "木", "金", "土", "日"];
       const MEAL_SLOTS = ["あさ", "ひる", "よる"];
+      const COMMON_FOOD_RATE_BY_WEEKDAY = [1, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70];
       const INTERLUDE_TIME = 2.8;    // 週末のひとやすみ
 
       // レシピLvとフィールドボーナス（ゲームをまたいで永続、他2作と同式）
@@ -1418,7 +1471,7 @@
         { id: "lv5", name: "レシピ じょうたつ", desc: "レシピLv5になる" },
         { id: "lv8", name: "ぜんぶのせ", desc: "レシピLv50になる" },
         { id: "boss_first", name: "ぬしと ごたいめん", desc: "ぬしを1体たおす" },
-        { id: "boss_all", name: "ぬし ハンター", desc: "7種のぬしを ぜんぶたおす" },
+        { id: "boss_all", name: "ぬし ハンター", desc: "8体のぬしを ぜんぶたおす" },
         { id: "foods_all", name: "食材 コンプ", desc: "19種の食材を ぜんぶしゅうかく" },
         { id: "dishes20", name: "やたいの エース", desc: "20種類の料理をつくる" },
         { id: "dishes50", name: "全レシピ コンプ", desc: "ぜんぶの料理をつくる" },
@@ -1453,7 +1506,7 @@
         { id: "wasted_combo", name: "もったいない", desc: "20コンボちゅうに ダメージをうける", hidden: true, hint: "ちょうしに のると" },
         { id: "week10", name: "ぎんがの りょうりばん", desc: "10週目にはいる", hidden: true, hint: "はるか さきの週" },
         { id: "million_run", name: "カンスト？", desc: "1回のプレイで100万エナジー", hidden: true, hint: "けたが たりない" },
-        { id: "tail_boss_nobomb", name: "でんせつ ごろし", desc: "日ようびのぬしを なべぶたなしでたおす", hidden: true, hint: "日ようびに フタをしないで" },
+        { id: "tail_boss_nobomb", name: "でんせつ ごろし", desc: "日ようびの2連戦を なべぶたなしでたおす", hidden: true, hint: "日ようびに フタをしないで" },
         { id: "legend", name: "怒破餓鬼 でんせつ", desc: "ほかのアチーブメントを ぜんぶかくとく", hidden: true, hint: "すべてを こえたさきに" },
       ];
       const ACH_BY_ID = {};
@@ -1473,6 +1526,13 @@
       const powerLv = $("powerLv");
       const powerDesc = $("powerDesc");
       const buffBar = $("buffBar");
+      const debugLoadout = $("debugLoadout");
+      const debugFoodSelect = $("debugFoodSelect");
+      const debugEquipButton = $("debugEquipButton");
+      const debugBasicLoadoutButton = $("debugBasicLoadoutButton");
+      const debugRandomLoadoutButton = $("debugRandomLoadoutButton");
+      const debugCoffeeRestButton = $("debugCoffeeRestButton");
+      const debugDefeatBossButton = $("debugDefeatBossButton");
       const orderCard = $("orderCard");
       const orderLabel = $("orderLabel");
       const orderName = $("orderName");
@@ -1519,7 +1579,7 @@
       let best = 0;
       let recipeLv = {};
       let dishesCooked = 0;
-      let secrets = { tail: false, wildTail: false, bosses: [], recipes: [] };
+      let secrets = { tail: false, wildTail: false, pumpkinBoss: false, bosses: [], recipes: [] };
       let muted = false;
       let achGot = [];
       let stats = { harvest: 0, energy: 0, maxCombo: 0, foods: [], foodKills: {}, weeks: 0, pauses: 0, escaped: 0, mushroomEscapes: 0 };
@@ -1537,7 +1597,7 @@
       {
         const s = loadJson(LS("secrets"), null);
         if (s && typeof s === "object") {
-          secrets = { tail: !!s.tail, wildTail: !!s.wildTail, bosses: Array.isArray(s.bosses) ? s.bosses : [], recipes: Array.isArray(s.recipes) ? s.recipes : [] };
+          secrets = { tail: !!s.tail, wildTail: !!s.wildTail, pumpkinBoss: !!s.pumpkinBoss, bosses: Array.isArray(s.bosses) ? s.bosses : [], recipes: Array.isArray(s.recipes) ? s.recipes : [] };
         }
         const a = loadJson(LS("ach"), null);
         if (Array.isArray(a)) achGot = a.filter((id) => ACH_BY_ID[id]);
@@ -1679,6 +1739,7 @@
       const comboMult = () => Math.max(1, Math.min(combo, COMBO_MULT_CAP));
       const mealSlot = () => mealsRun % 3;
       const weekday = () => Math.floor(Math.min(mealsRun, MEALS_PER_WEEK - 1) / 3);
+      const commonFoodRate = () => COMMON_FOOD_RATE_BY_WEEKDAY[weekday()];
 
       // ---- HUD --------------------------------------------------------
       const HEART_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21C7 16.6 2.5 13 2.5 8.6 2.5 5.6 4.9 3.5 7.6 3.5c1.8 0 3.4.9 4.4 2.4 1-1.5 2.6-2.4 4.4-2.4 2.7 0 5.1 2.1 5.1 5.1 0 4.4-4.5 8-9.5 12.4z" fill="#e85f5c"/></svg>';
@@ -1744,8 +1805,8 @@
         });
         return idx < 0 ? equippedFoods.length - 1 : idx;
       }
-      function equipFood(name) {
-        if (!FOOD_SHOT[name] || equippedFoods.includes(name) || foodLocked(name)) return false;
+      function equipFood(name, ignoreLock = false) {
+        if (!FOOD_SHOT[name] || equippedFoods.includes(name) || (!ignoreLock && foodLocked(name))) return false;
         if (equippedFoods.length >= EQUIP_MAX) {
           // ロック中のものは交代しない（いちばん古い ロックなしと交代）
           const idx = weakestEquipIndex();
@@ -1761,6 +1822,12 @@
         renderBuffBar();
         return true;
       }
+      function setDebugLoadout(names) {
+        equippedFoods = [];
+        lockedFood = null;
+        for (const k of Object.keys(foodFire)) delete foodFire[k];
+        names.slice(0, EQUIP_MAX).forEach((name) => equipFood(name, true));
+      }
       function unequipFood(i) {
         const name = equippedFoods[i];
         if (!name) return;
@@ -1773,15 +1840,21 @@
       }
       // うちおとした食材が画面の左右にうかぶ
       const PICKUP_YS = [250, 322, 394];
-      // 基礎エナジー150以上の食材弾は、その食材のぬしをたおすまでロック（カボチャは日ようびのぬし）
+      // 基礎エナジー150以上の食材弾は、その食材のぬしをたおすまでロック
       const FOOD_LOCK_ENERGY = 150;
       function foodLockBoss(name) {
         const f = FOODS[FOOD_BY_NAME[name]];
         if (!f || f.energy < FOOD_LOCK_ENERGY) return null;
+        if (name === SUNDAY_PUMPKIN_BOSS.food) return SUNDAY_PUMPKIN_BOSS;
         const i = BOSSES.findIndex((b) => b.food === name);
-        return BOSSES[i >= 0 ? i : BOSSES.length - 1];
+        return i >= 0 ? BOSSES[i] : null;
       }
-      const foodLocked = (name) => { const b = foodLockBoss(name); return !!b && !secrets.bosses.includes(BOSSES.indexOf(b)); };
+      const foodLocked = (name) => {
+        const b = foodLockBoss(name);
+        if (!b) return false;
+        if (b === SUNDAY_PUMPKIN_BOSS) return !secrets.pumpkinBoss;
+        return !secrets.bosses.includes(BOSSES.indexOf(b));
+      };
       function spawnPickup(name, x, y) {
         if (!FOOD_SHOT[name] || equippedFoods.includes(name)) return;
         if (foodLocked(name)) { addPopup(x, y - 22, `${foodLockBoss(name).title}を たおすと装備できる`, "#7d7269", 11); return; }
@@ -1938,7 +2011,7 @@
         sideOrder = null;
         if (mealSlot() === 2) {
           // よる＝ぬし。ぬしが食材をもっているので、たおせば料理がかんせいする。あいだにも ふつうのちゅうもんをつくれる
-          const boss = BOSSES[weekday()];
+          const boss = weekday() === 6 ? SUNDAY_PUMPKIN_BOSS : BOSSES[weekday()];
           order = { recipe: pick(eligibleRecipes()), got: {}, boss };
           lastRecipeName = order.recipe.name;
           sideOrder = makeOrder();
@@ -2161,7 +2234,7 @@
         showBanner("なにかが ものすごいスピードで とんでいく！");
         sfxTail();
       }
-      function spawnBoss(def) {
+      function spawnBoss(def, { keepBombCount = false } = {}) {
         const idx = FOOD_BY_NAME[def.food];
         const hp = Math.round(def.hp * 1.5 * (1 + 0.7 * (week - 1)));
         bossRef = makeEnemy(idx, WORLD.w / 2, -80, {
@@ -2182,7 +2255,7 @@
         enemies.push(bossRef);
         ebullets = [];
         bossTime = 0;
-        bombsThisBoss = 0;
+        if (!keepBombCount) bombsThisBoss = 0;
         showBanner(`${def.title}が あらわれた！`);
         sfxBoss();
         shake = Math.max(shake, 0.5);
@@ -2200,7 +2273,7 @@
         if (spawnT > 0) return;
         const d = diff();
         const bossMul = bossRef ? 2.1 : 1;
-        spawnT = Math.max(0.42, 1.15 - d * 0.008) * rand(0.8, 1.2) * bossMul;
+        spawnT = (Math.max(0.42, 1.15 - d * 0.008) * rand(0.8, 1.2) * bossMul) / commonFoodRate();
         if (!bossRef && mealsRun >= 2 && tailsSpawned < 1 && Math.random() < 0.012) { spawnTail(); return; }
         const roll = Math.random();
         if (bossRef) { if (roll < 0.7) spawnDrift(); else spawnColumn(); return; }
@@ -2400,6 +2473,7 @@
       function defeatBoss(e) {
         bossRef = null;
         const def = e.def;
+        const isSundayPrelude = def === SUNDAY_PUMPKIN_BOSS;
         const idx = e.foodIdx;
         const bonus = withFb(FOODS[idx].energy * 10 * week);
         addScore(bonus);
@@ -2412,7 +2486,11 @@
         noteFoodKill(FOODS[idx].name, 3);
         bossLvBonus = runLv; // たおしたあとの料理でLvがあがらなければ、かならず1あげる
         const wd = BOSSES.indexOf(def);
-        if (!secrets.bosses.includes(wd)) {
+        if (isSundayPrelude && !secrets.pumpkinBoss) {
+          secrets.pumpkinBoss = true;
+          persistSecrets();
+          showBanner("カボチャの弾が 装備できるようになった！");
+        } else if (wd >= 0 && !secrets.bosses.includes(wd)) {
           secrets.bosses.push(wd);
           persistSecrets();
           const freed = FOODS.filter((f) => foodLockBoss(f.name) === def).map((f) => f.name);
@@ -2425,11 +2503,20 @@
           if (bombsThisBoss === 0) unlock("tail_boss_nobomb");
         }
         unlock("boss_first");
-        if (secrets.bosses.length >= BOSSES.length) unlock("boss_all");
+        if (secrets.pumpkinBoss && secrets.bosses.length >= BOSSES.length) unlock("boss_all");
         if (e.defeatedBy === "big") unlock("big_finish");
         if (e.defeatedBy === "bomb") unlock("bomb_finish");
         if (bossTime <= 20) unlock("fast_boss");
         ebullets = [];
+        if (isSundayPrelude) {
+          enemies = [];
+          const finalBoss = BOSSES[6];
+          order.boss = finalBoss;
+          spawnBoss(finalBoss, { keepBombCount: true });
+          showBanner("日ようび後半戦！ つぎは巨大シッポ！");
+          renderOrder();
+          return;
+        }
         cookDish();
         if (runLv === bossLvBonus && runLv < RUN_LV_MAX) { xp = runLvXp(runLv + 1); gainXp(0); }
       }
@@ -2560,10 +2647,12 @@
         if (e.intro > 0) e.intro -= dt;
         if (e.y < e.targetY && !e.entered) { e.y += e.vy * dt * 1.6; if (e.y >= e.targetY) e.entered = true; return; }
         if (e.intro > 0) { e.x += (WORLD.w / 2 - e.x) * dt; e.y = e.targetY + Math.sin(e.t * 2) * 4; e.fireT = Math.max(e.fireT, 0.8); return; }
+        e.activeT = (e.activeT || 0) + dt;
         const amp = WORLD.w / 2 - 84;
         const pat = e.def.pattern;
         const shotSpeed = 150 + wk * 14 + d * 0.5;
         const cx = WORLD.w / 2;
+        dt *= e.def.strength || 1;
 
         if (pat === "fan") {
           // カボチャ：8の字にゆれながら、ときどき下までせりだしてくる
@@ -2645,7 +2734,24 @@
             sfxEnemyShot();
           }
         } else if (pat === "dash") {
-          // コーヒー：ジグザグに画面じゅうをかけまわる。とまったしゅんかんにねらいうち
+          // コーヒー：25秒の猛攻と5秒の休憩をくりかえす。休憩中は超スローで攻撃しない
+          const cycle = COFFEE_ATTACK_SECONDS + COFFEE_REST_SECONDS;
+          const resting = e.activeT % cycle >= COFFEE_ATTACK_SECONDS;
+          if (resting) {
+            if (!e.resting) {
+              e.resting = true;
+              showBanner("コーヒーが ひとやすみ！ いまだ！");
+            }
+            e.moveT = 0;
+            e.x += (cx - e.x) * Math.min(1, dt * 0.12);
+            e.y += (e.targetY - e.y) * Math.min(1, dt * 0.12);
+            return;
+          }
+          if (e.resting) {
+            e.resting = false;
+            e.moveT = 0;
+            showBanner("コーヒーが また動きだした！");
+          }
           if (e.moveT == null) { e.moveT = 0; e.mx = e.x; e.my = e.y; e.nx = e.x; e.ny = e.y; }
           e.moveT -= dt;
           if (e.moveT <= 0) {
@@ -2718,11 +2824,9 @@
           }
           e.miniT -= dt;
           if (e.miniT <= 0) {
-            e.miniT = 6;
-            e.miniAlt = !e.miniAlt;
-            // 護衛も むりゲー級：カボチャは3方向にとうがらし、シッポはかたい
-            if (e.miniAlt) spawnMini("ずっしりカボチャ", rand(60, WORLD.w - 60), e.y + 40, { hp: 45, r: 22, energy: 250, attack: "fan", armed: true, speed: 0.6 });
-            else spawnMini("おいしいシッポ", rand(60, WORLD.w - 60), e.y + 40, { hp: 30, energy: 342, speed: 0.8 });
+            e.miniT = 7.5;
+            // カボチャは前半戦で決着済み。後半はシッポの分身だけが援護する
+            spawnMini("おいしいシッポ", rand(60, WORLD.w - 60), e.y + 40, { hp: 30, energy: 342, speed: 0.8 });
           }
         }
       }
@@ -3271,7 +3375,8 @@
         ctx.font = "1000 11px 'M PLUS 1p', system-ui, sans-serif";
         ctx.textAlign = "center";
         const dish = order && order.boss ? `  たおすと ${order.recipe.name}` : "";
-        ctx.fillText(`${bossRef.def.title}  ${Math.max(0, bossRef.hp)}/${bossRef.maxHp}${dish}`, WORLD.w / 2, y - 6);
+        const rest = bossRef.resting ? "  ひとやすみ中！" : "";
+        ctx.fillText(`${bossRef.def.title}  ${Math.max(0, bossRef.hp)}/${bossRef.maxHp}${rest}${dish}`, WORLD.w / 2, y - 6);
       }
 
       function draw() {
@@ -3420,6 +3525,15 @@
         resultOverlay.hidden = true;
         startOverlay.hidden = true;
         mode = "play";
+      }
+
+      function startDebugBoss(index) {
+        startNewRun();
+        const bossIndex = clamp(Math.round(index), 0, BOSSES.length - 1);
+        mealsRun = bossIndex * 3 + 2;
+        newOrder();
+        ["とくせんリンゴ", "モーモーミルク", "ワカクサ大豆"].forEach((name) => equipFood(name));
+        updateMeta();
       }
 
       // ---- 入力 -------------------------------------------------------
@@ -3715,9 +3829,14 @@
         }
       });
       function renderSecretDex() {
+        const bossEntries = [
+          ...BOSSES.slice(0, 6).map((b, i) => ({ found: secrets.bosses.includes(i), img: FOODS[FOOD_BY_NAME[b.food]].img, name: b.title, desc: b.desc })),
+          { found: secrets.pumpkinBoss, img: FOODS[FOOD_BY_NAME[SUNDAY_PUMPKIN_BOSS.food]].img, name: SUNDAY_PUMPKIN_BOSS.title, desc: SUNDAY_PUMPKIN_BOSS.desc },
+          { found: secrets.bosses.includes(6), img: FOODS[FOOD_BY_NAME[BOSSES[6].food]].img, name: BOSSES[6].title, desc: BOSSES[6].desc },
+        ];
         const entries = [
           { found: secrets.wildTail, img: "SlowpokeTail", name: "野生のおいしいシッポ", desc: "ものすごいスピードで空をよこぎる でんせつの食材。とてつもなくかたく、うちおとすのは ほぼむり…（エナジー342）" },
-          ...BOSSES.map((b, i) => ({ found: secrets.bosses.includes(i), img: FOODS[FOOD_BY_NAME[b.food]].img, name: b.title, desc: b.desc })),
+          ...bossEntries,
           ...SECRET_RECIPES.map((r) => ({ found: secrets.recipes.includes(r.name), img: null, name: r.name, desc: `シークレットレシピ（+${fmt(r.bonus)}）。おいしいシッポで つくる ごちそう。` })),
         ];
         const foundCount = entries.filter((e) => e.found).length;
@@ -3773,16 +3892,49 @@
       }
 
       // ---- デバッグフック（?debug 付きURLのみ。自動検証用） -----------
-      if (location.search.includes("debug")) {
+      const debugParams = new URLSearchParams(location.search);
+      const debugMode = debugParams.has("debug");
+      if (debugMode) {
+        debugLoadout.hidden = false;
+        FOODS.forEach((food) => {
+          const option = document.createElement("option");
+          option.value = food.name;
+          option.textContent = `${food.name}（${FOOD_SHOT[food.name].desc.split("：")[1]}）`;
+          debugFoodSelect.appendChild(option);
+        });
+        debugFoodSelect.value = "めざましコーヒー";
+        debugEquipButton.addEventListener("click", () => equipFood(debugFoodSelect.value, true));
+        debugBasicLoadoutButton.addEventListener("click", () => setDebugLoadout(["とくせんリンゴ", "モーモーミルク", "ワカクサ大豆"]));
+        debugRandomLoadoutButton.addEventListener("click", () => {
+          const choices = FOODS.map((food) => food.name);
+          for (let i = choices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choices[i], choices[j]] = [choices[j], choices[i]];
+          }
+          setDebugLoadout(choices);
+        });
+        debugCoffeeRestButton.addEventListener("click", () => {
+          if (!bossRef || bossRef.def.pattern !== "dash") return;
+          bossRef.intro = 0;
+          bossRef.entered = true;
+          bossRef.y = bossRef.targetY;
+          bossRef.activeT = COFFEE_ATTACK_SECONDS - 0.5;
+          bossRef.resting = false;
+          ebullets = [];
+          showBanner("まもなく コーヒーがひとやすみ");
+        });
+        debugDefeatBossButton.addEventListener("click", () => {
+          if (bossRef) damageEnemy(bossRef, 99999, "debug");
+        });
         window.__dopagaki = {
           step(dt = 1 / 60, n = 1) { for (let i = 0; i < n; i++) if (mode === "play") update(dt); draw(); },
           state() {
             return {
               mode, score, week, mealsRun, shields: equippedFoods.length, bombs: equippedFoods.length, xp, weaponLv: runLv, tier: weaponIdx + 1, combo,
               enemies: enemies.length, pbullets: pbullets.length, ebullets: ebullets.length,
-              order: order && order.recipe.name, boss: bossRef ? { title: bossRef.def.title, hp: bossRef.hp, maxHp: bossRef.maxHp } : null,
+              order: order && order.recipe.name, boss: bossRef ? { title: bossRef.def.title, hp: bossRef.hp, maxHp: bossRef.maxHp, resting: !!bossRef.resting, activeT: +(bossRef.activeT || 0).toFixed(2) } : null,
               got: order && { ...order.got }, side: sideOrder && { name: sideOrder.recipe.name, got: { ...sideOrder.got } }, dishesCooked, fb: fbPercent(), runKills, interlude,
-              bombCooldown: +bombCooldown.toFixed(2),
+              bombCooldown: +bombCooldown.toFixed(2), commonFoodRate: commonFoodRate(),
               ach: achGot.slice(), secrets: JSON.parse(JSON.stringify(secrets)), stats: JSON.parse(JSON.stringify(stats)),
             };
           },
@@ -3797,7 +3949,7 @@
           unlockBoss: (i) => { if (!secrets.bosses.includes(i)) secrets.bosses.push(i); },
           foodLv: (name) => ({ kill: foodKillLv(name), shot: foodShotLv(name), exp: foodExp[name] || 0, total: foodTotalExp(name) }),
           spawnPickup,
-          equip: (name) => equipFood(name),
+          equip: (name) => equipFood(name, true),
           unequip: (i) => unequipFood(i),
           tap: (x, y) => tapPickup(x, y),
           equipped: () => ({ list: equippedFoods.slice(), locked: lockedFood }),
@@ -3816,6 +3968,7 @@
           listEnemies: () => enemies.map((e) => ({ kind: e.kind, name: FOODS[e.foodIdx].name, hp: e.hp, armed: e.armed, x: Math.round(e.x), y: Math.round(e.y) })),
           listBullets: () => ebullets.map((b) => b.kind),
           resetSave() { ["best", "recipeLv", "dishes", "secrets", "ach", "stats", "title", "muted"].forEach((k) => localStorage.removeItem(LS(k))); },
+          startBoss: (i) => startDebugBoss(i),
         };
       }
 
@@ -3828,6 +3981,8 @@
       updateMeta();
       newOrder();
       updateScoreUI();
+      if (debugMode && debugParams.get("boss") === "coffee") startDebugBoss(2);
+      if (debugMode && debugParams.get("boss") === "pumpkin") startDebugBoss(6);
       requestAnimationFrame(loop);
     })();
   </script>

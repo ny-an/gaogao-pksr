@@ -894,6 +894,65 @@ test('シューティングのXシェアはシッポ戦敗北時だけ残りHP�
   assert.match(shooterSource, /タイトル「\$\{currentTitle\}」\）\$\{bossDefeatText\} #食材とれるかな/);
 });
 
+test('シューティングはデバッグURLからコーヒーボス戦を開始できる', () => {
+  const startDebugBoss = shooterFunctionSource('startDebugBoss');
+  assert.match(startDebugBoss, /mealsRun = bossIndex \* 3 \+ 2/);
+  assert.match(startDebugBoss, /\["とくせんリンゴ", "モーモーミルク", "ワカクサ大豆"\]\.forEach/);
+  assert.match(shooterSource, /debugParams\.get\("boss"\) === "coffee"\) startDebugBoss\(2\)/);
+  assert.match(shooterSource, /startBoss: \(i\) => startDebugBoss\(i\)/);
+});
+
+test('シューティングのデバッグ画面では装備を選んで変更できる', () => {
+  assert.match(shooterSource, /id="debugLoadout" hidden/);
+  assert.match(shooterSource, /debugLoadout\.hidden = false/);
+  assert.match(shooterSource, /debugEquipButton\.addEventListener\("click", \(\) => equipFood\(debugFoodSelect\.value, true\)\)/);
+  assert.match(shooterSource, /function setDebugLoadout\(names\)/);
+  assert.match(shooterSource, /debugRandomLoadoutButton\.addEventListener/);
+  assert.match(shooterSource, /debugDefeatBossButton\.addEventListener\("click"[\s\S]*?damageEnemy\(bossRef, 99999, "debug"\)/);
+});
+
+test('シューティングのコーヒーボスは25秒攻撃して5秒休む', () => {
+  const updateBoss = shooterFunctionSource('updateBoss');
+  assert.match(shooterSource, /const COFFEE_ATTACK_SECONDS = 25/);
+  assert.match(shooterSource, /const COFFEE_REST_SECONDS = 5/);
+  assert.match(updateBoss, /e\.activeT % cycle >= COFFEE_ATTACK_SECONDS/);
+  assert.match(updateBoss, /コーヒーが ひとやすみ！ いまだ！/);
+  assert.match(updateBoss, /dt \* 0\.12/);
+  assert.match(updateBoss, /if \(resting\)[\s\S]*?return;/);
+  assert.match(shooterSource, /bossRef\.activeT = COFFEE_ATTACK_SECONDS - 0\.5/);
+});
+
+test('シューティングのコーヒー以降はボス強度が少しずつ上がる', () => {
+  assert.match(shooterSource, /pattern: "dash",\s+strength: 1,/);
+  assert.match(shooterSource, /pattern: "split",\s+strength: 1\.03,/);
+  assert.match(shooterSource, /pattern: "spore",\s+strength: 1\.06,/);
+  assert.match(shooterSource, /pattern: "lance",\s+strength: 1\.09,/);
+  assert.match(shooterSource, /hp: 360, pattern: "legend", strength: 1\.12,/);
+});
+
+test('シューティングの日曜夜はカボチャからシッポへの2連戦になる', () => {
+  const newOrder = shooterFunctionSource('newOrder');
+  const defeatBoss = shooterFunctionSource('defeatBoss');
+  const foodLockBoss = shooterFunctionSource('foodLockBoss');
+  assert.match(shooterSource, /const SUNDAY_PUMPKIN_BOSS = \{[\s\S]*?food: "ずっしりカボチャ"[\s\S]*?hp: 300/);
+  assert.match(newOrder, /weekday\(\) === 6 \? SUNDAY_PUMPKIN_BOSS : BOSSES\[weekday\(\)\]/);
+  assert.match(defeatBoss, /const isSundayPrelude = def === SUNDAY_PUMPKIN_BOSS/);
+  assert.match(defeatBoss, /secrets\.pumpkinBoss = true/);
+  assert.match(defeatBoss, /order\.boss = finalBoss;[\s\S]*?spawnBoss\(finalBoss, \{ keepBombCount: true \}\);[\s\S]*?return;[\s\S]*?cookDish\(\);/);
+  assert.match(foodLockBoss, /name === SUNDAY_PUMPKIN_BOSS\.food/);
+  assert.match(shooterSource, /secrets\.pumpkinBoss && secrets\.bosses\.length >= BOSSES\.length/);
+  assert.match(shooterSource, /debugParams\.get\("boss"\) === "pumpkin"\) startDebugBoss\(6\)/);
+  assert.match(shooterSource, /日ようびだけ、カボチャからシッポへ続く2連戦/);
+});
+
+test('シューティングの一般食材は曜日が進むほど少なくなる', () => {
+  const spawnTick = shooterFunctionSource('spawnTick');
+  assert.match(shooterSource, /const COMMON_FOOD_RATE_BY_WEEKDAY = \[1, 0\.95, 0\.90, 0\.85, 0\.80, 0\.75, 0\.70\]/);
+  assert.match(shooterSource, /const commonFoodRate = \(\) => COMMON_FOOD_RATE_BY_WEEKDAY\[weekday\(\)\]/);
+  assert.match(spawnTick, /\* bossMul\) \/ commonFoodRate\(\)/);
+  assert.match(shooterSource, /曜日が進むほど一般食材の補給は少なくなる/);
+});
+
 test('ごちそうできるかなのXシェアは今回完成した料理数を添える', () => {
   assert.match(suikaSource, /料理 \$\{gameDishes\}品・いちばん大きな食材は \$\{topName\}/);
 });
