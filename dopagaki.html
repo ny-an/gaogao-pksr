@@ -625,6 +625,8 @@
     }
 
     .primary-button:active { transform: translateY(2px); box-shadow: none; }
+    .resume-new { margin-top: 14px; padding: 8px; border: 0; background: none; color: var(--muted); font: inherit; font-size: .78rem; cursor: pointer; }
+    .run-save-status { margin: 8px 12px 0; min-height: 1em; text-align: right; color: var(--muted); font-size: .65rem; }
 
     .result-score-box {
       display: grid;
@@ -1162,6 +1164,7 @@
               <span class="start-copy-line">弾も体当たりも ようしゃなし。</span>
             </p>
             <button type="button" class="primary-button" id="startButton">スタート！</button>
+            <button type="button" class="resume-new" id="newRunButton" hidden>はじめから</button>
           </div>
         </div>
 
@@ -1186,6 +1189,7 @@
       </div>
 
       <div class="buff-bar" id="buffBar" aria-label="直近の食材弾（タップでロック）"></div>
+      <p class="run-save-status" id="runSaveStatus" role="status"></p>
       <div class="debug-loadout" id="debugLoadout" hidden>
         <strong>デバッグ装備</strong>
         <select id="debugFoodSelect" aria-label="装備する食材"></select>
@@ -1633,9 +1637,11 @@
           localStorage.setItem(LS("recipeLv"), JSON.stringify(recipeLv));
           localStorage.setItem(LS("dishes"), String(dishesCooked));
         } catch (_) {}
+        queueRunSave();
       }
       function persistSecrets() {
         try { localStorage.setItem(LS("secrets"), JSON.stringify(secrets)); } catch (_) {}
+        queueRunSave();
       }
       function persistBest() {
         try { localStorage.setItem(LS("best"), String(best)); } catch (_) {}
@@ -1646,6 +1652,7 @@
           localStorage.setItem(LS("stats"), JSON.stringify(stats));
           localStorage.setItem(LS("title"), currentTitle);
         } catch (_) {}
+        queueRunSave();
       }
 
       const recipeLevel = (name) => Math.min(RECIPE_LV_MAX, Math.max(1, Number(recipeLv[name]) || 1));
@@ -1762,6 +1769,167 @@
       let dishHistory = [];      // このプレイでつくった料理名（直近）
       let todayDishes = [];
       const keys = {};
+
+      // 途中セーブは進行と累積記録を同じJSONへ保存する。料理獲得とセーブの間で
+      // 終了しても、再開時に同じ料理・報酬だけを二重加算しない。
+      const RUN_SAVE_VERSION = 1;
+      const RUN_SAVE_INTERVAL = 1000;
+      let lastRunRaw = null;
+      let lastRunSaveAt = 0;
+      let runSaveQueued = false;
+      let runSaveBlocked = false;
+      let resumeAvailable = false;
+      const initialStartTitle = startTitle.textContent;
+      const initialStartSub = startSub.innerHTML;
+      const savedRecipe = (name) => RECIPES.find((r) => r.name === name);
+      const savedBoss = (food) => [SUNDAY_PUMPKIN_BOSS, ...BOSSES].find((b) => b.food === food);
+      const packOrder = (o) => o && ({ recipe: o.recipe.name, got: o.got, boss: o.boss ? o.boss.food : null });
+      const unpackOrder = (o) => o && ({ recipe: savedRecipe(o.recipe), got: o.got, ...(o.boss ? { boss: savedBoss(o.boss) } : {}) });
+      function snapshotRun() {
+        return {
+          version: RUN_SAVE_VERSION, savedAt: Date.now(),
+          run: {
+            score, week, mealsRun, bombs, xp, weaponIdx, runLv, volley, equippedFoods, lockedFood,
+            foodFire, foodExp, debugFoodLevels, pickups, combo, comboTimer,
+            order: packOrder(order), sideOrder: packOrder(sideOrder), lastRecipeName,
+            pendingSecret: pendingSecret ? pendingSecret.name : null,
+            enemies: enemies.map((e) => ({ ...e, ...(e.def ? { def: e.def.food } : {}) })),
+            pbullets: pbullets.map((b) => ({ ...b, ...(b.hit ? { hit: [...b.hit] } : {}) })),
+            ebullets, particles, popups, player, fireT, spawnT, shake, flash, bombCooldown, invuln,
+            interlude, interludeText, tGlobal, tailsSpawned, bossId: bossRef ? bossRef.id : null,
+            bossTime, bombsThisBoss, bossLvBonus, chip, enemySeq, runKills, runAch,
+            weeksThisRun, hitsThisDay, hitsThisWeek, bombsThisWeek, weekEnergy, dishHistory, todayDishes,
+          },
+          progress: { best, recipeLv, dishesCooked, secrets, achGot, stats, currentTitle },
+        };
+      }
+      function validRunSave(data) {
+        // 壊れた/将来バージョンのセーブを部分復元しない。定義オブジェクトは名前で解決する。
+        const object = (v) => v && typeof v === "object" && !Array.isArray(v);
+        const safeTree = (v, depth = 0) => depth < 20 && (typeof v === "number" ? Number.isFinite(v) :
+          v && typeof v === "object" ? Object.entries(v).every(([k, x]) => !["__proto__", "constructor", "prototype"].includes(k) && safeTree(x, depth + 1)) :
+          v === null || ["string", "boolean"].includes(typeof v));
+        if (!object(data) || data.version !== RUN_SAVE_VERSION || !safeTree(data) || !object(data.run) || !object(data.progress)) return false;
+        const r = data.run, p = data.progress;
+        const numbers = "score week mealsRun bombs xp weaponIdx runLv volley combo comboTimer fireT spawnT shake flash bombCooldown invuln interlude tGlobal tailsSpawned bossTime bombsThisBoss bossLvBonus chip enemySeq runKills weeksThisRun hitsThisDay hitsThisWeek bombsThisWeek weekEnergy".split(" ");
+        if (!numbers.every((k) => typeof r[k] === "number") || !Number.isInteger(r.week) || r.week < 1 || !Number.isInteger(r.mealsRun) || r.mealsRun < 0 || r.mealsRun >= MEALS_PER_WEEK || !Number.isInteger(r.runLv) || r.runLv < 1 || r.runLv > RUN_LV_MAX || r.weaponIdx !== tierOf(r.runLv)) return false;
+        const foods = (list) => Array.isArray(list) && list.every((name) => FOOD_BY_NAME[name] != null);
+        const foodMap = (v) => object(v) && Object.entries(v).every(([name, n]) => FOOD_BY_NAME[name] != null && typeof n === "number");
+        const recipeList = (v) => Array.isArray(v) && v.every((name) => !!savedRecipe(name));
+        const achList = (v) => Array.isArray(v) && v.every((id) => !!ACH_BY_ID[id]);
+        const validOrder = (o) => object(o) && !!savedRecipe(o.recipe) && foodMap(o.got) && (o.boss === null || !!savedBoss(o.boss));
+        if (!validOrder(r.order) || (r.sideOrder !== null && !validOrder(r.sideOrder)) || (r.pendingSecret !== null && !savedRecipe(r.pendingSecret)?.secret) || (r.lastRecipeName !== "" && !savedRecipe(r.lastRecipeName))) return false;
+        if (!foods(r.equippedFoods) || r.equippedFoods.length > EQUIP_MAX || new Set(r.equippedFoods).size !== r.equippedFoods.length || (r.lockedFood !== null && !r.equippedFoods.includes(r.lockedFood)) || !foodMap(r.foodFire) || !foodMap(r.foodExp) || !foodMap(r.debugFoodLevels)) return false;
+        const positioned = (v) => object(v) && typeof v.x === "number" && typeof v.y === "number";
+        if (!positioned(r.player) || !["tx", "ty"].every((k) => typeof r.player[k] === "number")) return false;
+        if (!["enemies", "pbullets", "ebullets", "pickups", "particles", "popups"].every((k) => Array.isArray(r[k]) && r[k].length <= 10000 && r[k].every(positioned))) return false;
+        const numericFields = (v, fields) => fields.split(" ").every((k) => typeof v[k] === "number");
+        if (!r.enemies.every((e) => Number.isInteger(e.id) && Number.isInteger(e.foodIdx) && !!FOODS[e.foodIdx] &&
+          numericFields(e, "hp maxHp r vx vy baseX sineAmp sineFreq phase t hitT fireT state energy") &&
+          (e.kind !== "boss" || (!!savedBoss(e.def) && numericFields(e, "targetY miniT dashT angle intro"))))) return false;
+        if (!r.pbullets.every((b) => numericFields(b, "vx vy t dmg size") && (!b.pierce && b.hit === undefined || Array.isArray(b.hit) && b.hit.every(Number.isInteger)))) return false;
+        if (!r.ebullets.every((b) => numericFields(b, "vx vy t r"))) return false;
+        if (!r.pickups.every((pk) => FOOD_BY_NAME[pk.name] != null && ["tx", "ty", "t", "slot"].every((k) => typeof pk[k] === "number"))) return false;
+        const savedBossEnemy = r.enemies.find((e) => e.id === r.bossId);
+        if (r.bossId !== null && (!savedBossEnemy || savedBossEnemy.kind !== "boss" || savedBossEnemy.def !== r.order.boss || !r.sideOrder)) return false;
+        if (r.bossId === null && (r.order.boss || r.enemies.some((e) => e.kind === "boss"))) return false;
+        if (!recipeList(r.dishHistory) || !recipeList(r.todayDishes) || !achList(r.runAch) || typeof r.interludeText !== "string") return false;
+        return typeof p.best === "number" && typeof p.dishesCooked === "number" && object(p.recipeLv) && Object.entries(p.recipeLv).every(([n, lv]) => !!savedRecipe(n) && Number.isInteger(lv) && lv >= 1 && lv <= RECIPE_LV_MAX) &&
+          achList(p.achGot) && typeof p.currentTitle === "string" && (p.currentTitle === "おなべ みならい" || ACHS.some((a) => a.name === p.currentTitle)) &&
+          object(p.secrets) && ["tail", "wildTail", "pumpkinBoss"].every((k) => typeof p.secrets[k] === "boolean") && Array.isArray(p.secrets.bosses) && p.secrets.bosses.every((i) => Number.isInteger(i) && !!BOSSES[i]) && recipeList(p.secrets.recipes) &&
+          object(p.stats) && ["harvest", "energy", "maxCombo", "weeks", "pauses", "escaped", "mushroomEscapes"].every((k) => typeof p.stats[k] === "number") && foods(p.stats.foods) && foodMap(p.stats.foodKills);
+      }
+      function runSaveStatus(text) { $("runSaveStatus").textContent = text; }
+      function readRunSave() {
+        try {
+          lastRunRaw = localStorage.getItem(LS("run"));
+          if (!lastRunRaw) return null;
+          if (lastRunRaw.length > 4000000) throw new Error("save too large");
+          const data = JSON.parse(lastRunRaw);
+          if (data.version === RUN_SAVE_VERSION && data.ended === true) return null;
+          if (!validRunSave(data)) throw new Error("invalid save");
+          return data;
+        } catch (_) { runSaveStatus("途中セーブを読み込めませんでした。"); return null; }
+      }
+      function blockStaleRun() {
+        runSaveBlocked = true;
+        if (mode === "play") pauseGame();
+        startTitle.textContent = "別のタブで更新されました";
+        startSub.textContent = "最新の途中セーブを読み込んで再開できます。";
+        startButton.textContent = "最新のつづきから";
+        startOverlay.hidden = false;
+        $("newRunButton").hidden = false;
+        runSaveStatus("このタブの自動保存を停止しました。");
+      }
+      function writeRunSave(data, replace = false) {
+        try {
+          if (!replace && localStorage.getItem(LS("run")) !== lastRunRaw) { blockStaleRun(); return false; }
+          const raw = JSON.stringify(data);
+          localStorage.setItem(LS("run"), raw);
+          lastRunRaw = raw;
+          lastRunSaveAt = performance.now();
+          runSaveStatus(data.ended ? "" : "自動保存済み");
+          return true;
+        } catch (_) { runSaveStatus("保存できません。この画面を閉じると続きが残らない場合があります。"); return false; }
+      }
+      function saveRun(force = false) {
+        if (runSaveBlocked || !["play", "pause"].includes(mode) || (!force && performance.now() - lastRunSaveAt < RUN_SAVE_INTERVAL)) return;
+        writeRunSave(snapshotRun());
+      }
+      function queueRunSave() {
+        if (runSaveQueued) return;
+        runSaveQueued = true;
+        // 同じフレームの獲得・料理・次注文への切替がすべて完了してから保存する。
+        queueMicrotask(() => { runSaveQueued = false; saveRun(true); });
+      }
+      function offerSavedRun() {
+        const data = readRunSave();
+        resumeAvailable = !!data;
+        $("newRunButton").hidden = !data;
+        startTitle.textContent = data ? "つづきが あるよ！" : initialStartTitle;
+        startSub.innerHTML = initialStartSub;
+        if (data) {
+          const r = data.run;
+          startSub.textContent = `${r.week}週目・${WEEKDAYS[Math.floor(r.mealsRun / 3)]}ようびの${MEAL_SLOTS[r.mealsRun % 3]} / ${fmt(r.score)}エナジー`;
+        }
+        startButton.textContent = data ? "つづきから" : "スタート！";
+        return data;
+      }
+      function restoreRunProgress(p) {
+        ({ recipeLv, dishesCooked, secrets, achGot, stats, currentTitle } = p);
+        best = Math.max(best, p.best);
+      }
+      function restoreRun() {
+        const data = readRunSave();
+        if (!data) { mode = "title"; runSaveBlocked = false; offerSavedRun(); return; }
+        const r = data.run, p = data.progress;
+        // 参照同一性が必要なボス定義と、貫通弾の既命中ID Setを復元する。
+        const restoredEnemies = r.enemies.map((e) => ({ ...e, ...(e.def ? { def: savedBoss(e.def) } : {}) }));
+        const restoredShots = r.pbullets.map((b) => ({ ...b, ...(b.hit ? { hit: new Set(b.hit) } : {}) }));
+        ({ score, week, mealsRun, bombs, xp, weaponIdx, runLv, volley, equippedFoods, lockedFood,
+          pickups, combo, comboTimer, lastRecipeName, ebullets, particles, popups, player, fireT, spawnT,
+          shake, flash, bombCooldown, invuln, interlude, interludeText, tGlobal, tailsSpawned, bossTime,
+          bombsThisBoss, bossLvBonus, chip, enemySeq, runKills, runAch, weeksThisRun, hitsThisDay,
+          hitsThisWeek, bombsThisWeek, weekEnergy, dishHistory, todayDishes } = r);
+        enemies = restoredEnemies; pbullets = restoredShots;
+        bossRef = enemies.find((e) => e.id === r.bossId) || null;
+        order = unpackOrder(r.order); sideOrder = unpackOrder(r.sideOrder);
+        pendingSecret = r.pendingSecret ? savedRecipe(r.pendingSecret) : null;
+        for (const [target, source] of [[foodFire, r.foodFire], [foodExp, r.foodExp], [debugFoodLevels, r.debugFoodLevels]]) {
+          Object.keys(target).forEach((k) => delete target[k]); Object.assign(target, source);
+        }
+        restoreRunProgress(p);
+        activePointer = potTap = lastTap = null;
+        Object.keys(keys).forEach((k) => delete keys[k]);
+        resumeAvailable = false; runSaveBlocked = false;
+        mode = "play";
+        startOverlay.hidden = true; resultOverlay.hidden = true; $("newRunButton").hidden = true;
+        lastTs = performance.now();
+        renderBombs(); renderPower(); renderBuffBar(); renderOrder(); updateMeta(); updateScoreUI(); updateTitleLabel();
+        bestValue.textContent = fmt(best);
+        persistCooking(); persistSecrets(); persistAch(); persistBest();
+        saveRun(true);
+      }
 
       const diff = () => Math.min(84, (week - 1) * MEALS_PER_WEEK + mealsRun);
       const comboMult = () => Math.max(1, Math.min(combo, COMBO_MULT_CAP));
@@ -3538,7 +3706,10 @@
       }
 
       function endRun() {
+        if (mode === "over") return;
         mode = "over";
+        // 終了マーカーで直前の途中セーブを置き換える。遅延保存では復活させない。
+        if (!runSaveBlocked) writeRunSave({ version: RUN_SAVE_VERSION, ended: true, savedAt: Date.now() });
         const prevBest = best;
         const isBest = score > best;
         if (isBest) { best = score; persistBest(); }
@@ -3564,6 +3735,19 @@
 
       // ---- リセット・進行 ---------------------------------------------
       function startNewRun() {
+        if (resumeAvailable || runSaveBlocked) {
+          const saved = readRunSave();
+          if (saved) {
+            restoreRunProgress(saved.progress);
+            best = Math.max(best, saved.run.score);
+            persistCooking(); persistSecrets(); persistAch(); persistBest();
+            updateTitleLabel(); bestValue.textContent = fmt(best);
+          }
+        }
+        runSaveBlocked = false;
+        resumeAvailable = false;
+        try { lastRunRaw = localStorage.getItem(LS("run")); } catch (_) {}
+        $("newRunButton").hidden = true;
         score = 0;
         week = 1;
         mealsRun = 0;
@@ -3614,6 +3798,7 @@
         resultOverlay.hidden = true;
         startOverlay.hidden = true;
         mode = "play";
+        saveRun(true);
       }
 
       function startDebugBoss(index) {
@@ -3688,22 +3873,39 @@
         startSub.innerHTML = "おちゃでも のんで ひとやすみ。";
         startButton.textContent = "つづける！";
         startOverlay.hidden = false;
+        $("newRunButton").hidden = true;
+        activePointer = potTap = lastTap = null;
+        Object.keys(keys).forEach((k) => delete keys[k]);
         stats.pauses++;
         if (stats.pauses >= 10) unlock("pause10");
+        saveRun(true);
       }
       function resumeGame() {
         if (mode !== "pause") return;
         mode = "play";
         startOverlay.hidden = true;
+        lastTs = performance.now();
+        saveRun(true);
       }
       document.addEventListener("visibilitychange", () => { if (document.hidden) { pauseGame(); persistAch(); persistCooking(); } });
-      addEventListener("pagehide", () => { persistAch(); persistCooking(); if (score > best) { best = score; persistBest(); } });
+      addEventListener("pagehide", () => { pauseGame(); saveRun(true); persistAch(); persistCooking(); if (score > best) { best = score; persistBest(); } });
+      addEventListener("storage", (ev) => {
+        if (ev.key !== LS("run") || ev.newValue === lastRunRaw) return;
+        if (mode === "title") offerSavedRun();
+        else if (["play", "pause"].includes(mode)) blockStaleRun();
+      });
+      document.addEventListener("click", queueRunSave);
       startButton.addEventListener("click", () => {
         ensureAudio();
-        if (mode === "title") startNewRun();
+        if (resumeAvailable || runSaveBlocked) restoreRun();
+        else if (mode === "title") startNewRun();
         else if (mode === "pause") resumeGame();
       });
       restartButton.addEventListener("click", () => { ensureAudio(); startNewRun(); });
+      $("newRunButton").addEventListener("click", () => {
+        if (!confirm("途中のゲームを終了して、はじめから遊びますか？\n自己ベスト・図鑑などの記録は残ります。")) return;
+        ensureAudio(); startNewRun();
+      });
 
       // ---- サウンドトグル ---------------------------------------------
       function renderSoundButton() { soundButton.classList.toggle("muted", muted); }
@@ -3974,7 +4176,7 @@
       function loop(ts) {
         const dt = Math.min(0.035, (ts - lastTs) / 1000);
         lastTs = ts;
-        if (mode === "play") update(dt);
+        if (mode === "play") { update(dt); saveRun(); }
         else tGlobal += dt * 0.35;
         draw();
         requestAnimationFrame(loop);
@@ -4044,6 +4246,9 @@
             };
           },
           start: () => startNewRun(),
+          save: () => saveRun(true),
+          snapshot: () => JSON.parse(JSON.stringify(snapshotRun())),
+          validateSave: validRunSave,
           setPlayer(x, y) { player.x = player.tx = x; player.y = player.ty = y; },
           grant: (name) => grantIngredient(name),
           spawnTail,
@@ -4074,7 +4279,7 @@
           clearField() { enemies = enemies.filter((e) => e.kind === "boss"); ebullets = []; pbullets = []; },
           listEnemies: () => enemies.map((e) => ({ kind: e.kind, name: FOODS[e.foodIdx].name, hp: e.hp, armed: e.armed, x: Math.round(e.x), y: Math.round(e.y) })),
           listBullets: () => ebullets.map((b) => b.kind),
-          resetSave() { ["best", "recipeLv", "dishes", "secrets", "ach", "stats", "title", "muted"].forEach((k) => localStorage.removeItem(LS(k))); },
+          resetSave() { ["best", "recipeLv", "dishes", "secrets", "ach", "stats", "title", "muted", "run"].forEach((k) => localStorage.removeItem(LS(k))); },
           startBoss: (i) => startDebugBoss(i),
         };
       }
@@ -4088,8 +4293,9 @@
       updateMeta();
       newOrder();
       updateScoreUI();
-      if (debugMode && debugParams.get("boss") === "coffee") startDebugBoss(2);
-      if (debugMode && debugParams.get("boss") === "pumpkin") startDebugBoss(6);
+      offerSavedRun();
+      if (!resumeAvailable && debugMode && debugParams.get("boss") === "coffee") startDebugBoss(2);
+      if (!resumeAvailable && debugMode && debugParams.get("boss") === "pumpkin") startDebugBoss(6);
       requestAnimationFrame(loop);
     })();
   </script>
