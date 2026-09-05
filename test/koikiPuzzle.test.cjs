@@ -911,6 +911,58 @@ test('シューティングのデバッグ画面では装備を選んで変更�
   assert.match(shooterSource, /debugDefeatBossButton\.addEventListener\("click"[\s\S]*?damageEnemy\(bossRef, 99999, "debug"\)/);
 });
 
+test('シューティングのデバッグ画面では食材弾Lvを1から10へ設定できる', () => {
+  const setDebugFoodLevel = shooterFunctionSource('setDebugFoodLevel');
+  assert.match(shooterSource, /id="debugFoodLevelSelect"/);
+  assert.match(shooterSource, /id="debugFoodLevelButton"/);
+  assert.match(shooterSource, /for \(let level = 1; level <= FOOD_LV_MAX; level\+\+\)/);
+  assert.match(shooterSource, /debugFoodLevelButton\.addEventListener\("click", \(\) => setDebugFoodLevel\(debugFoodSelect\.value, debugFoodLevelSelect\.value\)\)/);
+  assert.match(setDebugFoodLevel, /clamp\(Math\.round\(Number\(level\) \|\| 1\), 1, FOOD_LV_MAX\)/);
+  assert.match(setDebugFoodLevel, /if \(!equippedFoods\.includes\(name\)\) equipFood\(name, true\)/);
+  assert.match(shooterSource, /setFoodLv: \(name, level\) => setDebugFoodLevel\(name, level\)/);
+});
+
+test('シューティングのデバッグ画面ではレシピLvを1から75へ設定できる', () => {
+  const setDebugRecipeLevel = shooterFunctionSource('setDebugRecipeLevel');
+  assert.match(shooterSource, /id="debugRecipeLevelSelect"/);
+  assert.match(shooterSource, /id="debugRecipeLevelButton"/);
+  assert.match(shooterSource, /for \(let level = 1; level <= RUN_LV_MAX; level\+\+\)/);
+  assert.match(shooterSource, /debugRecipeLevelButton\.addEventListener\("click", \(\) => setDebugRecipeLevel\(debugRecipeLevelSelect\.value\)\)/);
+  assert.match(setDebugRecipeLevel, /runLv = clamp\(Math\.round\(Number\(level\) \|\| 1\), 1, RUN_LV_MAX\)/);
+  assert.match(setDebugRecipeLevel, /xp = runLvXp\(runLv\)/);
+  assert.match(setDebugRecipeLevel, /weaponIdx = tierOf\(runLv\)/);
+  assert.match(shooterSource, /setRecipeLv: \(level\) => setDebugRecipeLevel\(level\)/);
+});
+
+test('シューティングのボス紹介は攻略説明ではなく向かうおなべの気持ちを表示する', () => {
+  const bossDefinitions = shooterSource.match(/const BOSSES = \[[\s\S]*?const SUNDAY_PUMPKIN_BOSS = \{[\s\S]*?\n      \};/)[0];
+  for (const message of [
+    'おなべは まだ あつあつだ。',
+    'おなべは ちょっと ちょうしにのっている。',
+    'おなべは めが さえてきた。',
+    'おなべは ここで ひけない。',
+    'おなべは いやな よかんがしている。',
+    'おなべは ぐっと ふたをしめなおした。',
+    'おなべは ぶるぶる ふるえている。',
+    'おなべのたたかいは これからだ',
+  ]) assert.match(shooterSource, new RegExp(message));
+  assert.doesNotMatch(bossDefinitions, /desc: "[^"]*(?:方向|うずまき|猛攻|タネ|ほうし|突進)/);
+  assert.doesNotMatch(shooterFunctionSource('drawBossIntro'), /たおすと/);
+  assert.doesNotMatch(shooterFunctionSource('drawBossBar'), /たおすと/);
+});
+
+test('シューティングの未解放ボスだけ登場カードへ食材解放を表示する', () => {
+  const bossUnlockText = shooterFunctionSource('bossUnlockText');
+  const drawBossIntro = shooterFunctionSource('drawBossIntro');
+  assert.match(bossUnlockText, /def === SUNDAY_PUMPKIN_BOSS[\s\S]*?secrets\.pumpkinBoss/);
+  assert.match(bossUnlockText, /secrets\.bosses\.includes\(index\)/);
+  assert.match(bossUnlockText, /if \(unlocked[\s\S]*?return ""/);
+  assert.match(bossUnlockText, /return `たおすと \$\{shortName\}かいほう`/);
+  assert.match(drawBossIntro, /const unlockText = bossUnlockText\(bossRef\.def\)/);
+  assert.match(drawBossIntro, /bh = unlockText \? 104 : 80/);
+  assert.match(drawBossIntro, /if \(unlockText\)[\s\S]*?ctx\.fillText\(unlockText/);
+});
+
 test('シューティングのコーヒーボスは25秒攻撃して5秒休む', () => {
   const updateBoss = shooterFunctionSource('updateBoss');
   assert.match(shooterSource, /const COFFEE_ATTACK_SECONDS = 25/);
@@ -943,6 +995,22 @@ test('シューティングの日曜夜はカボチャからシッポへの2連�
   assert.match(shooterSource, /secrets\.pumpkinBoss && secrets\.bosses\.length >= BOSSES\.length/);
   assert.match(shooterSource, /debugParams\.get\("boss"\) === "pumpkin"\) startDebugBoss\(6\)/);
   assert.match(shooterSource, /日ようびだけ、カボチャからシッポへ続く2連戦/);
+});
+
+test('シューティングのカボチャは空白地帯つきの直線弾幕を張る', () => {
+  const firePrisonWall = shooterFunctionSource('firePrisonWall');
+  const updateBoss = shooterFunctionSource('updateBoss');
+  assert.match(shooterSource, /food: "ずっしりカボチャ",[\s\S]*?pattern: "prison"/);
+  assert.match(firePrisonWall, /const lanes = \[28, 88, 148, 210, 272, 332, 392\]/);
+  assert.match(firePrisonWall, /i !== e\.prisonLane/);
+  assert.match(firePrisonWall, /const gapHalf = 25/);
+  assert.match(firePrisonWall, /const speed = 100/);
+  assert.match(firePrisonWall, /for \(let row = 0; row < 4; row\+\+\)/);
+  assert.match(firePrisonWall, /if \(Math\.abs\(x - e\.prisonGapX\) < gapHalf\) continue/);
+  assert.match(firePrisonWall, /enemyShot\(x, y, 0, speed, "prison"/);
+  assert.match(updateBoss, /if \(pat === "prison"\)[\s\S]*?firePrisonWall\(e, wk\)/);
+  assert.doesNotMatch(shooterSource, /function drawPrisonGuide\(\)/);
+  assert.match(shooterSource, /desc: "おなべは ぶるぶる ふるえている。"/);
 });
 
 test('シューティングの一般食材は曜日が進むほど少なくなる', () => {

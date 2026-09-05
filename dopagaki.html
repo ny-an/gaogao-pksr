@@ -427,6 +427,13 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 6px;
     }
+    .debug-level-actions {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(72px, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+    }
 
     .order {
       position: relative;
@@ -1183,6 +1190,16 @@
         <strong>デバッグ装備</strong>
         <select id="debugFoodSelect" aria-label="装備する食材"></select>
         <button type="button" id="debugEquipButton">装備</button>
+        <div class="debug-level-actions">
+          <strong>食材弾Lv</strong>
+          <select id="debugFoodLevelSelect" aria-label="設定する食材弾レベル"></select>
+          <button type="button" id="debugFoodLevelButton">設定</button>
+        </div>
+        <div class="debug-level-actions">
+          <strong>レシピLv</strong>
+          <select id="debugRecipeLevelSelect" aria-label="設定するレシピレベル"></select>
+          <button type="button" id="debugRecipeLevelButton">設定</button>
+        </div>
         <div class="debug-loadout-actions">
           <button type="button" id="debugBasicLoadoutButton">基本3種</button>
           <button type="button" id="debugRandomLoadoutButton">おまかせ3種</button>
@@ -1318,21 +1335,21 @@
 
       // 曜日ごとの「ぬし」（よるに登場する巨大食材。上位食材はここと注文でしか手に入らない）
       const BOSSES = [
-        { food: "げきからハーブ",   hp: 220, pattern: "fan",    title: "ぬしの巨大ハーブ",     desc: "月ようびのぬし。5方向のとうがらしと 小ハーブの護衛。" },
-        { food: "リラックスカカオ", hp: 240, pattern: "spiral", title: "ぬしの巨大カカオ",     desc: "火ようびのぬし。画面を周回しながら うずまきのタネをまく。" },
-        { food: "めざましコーヒー", hp: 260, pattern: "dash",   strength: 1,    title: "ぬしの巨大コーヒー",   desc: "水ようびのぬし。猛攻をしのぐと 5秒だけひとやすみ。" },
-        { food: "つやつやアボカド", hp: 280, pattern: "split",  strength: 1.03, title: "ぬしの巨大アボカド",   desc: "木ようびのぬし。下までせまってきて、おおきなタネが とちゅうではじける。" },
-        { food: "あじわいキノコ",   hp: 300, pattern: "spore",  strength: 1.06, title: "ぬしの巨大キノコ",     desc: "金ようびのぬし。ほうしのわっかをまいて ワープする。" },
-        { food: "ふといながねぎ",   hp: 330, pattern: "lance",  strength: 1.09, title: "ぬしの巨大ながねぎ",   desc: "土ようびのぬし。ずっと突進してくる。" },
-        { food: "おいしいシッポ",   hp: 360, pattern: "legend", strength: 1.12, title: "ぬしの巨大シッポ",     desc: "日ようびの最終戦。突進・うずまき・ほうしを くりかえす。" },
+        { food: "げきからハーブ",   hp: 220, pattern: "fan",    title: "ぬしの巨大ハーブ",     desc: "おなべは まだ あつあつだ。" },
+        { food: "リラックスカカオ", hp: 240, pattern: "spiral", title: "ぬしの巨大カカオ",     desc: "おなべは ちょっと ちょうしにのっている。" },
+        { food: "めざましコーヒー", hp: 260, pattern: "dash",   strength: 1,    title: "ぬしの巨大コーヒー",   desc: "おなべは めが さえてきた。" },
+        { food: "つやつやアボカド", hp: 280, pattern: "split",  strength: 1.03, title: "ぬしの巨大アボカド",   desc: "おなべは ここで ひけない。" },
+        { food: "あじわいキノコ",   hp: 300, pattern: "spore",  strength: 1.06, title: "ぬしの巨大キノコ",     desc: "おなべは いやな よかんがしている。" },
+        { food: "ふといながねぎ",   hp: 330, pattern: "lance",  strength: 1.09, title: "ぬしの巨大ながねぎ",   desc: "おなべは ぐっと ふたをしめなおした。" },
+        { food: "おいしいシッポ",   hp: 360, pattern: "legend", strength: 1.12, title: "ぬしの巨大シッポ",     desc: "おなべのたたかいは これからだ" },
       ];
       const SUNDAY_PUMPKIN_BOSS = {
         food: "ずっしりカボチャ",
         hp: 300,
-        pattern: "fan",
+        pattern: "prison",
         strength: 1.1,
         title: "ぬしの巨大カボチャ",
-        desc: "日ようびの前半戦。深くせり出して 5方向へタネをまく。",
+        desc: "おなべは ぶるぶる ふるえている。",
       };
 
       // ちゅうもん（ポケモンスリープの実在料理。needs はミニ化した必要数、
@@ -1529,6 +1546,10 @@
       const debugLoadout = $("debugLoadout");
       const debugFoodSelect = $("debugFoodSelect");
       const debugEquipButton = $("debugEquipButton");
+      const debugFoodLevelSelect = $("debugFoodLevelSelect");
+      const debugFoodLevelButton = $("debugFoodLevelButton");
+      const debugRecipeLevelSelect = $("debugRecipeLevelSelect");
+      const debugRecipeLevelButton = $("debugRecipeLevelButton");
       const debugBasicLoadoutButton = $("debugBasicLoadoutButton");
       const debugRandomLoadoutButton = $("debugRandomLoadoutButton");
       const debugCoffeeRestButton = $("debugCoffeeRestButton");
@@ -1630,9 +1651,16 @@
       const recipeLevel = (name) => Math.min(RECIPE_LV_MAX, Math.max(1, Number(recipeLv[name]) || 1));
       // 食材弾のLv：経験値によるLvに、いまのレシピLvぶんを上乗せ（最大8）
       const foodExp = {};
+      const debugFoodLevels = {};
       const foodExpGain = (name) => { const e = FOOD_BY_NAME[name] != null ? FOODS[FOOD_BY_NAME[name]].energy : 100; return e * (e > RANDOM_POOL_ENERGY ? 2 : 1); };
       const foodTotalExp = (name) => (foodExp[name] || 0) + (runLv - 1) * RECIPE_FOOD_EXP;
-      const foodKillLv = (name) => { const k = foodTotalExp(name); let lv = 1; for (let i = 1; i < FOOD_LV_EXP.length; i++) if (k >= FOOD_LV_EXP[i]) lv = i + 1; return lv; };
+      const foodKillLv = (name) => {
+        if (debugFoodLevels[name]) return debugFoodLevels[name];
+        const k = foodTotalExp(name);
+        let lv = 1;
+        for (let i = 1; i < FOOD_LV_EXP.length; i++) if (k >= FOOD_LV_EXP[i]) lv = i + 1;
+        return lv;
+      };
       const foodShotLv = (name) => foodKillLv(name);
       const recipeReward = (recipe) => Math.round(recipe.bonus * (1 + 0.05 * (recipeLevel(recipe.name) - 1)));
       const fbPercent = () => Math.min(75, Math.floor(dishesCooked / FB_STEP_DISHES) * 5);
@@ -1827,6 +1855,22 @@
         lockedFood = null;
         for (const k of Object.keys(foodFire)) delete foodFire[k];
         names.slice(0, EQUIP_MAX).forEach((name) => equipFood(name, true));
+      }
+      function setDebugFoodLevel(name, level) {
+        if (!FOOD_SHOT[name]) return false;
+        debugFoodLevels[name] = clamp(Math.round(Number(level) || 1), 1, FOOD_LV_MAX);
+        if (!equippedFoods.includes(name)) equipFood(name, true);
+        renderBuffBar();
+        showBanner(`${FOOD_SHOT[name].desc.split("：")[0]} Lv${debugFoodLevels[name]}！`);
+        return true;
+      }
+      function setDebugRecipeLevel(level) {
+        runLv = clamp(Math.round(Number(level) || 1), 1, RUN_LV_MAX);
+        xp = runLvXp(runLv);
+        weaponIdx = tierOf(runLv);
+        renderPower();
+        showBanner(`レシピLv${runLv}！ ${WEAPON[weaponIdx].desc}`);
+        return runLv;
       }
       function unequipFood(i) {
         const name = equippedFoods[i];
@@ -2304,6 +2348,26 @@
           else enemyShot(x, y, Math.cos(a) * speed, Math.sin(a) * speed, "spore");
         }
       }
+      function firePrisonWall(e, wk) {
+        const lanes = [28, 88, 148, 210, 272, 332, 392];
+        if (e.prisonLane == null) {
+          e.prisonLane = Math.floor(Math.random() * lanes.length);
+        } else {
+          const otherLanes = lanes.map((_, i) => i).filter((i) => i !== e.prisonLane);
+          e.prisonLane = pick(otherLanes);
+        }
+        e.prisonGapX = lanes[e.prisonLane];
+        const gapHalf = 25;
+        const speed = 100;
+        for (let row = 0; row < 4; row++) {
+          const y = e.y + 50 - row * 16;
+          for (let x = 7; x < WORLD.w; x += 14) {
+            if (Math.abs(x - e.prisonGapX) < gapHalf) continue;
+            enemyShot(x, y, 0, speed, "prison", { r: 6, prison: true });
+          }
+        }
+        sfxEnemyShot();
+      }
       // 弾速（基本）。食材弾は speed 倍率がかかる
       const SHOT_SPEED = 220;
       function fireVolley() {
@@ -2654,7 +2718,16 @@
         const cx = WORLD.w / 2;
         dt *= e.def.strength || 1;
 
-        if (pat === "fan") {
+        if (pat === "prison") {
+          // カボチャ：画面幅いっぱいの直線弾。ひと区画だけ空いた安全地帯が少しずつ移動する
+          e.x += (cx - e.x) * Math.min(1, dt * 1.6);
+          e.y += (e.targetY - e.y) * Math.min(1, dt * 1.6);
+          e.fireT -= dt;
+          if (e.fireT <= 0) {
+            e.fireT = Math.max(2.0, 2.6 - wk * 0.08);
+            firePrisonWall(e, wk);
+          }
+        } else if (pat === "fan") {
           // カボチャ：8の字にゆれながら、ときどき下までせりだしてくる
           e.x = cx + Math.sin(e.t * 0.9) * amp;
           e.y = e.targetY + Math.abs(Math.sin(e.t * 0.45)) * 150;
@@ -3182,6 +3255,11 @@
           ctx.beginPath(); ctx.arc(0, 0, 4.5 + Math.sin(b.t * 12) * 0.8, 0, Math.PI * 2); ctx.fill();
           ctx.fillStyle = "rgba(255,255,255,.5)";
           ctx.beginPath(); ctx.arc(-1.2, -1.2, 1.4, 0, Math.PI * 2); ctx.fill();
+        } else if (b.kind === "prison") {
+          ctx.fillStyle = "#d97828";
+          ctx.fillRect(-6, -7, 12, 14);
+          ctx.fillStyle = "rgba(255, 236, 173, .8)";
+          ctx.fillRect(-3.5, -5, 2.5, 10);
         } else {
           // big: アボカドのおおきなタネ
           ctx.rotate(b.t * 2);
@@ -3340,26 +3418,38 @@
         ctx.fillText("そうび", 0, 32);
         ctx.restore();
       }
+      function bossUnlockText(def) {
+        const index = BOSSES.indexOf(def);
+        const unlocked = def === SUNDAY_PUMPKIN_BOSS
+          ? secrets.pumpkinBoss
+          : index >= 0 && secrets.bosses.includes(index);
+        if (unlocked || (index < 0 && def !== SUNDAY_PUMPKIN_BOSS)) return "";
+        const shortName = FOOD_SHOT[def.food].desc.split("弾")[0];
+        return `たおすと ${shortName}かいほう`;
+      }
       function drawBossIntro() {
         if (!bossRef || bossRef.intro <= 0 || !order || !order.boss) return;
         const k = Math.min(1, (BOSS_INTRO - bossRef.intro) / 0.4);
         const fade = Math.min(1, bossRef.intro / 0.4);
+        const unlockText = bossUnlockText(bossRef.def);
         ctx.save();
         ctx.globalAlpha = k * fade;
-        const bw = WORLD.w - 40, bh = 104, bx = 20, by = WORLD.h / 2 - 20;
+        const bw = WORLD.w - 40, bh = unlockText ? 104 : 80, bx = 20, by = WORLD.h / 2 - (unlockText ? 20 : 8);
         ctx.fillStyle = "rgba(64, 55, 47, .9)";
         ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 18); ctx.fill();
         ctx.textAlign = "center";
         ctx.fillStyle = "#ffe9bd";
         ctx.font = "1000 22px 'M PLUS 1p', system-ui, sans-serif";
-        ctx.fillText(`${bossRef.def.title} あらわる！`, WORLD.w / 2, by + 36);
+        ctx.fillText(`${bossRef.def.title} あらわる！`, WORLD.w / 2, by + 31);
         ctx.fillStyle = "#fff7e5";
         ctx.font = "900 13px 'M PLUS 1p', system-ui, sans-serif";
         const desc = bossRef.def.desc.replace(/^.ようびのぬし。/, "");
-        ctx.fillText(desc, WORLD.w / 2, by + 64);
-        ctx.fillStyle = "#f2c06c";
-        ctx.font = "1000 14px 'M PLUS 1p', system-ui, sans-serif";
-        ctx.fillText(`たおすと ${order.recipe.name}`, WORLD.w / 2, by + 90);
+        ctx.fillText(desc, WORLD.w / 2, by + 58);
+        if (unlockText) {
+          ctx.fillStyle = "#f2c06c";
+          ctx.font = "1000 14px 'M PLUS 1p', system-ui, sans-serif";
+          ctx.fillText(unlockText, WORLD.w / 2, by + 87);
+        }
         ctx.restore();
       }
       function drawBossBar() {
@@ -3374,9 +3464,8 @@
         ctx.fillStyle = "#7d7269";
         ctx.font = "1000 11px 'M PLUS 1p', system-ui, sans-serif";
         ctx.textAlign = "center";
-        const dish = order && order.boss ? `  たおすと ${order.recipe.name}` : "";
         const rest = bossRef.resting ? "  ひとやすみ中！" : "";
-        ctx.fillText(`${bossRef.def.title}  ${Math.max(0, bossRef.hp)}/${bossRef.maxHp}${rest}${dish}`, WORLD.w / 2, y - 6);
+        ctx.fillText(`${bossRef.def.title}  ${Math.max(0, bossRef.hp)}/${bossRef.maxHp}${rest}`, WORLD.w / 2, y - 6);
       }
 
       function draw() {
@@ -3903,7 +3992,23 @@
           debugFoodSelect.appendChild(option);
         });
         debugFoodSelect.value = "めざましコーヒー";
+        for (let level = 1; level <= FOOD_LV_MAX; level++) {
+          const option = document.createElement("option");
+          option.value = String(level);
+          option.textContent = `Lv${level}`;
+          debugFoodLevelSelect.appendChild(option);
+        }
+        debugFoodLevelSelect.value = "5";
+        for (let level = 1; level <= RUN_LV_MAX; level++) {
+          const option = document.createElement("option");
+          option.value = String(level);
+          option.textContent = `Lv${level}`;
+          debugRecipeLevelSelect.appendChild(option);
+        }
+        debugRecipeLevelSelect.value = "40";
         debugEquipButton.addEventListener("click", () => equipFood(debugFoodSelect.value, true));
+        debugFoodLevelButton.addEventListener("click", () => setDebugFoodLevel(debugFoodSelect.value, debugFoodLevelSelect.value));
+        debugRecipeLevelButton.addEventListener("click", () => setDebugRecipeLevel(debugRecipeLevelSelect.value));
         debugBasicLoadoutButton.addEventListener("click", () => setDebugLoadout(["とくせんリンゴ", "モーモーミルク", "ワカクサ大豆"]));
         debugRandomLoadoutButton.addEventListener("click", () => {
           const choices = FOODS.map((food) => food.name);
@@ -3948,6 +4053,8 @@
           foodLocked: (name) => foodLocked(name),
           unlockBoss: (i) => { if (!secrets.bosses.includes(i)) secrets.bosses.push(i); },
           foodLv: (name) => ({ kill: foodKillLv(name), shot: foodShotLv(name), exp: foodExp[name] || 0, total: foodTotalExp(name) }),
+          setFoodLv: (name, level) => setDebugFoodLevel(name, level),
+          setRecipeLv: (level) => setDebugRecipeLevel(level),
           spawnPickup,
           equip: (name) => equipFood(name, true),
           unequip: (i) => unequipFood(i),
