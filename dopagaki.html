@@ -86,7 +86,18 @@
       text-decoration: none;
     }
 
-    .topbar-actions { display: flex; justify-content: flex-end; gap: 5px; }
+    .topbar-actions { position: relative; display: flex; justify-content: flex-end; gap: 5px; }
+    .game-version {
+      position: absolute;
+      right: 2px;
+      bottom: calc(100% + 3px);
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      pointer-events: none;
+    }
 
     .chip-button {
       padding: 7px 9px;
@@ -1088,6 +1099,7 @@
     <div class="topbar">
       <a class="back" href="games.html">← ゲーム一覧へ</a>
       <div class="topbar-actions">
+        <span class="game-version" aria-label="バージョン1.1">ver.1.1</span>
         <button type="button" class="chip-button" id="soundButton" aria-label="おとのオンオフ">おと</button>
         <button type="button" class="chip-button chip-icon" id="foodDexButton" aria-label="食材図鑑をひらく"><img src="img/foods/svg/FancyApple.svg" alt=""></button>
         <button type="button" class="chip-button" id="rulesButton">あそびかた</button>
